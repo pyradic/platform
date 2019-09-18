@@ -1,0 +1,41 @@
+<?php
+
+namespace Pyradic\Platform\Components\Service;
+
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+
+/**
+ * Class ComponentPass
+ * @package App\Olveneer\TwigComponentsBundle\Service
+ */
+class ComponentPass implements CompilerPassInterface
+{
+    /**
+     * Registers all services with the 'olveneer.component' tag as valid components.
+     *
+     * @param ContainerBuilder $container
+     */
+    public function process(ContainerBuilder $container)
+    {
+        if (!$container->has(ComponentStore::class)) {
+            return;
+        }
+
+        $renderer = $container->findDefinition(ComponentRenderer::class);
+        $store = $container->findDefinition(ComponentStore::class);
+
+        $taggedServices = $container->findTaggedServiceIds('olveneer.component');
+
+        foreach ($taggedServices as $id => $tags) {
+            $renderer->addMethodCall('register', [new Reference($id)]);
+        }
+
+        $taggedServices = $container->findTaggedServiceIds('olveneer.mixin');
+
+        foreach ($taggedServices as $id => $tags) {
+            $store->addMethodCall('registerMixin', [new Reference($id)]);
+        }
+    }
+}
