@@ -3,6 +3,7 @@
 namespace Pyradic\Platform;
 
 use Illuminate\Support\Arr;
+use Illuminate\Contracts\View\View;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\ServiceProvider;
@@ -23,6 +24,7 @@ use Pyradic\Platform\Console\IdeHelperPlatformCommand;
 use Pyradic\Platform\Addon\Theme\Command\LoadParentTheme;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
+use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Crvs\DepartmentsModule\Http\Middleware\EnforceUserDepartment;
 
 class PlatformServiceProvider extends ServiceProvider
@@ -47,6 +49,13 @@ class PlatformServiceProvider extends ServiceProvider
 //                $this->dispatchNow(new ClearAssets());
             });
         }
+        $this->app->events->listen(TemplateDataIsLoading::class, function(TemplateDataIsLoading $event){
+            $t = $event->getTemplate();
+            return ;
+        });
+        $this->app->events->listen('creating:*', function(View $view){
+            return;
+        });
 
         $this->registerCommands();
         $this->registerMiddleware();

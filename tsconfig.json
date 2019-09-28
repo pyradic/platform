@@ -1,0 +1,18 @@
+{
+    "extends": "../../../webpack.tsconfig.json",
+    "compileOnSave": false,
+    "compilerOptions": {
+        "baseUrl": ".",
+        "typeRoots": [
+            "../../../node_modules/@types"
+        ],
+        "paths": {
+            "@/*": ["lib/*"],
+            "@c/*": ["lib/core/*"],
+            "@u/*": ["lib/utils/*"],
+            "#/*": ["lib/components/*"]
+        }
+    },
+    "include": ["lib"],
+    "exclude": [ "node_modules","resources"]
+}
