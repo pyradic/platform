@@ -4,9 +4,10 @@ namespace Pyradic\Platform\Addon;
 
 class AddonServiceProvider extends \Anomaly\Streams\Platform\Addon\AddonServiceProvider
 {
+
     /**
-     * @return array = [
-     *     $i => [
+     * @var array = [
+     *     $url => [
      *          'as' => '',
      *          'uses' => '',
      *          'verb' => '',
@@ -30,19 +31,6 @@ class AddonServiceProvider extends \Anomaly\Streams\Platform\Addon\AddonServiceP
      *      ]
      * ]
      */
-    public function routes()
-    {
-
-    }
-
-    public function getRoutes()
-    {
-        $routes = parent::getRoutes();
-        if (method_exists($this, 'routes')) {
-            $routes = array_merge($routes, $this->routes());
-        }
-        return $routes;
-    }
-
+    protected $routes = [];
 
 }

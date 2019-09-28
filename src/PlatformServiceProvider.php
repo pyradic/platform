@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
 
 namespace Pyradic\Platform;
 
@@ -20,8 +20,8 @@ use Pyradic\Platform\Command\AddAddonOverrides;
 use Pyradic\Platform\Console\IdeHelperModelsCommand;
 use Pyradic\Platform\Console\IdeHelperStreamsCommand;
 use Pyradic\Platform\Console\IdeHelperPlatformCommand;
-use Pyradic\Platform\Connector\ConnectorServiceProvider;
 use Pyradic\Platform\Addon\Theme\Command\LoadParentTheme;
+use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
 use Crvs\DepartmentsModule\Http\Middleware\EnforceUserDepartment;
 
@@ -35,6 +35,7 @@ class PlatformServiceProvider extends ServiceProvider
 //        $this->mergeConfigFrom(dirname(__DIR__) . '/config/crvs.applications.php', 'crvs.applications');
 
         $this->app->register(SupportServiceProvider::class);
+        $this->app->register(Http\HttpServiceProvider::class);
         Arr::macro('cut', function (array &$array, array $names) {
             $res   = Arr::only($array, $names);
             $array = Arr::except($array, $names);
@@ -54,15 +55,33 @@ class PlatformServiceProvider extends ServiceProvider
 
         $this->registerAddonOverrides();
         $this->registerStreamOverrides();
+        $this->registerStreamCompilerOverrides();
 
-
-        $this->app->register(ConnectorServiceProvider::class);
-
-        Hooks::register('crvs.module.departments::middleware.enforce', function(EnforceUserDepartment $middleware){
-            return;
-        });
+//        Hooks::register('crvs.module.departments::middleware.enforce', function (EnforceUserDepartment $middleware) {
+//            return;
+//        });
         // $this->app->register(Components\ComponentsServiceProvider::class);
 
+    }
+
+    protected function registerStreamCompilerOverrides()
+    {
+
+        $this->app->bind(\Anomaly\Streams\Platform\Addon\FieldType\FieldTypeParser::class, \Pyradic\Platform\Addon\FieldType\FieldTypeParser::class);
+
+        $this->app->events->listen(GatherParserData::class, function (GatherParserData $event) {
+            $data   = $event->getData();
+            $stream = $event->getStream();
+            $data->put('template', file_get_contents(__DIR__ . '/Entry/entry.stub'));
+            $relations = $data->get('relations');
+
+            if ($stream->getNamespace() === 'users' && $stream->getSlug() === 'users') {
+                $with = str_replace('[', "['department'", $data->get('with', '[]'));
+                $data->put('with', $with);
+                return;
+            }
+            return;
+        });
     }
 
     protected function registerCommands()
@@ -88,7 +107,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton('command.addon.list', function ($app) {
             return new AddonListCommand();
         });
-        $this->commands([ 'command.ide-helper.models', 'command.ide-helper.streams','command.ide-helper.platform', 'command.addon.list' ]);
+        $this->commands([ 'command.ide-helper.models', 'command.ide-helper.streams', 'command.ide-helper.platform', 'command.addon.list' ]);
     }
 
     protected function registerMiddleware()
@@ -96,8 +115,8 @@ class PlatformServiceProvider extends ServiceProvider
         /** @var \Illuminate\Foundation\Http\Kernel $kernel */
         $kernel = $this->app->make(Kernel::class);
         $kernel->prependMiddleware(Middleware\DebugLoginMiddleware::class);
-        if($this->app['config']['webpack.middleware.enabled']) {
-            $kernel->prependMiddleware($this->app['config']->get('webpack.middleware.class',Middleware\WebpackHotMiddleware::class));
+        if ($this->app[ 'config' ][ 'webpack.middleware.enabled' ]) {
+            $kernel->prependMiddleware($this->app[ 'config' ]->get('webpack.middleware.class', Middleware\WebpackHotMiddleware::class));
         }
     }
 

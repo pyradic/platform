@@ -9,6 +9,12 @@ class Kernel extends \Anomaly\Streams\Platform\Console\Kernel
 {
     use ConfiguresCommandVisibility;
 
+    protected function getArtisan()
+    {
+        return $this->addCommandVisibility(parent::getArtisan());
+    }
+
+
     protected function configureVisibility(CommandsVisibility $visibility)
     {
         $visibility->hide(...[
