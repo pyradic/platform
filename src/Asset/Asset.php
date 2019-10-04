@@ -7,63 +7,6 @@ use Illuminate\Support\Arr;
 
 class Asset extends \Anomaly\Streams\Platform\Asset\Asset
 {
-    /**
-     * Return the script tag for a collection.
-     *
-     * @param         $collection
-     * @param  array $filters
-     * @param  array $attributes
-     * @return string
-     */
-    public function script2($collection, array $filters = [], array $attributes = [])
-    {
-
-        $output = '';
-        if($this->isWebpackEnabled() && in_array('webpack', $filters,true) && array_key_exists($collection, $this->collections)){
-            foreach($this->collections[$collection] as $path => $filter){
-                if(Str::startsWith($path, ['http','//'])){
-                    $attributes[ 'src' ] = $path;
-                } else {
-                    $attributes[ 'src' ] = $this->asset($collection, $filters);
-                }
-                $output .= '<script' . $this->html->attributes($attributes) . '></script>';
-            }
-            return $output;
-        }
-        $attributes[ 'src' ] = $this->path($collection, $filters);
-        return '<script' . $this->html->attributes($attributes) . '></script>';
-    }
-
-    /**
-     * Return the style tag for a collection.
-     *
-     * @param         $collection
-     * @param  array $filters
-     * @param  array $attributes
-     * @return string
-     */
-    public function style2($collection, array $filters = [], array $attributes = [])
-    {
-        $defaults = ['media' => 'all', 'type' => 'text/css', 'rel' => 'stylesheet'];
-
-        $attributes = $attributes + $defaults;
-
-        $output = '';
-        if($this->isWebpackEnabled() && in_array('webpack', $filters,true) && array_key_exists($collection, $this->collections)){
-            foreach($this->collections[$collection] as $path => $filter){
-                if(Str::startsWith($path, ['http','//'])){
-                    $attributes[ 'href' ] = $path;
-                } else {
-                    $attributes[ 'href' ] = $this->asset($collection, $filters);
-                }
-                $output .= '<link' . $this->html->attributes($attributes) . '>';
-            }
-            return $output;
-        }
-        $attributes[ 'href' ] = $this->asset($collection, $filters);
-        return '<link' . $this->html->attributes($attributes) . '>';
-    }
-
     public function add($collection, $file, array $filters = [], $internal = false)
     {
         $webpack = $this->getWebpackPath($filters);
@@ -73,10 +16,6 @@ class Asset extends \Anomaly\Streams\Platform\Asset\Asset
         if($webpack === false) {
             return parent::add($collection, $file, $filters, $internal);
         }
-
-//        foreach($webpack as $asset) {
-//            parent::add($collection, $asset, $filters, $internal);
-//        }
         return $this;
     }
 
@@ -138,58 +77,4 @@ class Asset extends \Anomaly\Streams\Platform\Asset\Asset
     {
         return config('webpack.enabled', false) === true;
     }
-
-    private static function sample($k)
-    {
-        return [ $k => [ 'scripts' => [], 'styles' => [] ], ];
-    }
-
-//    /**
-//     * Return the script tag for a collection.
-//     *
-//     * @param         $collection
-//     * @param array   $filters
-//     * @param array   $attributes
-//     * @return string
-//     */
-//    public function script($collection, array $filters = [], array $attributes = [])
-//    {
-//        $webpack = $this->getWebpackPath($filters, 'scripts');
-//        if ($webpack === true) {
-//            return '';
-//        }
-//        if ($webpack === false) {
-//            $attributes[ 'src' ] = $this->path($collection, $filters);
-//        } else {
-//            $attributes[ 'src' ] = $webpack;
-//        }
-//        return '<script' . $this->html->attributes($attributes) . '></script>';
-//    }
-//
-//    /**
-//     * Return the style tag for a collection.
-//     *
-//     * @param         $collection
-//     * @param array   $filters
-//     * @param array   $attributes
-//     * @return string
-//     */
-//    public function style($collection, array $filters = [], array $attributes = [])
-//    {
-//        $defaults = [ 'media' => 'all', 'type' => 'text/css', 'rel' => 'stylesheet' ];
-//
-//        $attributes = $attributes + $defaults;
-//
-//        $webpack = $this->getWebpackPath($filters, 'styles');
-//        if ($webpack === true) {
-//            return '';
-//        }
-//        if ($webpack === false) {
-//            $attributes[ 'href' ] = $this->asset($collection, $filters);
-//        } else {
-//            $attributes[ 'href' ] = $webpack;
-//        }
-//        return '<link' . $this->html->attributes($attributes) . '>';
-//    }
-
 }
