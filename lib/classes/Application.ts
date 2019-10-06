@@ -1,9 +1,14 @@
-import { AsyncContainerModule, Container } from 'inversify';
+import { AsyncContainerModule, Container, interfaces } from 'inversify';
 import { Dispatcher } from './Dispatcher';
-import { IServiceProvider, IServiceProviderClass } from '../interfaces';
+import { IConfig, IPlatform, IServiceProvider, IServiceProviderClass } from '../interfaces';
 import { SyncHook, SyncWaterfallHook } from 'tapable';
 import { Config } from './Config';
 import { ServiceProvider } from './ServiceProvider';
+import Vue, { Component, ComponentOptions } from 'vue';
+import { merge } from 'lodash';
+import { Storage } from '@u/storage';
+import  debug  from 'debug';
+
 
 const log                             = require('debug')('classes:Application');
 const defaultConfig: Partial<IConfig> = {
@@ -11,7 +16,8 @@ const defaultConfig: Partial<IConfig> = {
 };
 
 export interface Application {
-
+    storage: Storage
+    platform: IPlatform
 }
 
 export namespace Application {
@@ -37,19 +43,19 @@ export namespace Application {
 }
 
 export function loadConfigDefaults(): Config<IConfig> {
-    if ( ! app.isBound('config.defaults') ) {
+    if ( !app().isBound('config.defaults') ) {
         let cpmfog = new Config(defaultConfig);
-        app.constant('config.defaults', cpmfog);
+        app().instance('config.defaults', cpmfog);
     }
-    return app.get('config.defaults');
+    return app().get('config.defaults');
 }
 
 
-export function app<T = Application>(binding:string=null):T{
-    if(binding === null) {
-        return Application.instance as T
+export function app<T = Application>(binding: string = null): T {
+    if ( binding === null ) {
+        return Application.instance as any;
     }
-    return Application.instance.get<T>(binding)
+    return Application.instance.get<T>(binding);
 }
 
 export class Application extends Container {
@@ -64,7 +70,7 @@ export class Application extends Container {
         bootstrapped       : new SyncHook<Application.BootstrapOptions>([ 'options' ]),
         boot               : new SyncHook(),
         booted             : new SyncHook(),
-        start              : new SyncWaterfallHook<typeof Vue>([ 'Root' ]),
+        start              : new SyncHook<typeof Vue>([ 'Root' ]),
         started            : new SyncHook<Vue>([ 'root' ]),
         error              : new SyncWaterfallHook<Error>([ 'error' ]),
         provider           : {
@@ -83,26 +89,28 @@ export class Application extends Container {
     protected static _instance: Application;
     public static get instance(): Application {
         if ( this._instance === undefined ) {
-            this._instance = new Application()
+            this._instance = new Application();
         }
         return this._instance;
     };
 
 
-    protected loadedProviders: Record<string, IServiceProvider> = {}
-    protected providers: Array<IServiceProvider> = [];
-    protected booted: boolean                    = false;
-    protected started: boolean                    = false;
-    protected shuttingDown                       = false;
+    protected loadedProviders: Record<string, IServiceProvider> = {};
+    protected providers: Array<IServiceProvider>                = [];
+    protected booted: boolean                                   = false;
+    protected started: boolean                                  = false;
+    protected shuttingDown                                      = false;
+
+    public get config(): Config<Application.AppConfig> & Application.AppConfig {return this.get('config');}
 
     protected constructor() {
         super({
-            defaultScope      : 'Singleton',
-            autoBindInjectable: true,
+            defaultScope       : 'Singleton',
+            autoBindInjectable : true,
             skipBaseClassChecks: false,
-        })
+        });
         if ( Application._instance !== undefined ) {
-            throw new Error('Cannot create another instance of Application')
+            throw new Error('Cannot create another instance of Application');
         }
         Application._instance = this;
         this.bind(Application).toConstantValue(this);
@@ -111,12 +119,13 @@ export class Application extends Container {
         this.bind('events').to(Dispatcher).inSingletonScope();
     }
 
-    public async bootstrap(_options: Application.BootstrapOptions) {
-        let options: Application.BootstrapOptions = {
+
+    public async bootstrap(_options: Application.BootstrapOptions, ...mergeOptions: Application.BootstrapOptions[]) {
+        let options: Application.BootstrapOptions = merge({
             providers: [],
-            ..._options,
-            config   : _options.config || {},
-        };
+            config   : {},
+        }, _options, ...mergeOptions);
+        log('bootstrap', { options });
         this.hooks.bootstrap.call(options);
         await this.loadProviders(options.providers);
         this.configure(options.config);
@@ -126,6 +135,7 @@ export class Application extends Container {
     }
 
     protected async loadProviders(Providers: Array<IServiceProviderClass>) {
+        log('loadProviders', { Providers });
         this.hooks.loadProviders.call(Providers);
         await Promise.all(Providers.map(async Provider => this.loadProvider(Provider)));
         this.hooks.loadedProviders.call(this.providers);
@@ -135,10 +145,11 @@ export class Application extends Container {
 
     public async loadProvider(Provider: IServiceProviderClass): Promise<IServiceProvider> {
         if ( Provider.name in this.loadedProviders ) {
-            return this.loadedProviders[ Provider.name ]
+            return this.loadedProviders[ Provider.name ];
         }
+        log('loadProvider', { Provider });
         this.hooks.provider.load.call(Provider);
-        let provider = new Provider(this);
+        let provider: any = new Provider(this);
         if ( 'configure' in provider && Reflect.getMetadata('configure', provider) !== true ) {
             const defaults = loadConfigDefaults();
             Reflect.defineMetadata('configure', true, provider);
@@ -146,7 +157,7 @@ export class Application extends Container {
         }
         if ( 'providers' in provider && Reflect.getMetadata('providers', provider) !== true ) {
             Reflect.defineMetadata('providers', true, provider);
-            await this.loadProviders(provider.providers)
+            await this.loadProviders(provider.providers);
         }
         this.loadedProviders[ Provider.name ] = provider;
         this.providers.push(provider);
@@ -158,7 +169,7 @@ export class Application extends Container {
         config = merge(loadConfigDefaults().raw(), config);
         this.hooks.configure.call(config);
         let instance = Config.proxied<Application.Config>(config);
-        this.constant('config', instance);
+        this.instance('config', instance);
         this.hooks.configured.call(instance);
         return this;
     }
@@ -171,6 +182,7 @@ export class Application extends Container {
     }
 
     public register = async (Provider: IServiceProviderClass | IServiceProvider) => {
+        log('register', { Provider });
         this.hooks.provider.register.call(Provider);
         let provider: IServiceProvider = Provider as IServiceProvider;
         if ( Provider instanceof ServiceProvider === false ) {
@@ -183,12 +195,13 @@ export class Application extends Container {
         this.providers.push(provider);
         this.hooks.provider.registered.call(provider);
         return this;
-    }
+    };
 
     public boot = async () => {
         if ( this.booted ) {
             return this;
         }
+        log('boot');
         this.booted = true;
         this.hooks.boot.call();
         for ( const provider of this.providers ) {
@@ -200,38 +213,69 @@ export class Application extends Container {
             }
         }
         this.hooks.booted.call();
-        return this
+        return this;
     };
 
     public startEnabled = true;
+
+    root: Vue;
+
+    Root:typeof Vue = Vue
+
+    extendRoot(options:ComponentOptions<Vue>){
+        this.Root = this.Root.extend(options)
+        return this;
+    }
+
+    createLog(namespace){
+        return debug(namespace)
+    }
 
     public start = (mountPoint: string | HTMLElement = null, options: ComponentOptions<Vue> = {}) => {
         if ( this.started ) {
             return;
         }
-        if ( ! this.startEnabled ) {
+        if ( !this.startEnabled ) {
             log('startEnabled=false', 'Skipping start', this);
             return;
         }
+        log('start', { mountPoint, options });
         this.started = true;
-        let Root     = this.hooks.start.call(this.component)
-        if ( this.storage.get('preview', false) ) {
-            Root = (Root.extend({ render: (h: CreateElement) => h(CPreview, { props: { menu: window[ 'preview_menu' ] } }) }))
-        }
-        Root      = this.hooks.start.call(Root);
-        this.root = new Root(options);
-        this.bind('root').toConstantValue(this.root);
+        this.hooks.start.call(Vue);
+
+        this.root = new (Vue.extend({
+            // template: '<div id="app"><slot></slot></div>',
+            // render(h,ctx){
+            //     return h(this.$slots.default, this.$slots.default)
+            // }
+        }));
         this.root.$mount(mountPoint);
+        // if ( this.storage.get('preview', false) ) {
+        //     Root = (Root.extend({ render: (h: CreateElement) => h(CPreview, { props: { menu: window[ 'preview_menu' ] } }) }))
+        // }
+        // Root      = this.hooks.start.call(Root);
+        // this.root = new Root(options);
+        // this.bind('root').toConstantValue(this.root);
+        // this.root.$mount(mountPoint);
         this.hooks.started.call(this.root);
-    }
+    };
 
     public error = async (error: any): Promise<this> => {
+        log('error', { error });
+
         error = this.hooks.error.call(error);
         throw error;
         // await this.errorHandler.handle(error);
         // return this;
     };
 
+    addBindingGetter(id, key = null) {
+        key        = key || id;
+        const self = this;
+        Object.defineProperty(this, key, {
+            get(): any {return self.get(id);},
+        });
+    }
 
     //region: ioc
     public alias<T, A>(abstract: interfaces.ServiceIdentifier<T>, alias: interfaces.ServiceIdentifier<A>, singleton: boolean = false) {
@@ -243,7 +287,7 @@ export class Application extends Container {
     }
 
     protected bindIf<T>(id, override: boolean = false, cb: (binding: interfaces.BindingToSyntax<T>) => void): this {
-        if ( this.isBound(id) && ! override ) return this;
+        if ( this.isBound(id) && !override ) return this;
         cb(this.isBound(id) ? this.rebind(id) : this.bind(id));
         return this;
     }
@@ -251,15 +295,15 @@ export class Application extends Container {
     public dynamic<T>(id: interfaces.ServiceIdentifier<T>, cb: (app: Application) => T) {
         return this.bind(id).toDynamicValue(ctx => {
             let req = ctx.currentRequest;
-            return cb(this)
-        })
+            return cb(this);
+        });
     }
 
     public singleton<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {
         return this.bindIf(id, override, b => b.to(value).inSingletonScope());
     }
 
-    public constant<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {
+    public instance<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {
         return this.bindIf(id, override, b => b.toConstantValue(value));
     }
 

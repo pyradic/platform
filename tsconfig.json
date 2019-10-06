@@ -8,11 +8,11 @@
         ],
         "paths": {
             "@/*": ["lib/*"],
-            "@c/*": ["lib/core/*"],
+            "@c/*": ["lib/classes/*"],
             "@u/*": ["lib/utils/*"],
             "#/*": ["lib/components/*"]
         }
     },
     "include": ["lib"],
-    "exclude": [ "node_modules","resources"]
+    "exclude": [ "node_modules"]
 }

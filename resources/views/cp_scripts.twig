@@ -1,0 +1,45 @@
+{{ asset_add('platform.js', 'platform::js/platform.js', [ 'webpack:core:scripts' ]) }}
+
+{% if config('webpack.enabled') and config('webpack.middleware.enabled') %}
+    <!--WEBPACK_HERE_PLEASE-->
+{% else %}
+    {{ asset_script("platform.js") }}
+{% endif %}
+
+
+<script>
+    var PLATFORM_DATA = JSON.parse('{{ platform.data.toJson | raw }}');
+    var PLATFORM_CONFIG = JSON.parse('{{ platform.config.toJson | raw }}');
+    var PLATFORM_PROVIDERS = [{{ platform.providers | join(', ') }}];
+</script>
+
+{{ asset_inline('platform_pre_boot') }}
+
+<script>
+    (function () {
+        var app = pyro.platform.Application.instance;
+        var log = app.createLog('cp_scripts');
+        var install = pyro.platform.install;
+        app
+            .bootstrap({
+                providers: [
+                    pyro.platform.PlatformServiceProvider
+                ]
+            }, {
+                config   : PLATFORM_CONFIG,
+                providers: PLATFORM_PROVIDERS
+            })
+            .then(function (app) {
+                return app.boot();
+            })
+            .then(function (app) {
+                // Vue.use(pyro.platform.Plugin);
+                app.extendRoot({
+                    mounted: function () {
+                        $.holdReady(false);
+                    }
+                });
+                app.start('#main');
+            });
+    }.call());
+</script>

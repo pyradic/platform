@@ -2,11 +2,11 @@
 
 namespace Pyradic\Platform\Command;
 
-use Illuminate\Http\Request;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Contracts\View\Factory;
-use Anomaly\Streams\Platform\Support\Configurator;
 use Anomaly\Streams\Platform\Addon\AddonCollection;
+use Anomaly\Streams\Platform\Support\Configurator;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Http\Request;
 
 class AddPathOverrides
 {
@@ -21,19 +21,29 @@ class AddPathOverrides
     public function handle(AddonCollection $addons, Filesystem $fs, Factory $factory, Configurator $configurator, Request $request)
     {
 
-        if(config('crvs.accept_debug_request_vars',false) && request()->has('NO_ADDON_OVERRIDES')){return;        }
+        if (config('crvs.accept_debug_request_vars', false) && request()->has('NO_ADDON_OVERRIDES')) {
+            return;
+        }
+        /** @var \Pyradic\Platform\FileViewFinder $finder */
+        $finder=$factory->getFinder();
         $overridePaths = glob(path_join($this->path, 'addons/*/*'), GLOB_NOSORT);
         foreach ($overridePaths as $overridePath) {
-            $namespace   = $this->getAddonNamespace($overridePath);
-            if(!$addons->has($namespace)){
+            $namespace = $this->getAddonNamespace($overridePath);
+            if ( ! $addons->has($namespace)) {
                 continue;
             }
             $targetAddon = $addons->get($namespace);
             if ($fs->exists($viewPath = $overridePath . '/views')) {
-                $factory->getFinder()->prependNamespace($targetAddon->getNamespace(), $viewPath);
+                $hints = $finder->getHints()[$namespace];
+
+                // backup the original namespace hints into another namespace.
+                // this allows overriding views to still include the 'parent' by prefixing the
+                // view name with 'original/' like: original/pyrocms.theme.accelerant::partials.metadata
+                $finder->addNamespace('original/' . $namespace, $hints);
+                $factory->getFinder()->prependNamespace($namespace, $viewPath);
             }
             if ($fs->exists($configPath = $overridePath . '/config')) {
-                $configurator->addNamespaceOverrides($targetAddon->getNamespace(), $configPath);
+                $configurator->addNamespaceOverrides($namespace, $configPath);
             }
         }
 

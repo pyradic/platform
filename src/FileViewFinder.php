@@ -2,11 +2,11 @@
 
 namespace Pyradic\Platform;
 
-use Illuminate\Support\Str;
-use Illuminate\Filesystem\Filesystem;
 use Anomaly\Streams\Platform\Addon\Addon;
 use Anomaly\Streams\Platform\Addon\AddonCollection;
 use Anomaly\Streams\Platform\Addon\Theme\ThemeCollection;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Str;
 
 class FileViewFinder extends \Illuminate\View\FileViewFinder
 {
@@ -22,6 +22,7 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
         parent::__construct($files, $paths, $extensions);
     }
 
+    // @todo remove
     public function setAddons(AddonCollection $addons)
     {
         $this->addons    = $addons;
@@ -40,7 +41,8 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
         });
     }
 
-    protected function override($namespace, $path, $sourceAddon)
+    // @todo remove
+    protected function override($namespace, $path, $sourceAddon = null)
     {
         $targetAddon = $this->addons->get($namespace);
         $type        = $targetAddon->getType();
@@ -52,8 +54,24 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
         $this->prependNamespace($namespace, $path);
     }
 
+    // @todo remove
+    protected $pathOverrides = [];
+
+    // @todo remove
+    public function addPathOverride($namespace, $hints)
+    {
+        if ( ! array_key_exists($namespace, $this->pathOverrides)) {
+            $this->pathOverrides[ $namespace ] = [];
+        }
+        $this->pathOverrides[ $namespace ][] = $this->getHints()[ $namespace ];
+    }
+
     public function find($name)
     {
+        if (Str::startsWith($name, 'parent::')) { // @todo remove
+            list($parent, $namespace, $view) = explode('::',$name);
+            return $this->findInPaths($view, $this->pathOverrides[$namespace][0]);
+        }
         if (Str::startsWith($name, 'theme::')) {
             $theme = resolve(ThemeCollection::class)->current();
             $name  = Str::replaceFirst('theme::', $theme->getNamespace() . '::', $name);
@@ -61,6 +79,7 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
         return parent::find($name);
     }
 
+    // @todo remove
     public function find2($name)
     {
         if (Str::startsWith($name, 'theme::')) {

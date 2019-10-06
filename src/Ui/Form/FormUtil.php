@@ -4,9 +4,20 @@ namespace Pyradic\Platform\Ui\Form;
 
 use Anomaly\Streams\Platform\Ui\Form\FormBuilder;
 use Illuminate\Support\Arr;
+use Laradic\Support\Wrap;
 
 class FormUtil
 {
+    public static function modifySectionData(FormBuilder $builder, \Closure $modifier)
+    {
+        $sections = $builder->getForm()->getSections();
+        $data     = Wrap::dot($sections->all());
+        $modifier($data);
+        foreach ($data->toArray() as $key => $value) {
+            $sections->put($key, $value);
+        }
+    }
+
     /**
      * @param \Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder
      * @param string                                        $path  The dot notated path to the fields, eg: 'user.tabs.account.fields'

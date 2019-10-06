@@ -40,9 +40,11 @@ class Dispatcher extends \Illuminate\Bus\Dispatcher
 
     protected function fire($name, $command, ...$args)
     {
-        $inspector = new CommandInspector($command);
+        $inspect = function() use ($command) {
+            return new CommandInspector($command);
+        };
         $class     = is_string($command) ? $command : get_class($command);
-        $payload   = array_merge([ $inspector ], $args);
+        $payload   = array_merge([ $command, $inspect ], $args);
 
         $name = Str::ensureLeft($name, 'bus.');
         $this->events->dispatch($name, $payload);

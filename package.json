@@ -1,6 +1,10 @@
 {
     "name": "@pyro/platform",
     "version": "1.0.0",
+    "main": "resources/js/admin.js",
+    "types": "lib/platform.ts",
+    "typings": "lib/platform.ts",
+    "private": true,
     "scripts": {},
     "pyro": {
         "srcPath": "lib",
@@ -15,11 +19,12 @@
         "inversify-inject-decorators": "^3.1.0",
         "tapable": "^1.1.3",
         "eventemitter2": "^5.0.1",
-        "reflect-metadata": "^0.1.13",
-        "lodash": "^4.17.15"
+        "lodash": "^4.17.15",
+        "debug": "^4.1.1",
+        "element-ui": "^2.12.0",
+        "vue": "^2.6.10",
+        "vue-class-component": "^7.1.0"
     },
     "devDependencies": {
-        "@types/eventemitter2": "^4.1.0",
-        "@types/lodash": "^4.14.141"
     }
 }

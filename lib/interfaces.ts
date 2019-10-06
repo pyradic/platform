@@ -1,4 +1,12 @@
-import { Application } from './core/Application';
+import { Application } from './classes/Application';
+import { Storage } from '@u/storage';
+
+export interface VuePy {
+    app:Application
+    storage:Storage
+    platform:IPlatform
+    config:Application.Config
+}
 
 export type IServiceProviderClass = {
     new(app: Application): IServiceProvider
