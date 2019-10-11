@@ -1,11 +1,11 @@
 <?php
 
-namespace Pyradic\Platform\Ui\TreeNode;
+namespace Pyro\Platform\Ui\TreeNode;
 
 use Illuminate\Support\Traits\ForwardsCalls;
 
 /**
- * @mixin \Pyradic\Platform\Ui\TreeNode\NodeTrait
+ * @mixin \Pyro\Platform\Ui\TreeNode\NodeTrait
  */
 trait ValueNodeTrait
 {

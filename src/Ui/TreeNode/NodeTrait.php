@@ -1,11 +1,11 @@
 <?php /** @noinspection PhpUnused */
 
-namespace Pyradic\Platform\Ui\TreeNode;
+namespace Pyro\Platform\Ui\TreeNode;
 
 use Illuminate\Support\Traits\Macroable;
 
 /**
- * @mixin \Pyradic\Platform\Ui\TreeNode\NodeInterface
+ * @mixin \Pyro\Platform\Ui\TreeNode\NodeInterface
  */
 trait NodeTrait
 {
@@ -14,7 +14,7 @@ trait NodeTrait
     /** @var mixed */
     private $value;
 
-    /** @var \Pyradic\Platform\Ui\TreeNode\NodeInterface */
+    /** @var \Pyro\Platform\Ui\TreeNode\NodeInterface */
     private $parent;
 
     /** @var NodeInterface[] */
@@ -23,7 +23,7 @@ trait NodeTrait
     /** @var int */
     private $index;
 
-    /** @var \Pyradic\Platform\Ui\TreeNode\NodeInterface */
+    /** @var \Pyro\Platform\Ui\TreeNode\NodeInterface */
     private $root;
 
     /** @var string */
@@ -46,7 +46,7 @@ trait NodeTrait
     }
 
     /**
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeCollection|\Pyradic\Platform\Ui\TreeNode\NodeInterface[]
+     * @return \Pyro\Platform\Ui\TreeNode\NodeCollection|\Pyro\Platform\Ui\TreeNode\NodeInterface[]
      */
     public function newCollection(array $items = [])
     {
@@ -141,7 +141,7 @@ trait NodeTrait
     }
 
     /**
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeCollection|\Pyradic\Platform\Ui\TreeNode\NodeInterface[]
+     * @return \Pyro\Platform\Ui\TreeNode\NodeCollection|\Pyro\Platform\Ui\TreeNode\NodeInterface[]
      */
     public function getChildren()
     {
@@ -149,7 +149,7 @@ trait NodeTrait
     }
 
     /**
-     * @param array|\Pyradic\Platform\Ui\TreeNode\NodeInterface[]|\Pyradic\Platform\Ui\TreeNode\NodeCollection $children
+     * @param array|\Pyro\Platform\Ui\TreeNode\NodeInterface[]|\Pyro\Platform\Ui\TreeNode\NodeCollection $children
      *
      * @return $this
      */

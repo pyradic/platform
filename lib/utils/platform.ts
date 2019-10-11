@@ -3,7 +3,7 @@
 /* eslint-disable no-mixed-operators */
 
 
-import { IPlatform, PlatformIs } from '../interfaces';
+import { IAgent, IAgentIs } from '../interfaces';
 
 export const isSSR = typeof window === 'undefined'
 
@@ -49,13 +49,13 @@ function getPlatformMatch(userAgent) {
 }
 
 
-function getPlatformIs(userAgent?: string): PlatformIs {
+function getPlatformIs(userAgent?: string): IAgentIs {
     userAgent = (userAgent || navigator.userAgent || navigator.vendor || window[ 'opera' ]).toLowerCase()
 
     const
-        platformMatch                = getPlatformMatch(userAgent),
-        matched                      = getMatch(userAgent, platformMatch),
-        browser: Partial<PlatformIs> = { ssr: isSSR }
+        platformMatch              = getPlatformMatch(userAgent),
+        matched                    = getMatch(userAgent, platformMatch),
+        browser: Partial<IAgentIs> = { ssr: isSSR }
 
     if ( matched.browser ) {
         browser[ matched.browser ] = true
@@ -162,10 +162,10 @@ function getPlatformIs(userAgent?: string): PlatformIs {
         }
     }
 
-    return browser as PlatformIs
+    return browser as IAgentIs
 }
 
-function getPlatform () :IPlatform {
+function getPlatform () :IAgent {
 
     if ( isSSR ) {
         return {
@@ -203,6 +203,6 @@ function getPlatform () :IPlatform {
 }
 
 
-const Platform: IPlatform = getPlatform();
+const Platform: IAgent = getPlatform();
 
 export default Platform

@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Console;
+namespace Pyro\Platform\Console;
 
 use Laradic\Support\Console\CommandsVisibility;
 use Laradic\Support\Console\ConfiguresCommandVisibility;

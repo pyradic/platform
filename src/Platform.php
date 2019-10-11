@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform;
+namespace Pyro\Platform;
 
 use Laradic\Support\Dot;
 

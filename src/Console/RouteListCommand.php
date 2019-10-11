@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Console;
+namespace Pyro\Platform\Console;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;

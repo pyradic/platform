@@ -9,22 +9,22 @@
     "pyro": {
         "srcPath": "lib",
         "entry": {
-            "development": "admin.development.ts",
-            "production": "admin.production.ts"
+            "development": "platform.development.ts",
+            "production": "platform.production.ts"
         }
     },
     "dependencies": {
+        "debug": "^4.1.1",
+        "element-ui": "^2.12.0",
+        "eventemitter2": "^5.0.1",
         "inversify": "^5.0.1",
         "inversify-binding-decorators": "^4.0.0",
         "inversify-inject-decorators": "^3.1.0",
-        "tapable": "^1.1.3",
-        "eventemitter2": "^5.0.1",
+        "js-cookie": "^2.2.1",
         "lodash": "^4.17.15",
-        "debug": "^4.1.1",
-        "element-ui": "^2.12.0",
+        "tapable": "^1.1.3",
         "vue": "^2.6.10",
         "vue-class-component": "^7.1.0"
     },
-    "devDependencies": {
-    }
+    "devDependencies": {}
 }

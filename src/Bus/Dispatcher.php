@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Bus;
+namespace Pyro\Platform\Bus;
 
 use Closure;
 use Illuminate\Contracts\Container\Container;

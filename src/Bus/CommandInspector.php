@@ -1,9 +1,8 @@
 <?php /** @noinspection PhpUnhandledExceptionInspection */
 
-namespace Pyradic\Platform\Bus;
+namespace Pyro\Platform\Bus;
 
 
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Traits\ForwardsCalls;
 use ReflectionClass;
 

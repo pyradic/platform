@@ -1,15 +1,14 @@
 <?php
 
-namespace Pyradic\Platform\Command;
+namespace Pyro\Platform\Command;
 
-use Illuminate\Http\Request;
-use Illuminate\Filesystem\Filesystem;
-use Pyradic\Platform\DebugRequestVars;
-use Illuminate\Contracts\View\Factory;
 use Anomaly\Streams\Platform\Addon\Addon;
-use Anomaly\Streams\Platform\Asset\AssetPaths;
-use Anomaly\Streams\Platform\Support\Configurator;
 use Anomaly\Streams\Platform\Addon\AddonCollection;
+use Anomaly\Streams\Platform\Support\Configurator;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Http\Request;
+use Pyro\Platform\DebugRequestVars;
 
 class AddAddonOverrides
 {

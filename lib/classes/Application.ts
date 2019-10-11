@@ -1,46 +1,31 @@
 import { AsyncContainerModule, Container, interfaces } from 'inversify';
 import { Dispatcher } from './Dispatcher';
-import { IConfig, IPlatform, IServiceProvider, IServiceProviderClass } from '../interfaces';
+import { BootstrapOptions, IAgent, IConfig, IServiceProvider, IServiceProviderClass } from '../interfaces';
 import { SyncHook, SyncWaterfallHook } from 'tapable';
 import { Config } from './Config';
 import { ServiceProvider } from './ServiceProvider';
 import Vue, { Component, ComponentOptions } from 'vue';
 import { merge } from 'lodash';
-import { Storage } from '@u/storage';
-import  debug  from 'debug';
+import { Cookies, Storage } from '@u/storage';
+import debug from 'debug';
+import { AxiosStatic } from 'axios';
 
-
-const log                             = require('debug')('classes:Application');
-const defaultConfig: Partial<IConfig> = {
-    prefix: 'c',
-};
+const log = require('debug')('classes:Application');
 
 export interface Application {
     storage: Storage
-    platform: IPlatform
+    agent: IAgent
+    http: AxiosStatic
+    data: Config<any> & any
+    cookies:Cookies
 }
 
-export namespace Application {
-    export interface OutputConfig {
-        enabled?: boolean
 
-    }
-
-    export interface AppConfig {
-        name?: string
-        version?: string
-        description?: string
-    }
-
-    export interface Config {
-        app?: AppConfig
-    }
-
-    export interface BootstrapOptions {
-        config?: Application.Config
-        providers?: Array<IServiceProviderClass>
-    }
-}
+const defaultConfig: Partial<IConfig> = {
+    prefix: 'py',
+    debug : false,
+    csrf  : null
+};
 
 export function loadConfigDefaults(): Config<IConfig> {
     if ( !app().isBound('config.defaults') ) {
@@ -64,10 +49,10 @@ export class Application extends Container {
         loadedProviders    : new SyncHook<Array<IServiceProvider>>([ 'providers' ]),
         registerProviders  : new SyncHook<Array<IServiceProviderClass | IServiceProvider>>([ 'providers' ]),
         registeredProviders: new SyncHook<Array<IServiceProviderClass | IServiceProvider>>([ 'providers' ]),
-        configure          : new SyncHook<Application.Config>([ 'config' ]),
-        configured         : new SyncHook<Config<Application.Config>>([ 'config' ]),
-        bootstrap          : new SyncHook<Application.BootstrapOptions>([ 'options' ]),
-        bootstrapped       : new SyncHook<Application.BootstrapOptions>([ 'options' ]),
+        configure          : new SyncHook<IConfig>([ 'config' ]),
+        configured         : new SyncHook<Config<IConfig>>([ 'config' ]),
+        bootstrap          : new SyncHook<BootstrapOptions>([ 'options' ]),
+        bootstrapped       : new SyncHook<BootstrapOptions>([ 'options' ]),
         boot               : new SyncHook(),
         booted             : new SyncHook(),
         start              : new SyncHook<typeof Vue>([ 'Root' ]),
@@ -79,11 +64,11 @@ export class Application extends Container {
             register  : new SyncHook<IServiceProviderClass | IServiceProvider>([ 'provider' ]),
             registered: new SyncHook<IServiceProvider>([ 'provider' ]),
             booting   : new SyncHook<IServiceProvider>([ 'provider' ]),
-            booted    : new SyncHook<IServiceProvider>([ 'provider' ]),
+            booted    : new SyncHook<IServiceProvider>([ 'provider' ])
         },
         install            : new SyncHook<typeof Vue, any>([ 'vue', 'options' ]),
         installComponents  : new SyncWaterfallHook<Record<string, Component | typeof Vue | any>>([ 'components' ]),
-        installed          : new SyncHook<typeof Vue, any>([ 'vue', 'options' ]),
+        installed          : new SyncHook<typeof Vue, any>([ 'vue', 'options' ])
     };
 
     protected static _instance: Application;
@@ -101,13 +86,13 @@ export class Application extends Container {
     protected started: boolean                                  = false;
     protected shuttingDown                                      = false;
 
-    public get config(): Config<Application.AppConfig> & Application.AppConfig {return this.get('config');}
+    public get config(): Config<IConfig> & IConfig {return this.get('config');}
 
     protected constructor() {
         super({
             defaultScope       : 'Singleton',
             autoBindInjectable : true,
-            skipBaseClassChecks: false,
+            skipBaseClassChecks: false
         });
         if ( Application._instance !== undefined ) {
             throw new Error('Cannot create another instance of Application');
@@ -120,10 +105,10 @@ export class Application extends Container {
     }
 
 
-    public async bootstrap(_options: Application.BootstrapOptions, ...mergeOptions: Application.BootstrapOptions[]) {
-        let options: Application.BootstrapOptions = merge({
+    public async bootstrap(_options: BootstrapOptions, ...mergeOptions: BootstrapOptions[]) {
+        let options: BootstrapOptions = merge({
             providers: [],
-            config   : {},
+            config   : {}
         }, _options, ...mergeOptions);
         log('bootstrap', { options });
         this.hooks.bootstrap.call(options);
@@ -165,10 +150,10 @@ export class Application extends Container {
         return provider;
     }
 
-    protected configure(config: Application.Config) {
+    protected configure(config: IConfig) {
         config = merge(loadConfigDefaults().raw(), config);
         this.hooks.configure.call(config);
-        let instance = Config.proxied<Application.Config>(config);
+        let instance = Config.proxied<IConfig>(config);
         this.instance('config', instance);
         this.hooks.configured.call(instance);
         return this;
@@ -218,20 +203,20 @@ export class Application extends Container {
 
     public startEnabled = true;
 
-    root: Vue;
+    public root: Vue;
 
-    Root:typeof Vue = Vue
+    public Root: typeof Vue = Vue
 
-    extendRoot(options:ComponentOptions<Vue>){
+    public extendRoot(options: ComponentOptions<Vue>) {
         this.Root = this.Root.extend(options)
         return this;
     }
 
-    createLog(namespace){
+    public createLog(namespace) {
         return debug(namespace)
     }
 
-    public start = (mountPoint: string | HTMLElement = null, options: ComponentOptions<Vue> = {}) => {
+    public start = async (mountPoint: string | HTMLElement = null, options: ComponentOptions<Vue> = {}) => {
         if ( this.started ) {
             return;
         }
@@ -242,22 +227,16 @@ export class Application extends Container {
         log('start', { mountPoint, options });
         this.started = true;
         this.hooks.start.call(Vue);
-
         this.root = new (Vue.extend({
             // template: '<div id="app"><slot></slot></div>',
-            // render(h,ctx){
-            //     return h(this.$slots.default, this.$slots.default)
-            // }
+            // render(h,ctx){     return h(this.$slots.default, this.$slots.default)
         }));
         this.root.$mount(mountPoint);
-        // if ( this.storage.get('preview', false) ) {
-        //     Root = (Root.extend({ render: (h: CreateElement) => h(CPreview, { props: { menu: window[ 'preview_menu' ] } }) }))
-        // }
-        // Root      = this.hooks.start.call(Root);
-        // this.root = new Root(options);
-        // this.bind('root').toConstantValue(this.root);
-        // this.root.$mount(mountPoint);
+        await this.root.$nextTick()
+        this.instance('root', this.root)
         this.hooks.started.call(this.root);
+
+        return this;
     };
 
     public error = async (error: any): Promise<this> => {
@@ -273,7 +252,7 @@ export class Application extends Container {
         key        = key || id;
         const self = this;
         Object.defineProperty(this, key, {
-            get(): any {return self.get(id);},
+            get(): any {return self.get(id);}
         });
     }
 
@@ -301,6 +280,11 @@ export class Application extends Container {
 
     public singleton<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {
         return this.bindIf(id, override, b => b.to(value).inSingletonScope());
+    }
+
+    public binding<T>(id: interfaces.ServiceIdentifier<T>, value: any):this{
+
+        return this
     }
 
     public instance<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {

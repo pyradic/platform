@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Addon\FieldType;
+namespace Pyro\Platform\Addon\FieldType;
 
 use Anomaly\MultipleFieldType\MultipleFieldType;
 use Anomaly\RelationshipFieldType\RelationshipFieldType;

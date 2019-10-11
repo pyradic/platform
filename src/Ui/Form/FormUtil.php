@@ -1,6 +1,6 @@
 <?php /** @noinspection NullPointerExceptionInspection */
 
-namespace Pyradic\Platform\Ui\Form;
+namespace Pyro\Platform\Ui\Form;
 
 use Anomaly\Streams\Platform\Ui\Form\FormBuilder;
 use Illuminate\Support\Arr;

@@ -1,7 +1,10 @@
+<meta name="csrf-token" content="{{ csrf_token() }}"/>
+{{ asset_add('theme.js', 'node_modules::debug/dist/debug.js') }}
 {% include "original/pyrocms.theme.accelerant::partials.metadata" %}
 
 <script>
     // The event handlers are lost because Vue replaces the elements that they're bound to.
     // You can use $.holdReady to delay the $(document).ready until the component is mounted.
     $.holdReady(true);
+
 </script>

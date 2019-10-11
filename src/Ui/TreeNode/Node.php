@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Ui\TreeNode;
+namespace Pyro\Platform\Ui\TreeNode;
 
 class Node implements NodeInterface
 {

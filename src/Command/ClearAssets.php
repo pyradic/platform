@@ -1,9 +1,9 @@
 <?php /** @noinspection BypassedPathTraversalProtectionInspection */
 
-namespace Pyradic\Platform\Command;
+namespace Pyro\Platform\Command;
 
-use Illuminate\Filesystem\Filesystem;
 use Anomaly\Streams\Platform\Application\Application;
+use Illuminate\Filesystem\Filesystem;
 
 class ClearAssets
 {

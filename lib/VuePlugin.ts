@@ -2,32 +2,38 @@ import Vue from 'vue'
 import lang from 'element-ui/lib/locale/lang/nl';
 import locale from 'element-ui/lib/locale';
 import { Application } from '@c/Application';
-import TestComp from '#/TestComp.vue';
+import LogPlugin from '@/plugins/log';
+import HttpPlugin from '@/plugins/http';
+import { prefixAndRegisterComponents } from '@u/registerComponents';
+import { Script } from '#/Script';
 
 const log = require('debug')('install')
 
-export{VuePlugin}
+export { VuePlugin }
 export default class VuePlugin {
     static __installed = false
-    static install(_Vue: typeof Vue, opts: any = {}) {
 
-        log('install', { _Vue, opts });
+    static install(_Vue: typeof Vue, opts: any = {}) {
         if ( this.__installed ) { return }
         this.__installed = true
-        const app        = Application.instance
-        app.hooks.install.call(_Vue, opts);
 
+        log('install', { _Vue, opts });
+        const app = Application.instance
+        app.hooks.install.call(_Vue, opts);
 
         locale.use(lang);
 
-        _Vue.component('TestComp', TestComp);
+        _Vue.use(LogPlugin)
+        _Vue.use(HttpPlugin, {
+            csrf: app.config.csrf
+        })
+        prefixAndRegisterComponents(_Vue, {
+            'script': Script
+        })
 
-        _Vue.prototype.$py = {
-            app     : Application.instance,
-            storage : Application.instance.storage,
-            platform: Application.instance.platform,
-            config  : Application.instance.config
-        }
+        Object.defineProperty(_Vue.prototype, '$py', {
+            get(): any {return app}
+        })
 
         app.hooks.installed.call(_Vue, opts)
     }

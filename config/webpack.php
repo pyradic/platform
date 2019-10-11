@@ -1,6 +1,6 @@
 <?php
 
-use Pyradic\Platform\Http\Middleware\WebpackHotMiddleware;
+use Pyro\Platform\Http\Middleware\WebpackHotMiddleware;
 
 $__filePath = config_path('webpack.json');
 return [

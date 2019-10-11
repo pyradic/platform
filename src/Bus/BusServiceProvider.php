@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Bus;
+namespace Pyro\Platform\Bus;
 
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Support\ServiceProvider;
@@ -27,7 +27,7 @@ class BusServiceProvider extends ServiceProvider
                 return $app[QueueFactoryContract::class]->connection($connection);
             });
         });
-        $this->app->alias(\Pyradic\Platform\Bus\Dispatcher::class, \Illuminate\Bus\Dispatcher::class);
+        $this->app->alias(\Pyro\Platform\Bus\Dispatcher::class, \Illuminate\Bus\Dispatcher::class);
     }
 
     public function provides()

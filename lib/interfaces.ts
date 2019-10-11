@@ -1,12 +1,32 @@
 import { Application } from './classes/Application';
 import { Storage } from '@u/storage';
+import { Config } from '@c/Config';
+import { AxiosStatic } from 'axios';
 
-export interface VuePy {
-    app:Application
-    storage:Storage
-    platform:IPlatform
-    config:Application.Config
+export interface LogConfig {
+    prefix?: string
+    suffix?: string
+    ns?: string
+    name?: string
+    id?: string
+    prepend?: any[]
+    append?: any[]
 }
+
+export interface BootstrapOptions {
+    config?: IConfig
+    providers?: Array<IServiceProviderClass>
+}
+
+// export interface VuePy {
+//     app:Application
+//     storage:Storage
+//     agent:IAgent
+//     config:Config<IConfig> & IConfig
+//     http:AxiosStatic
+//     data:Config<any> & any
+//     set?(name:string, obj:any)
+// }
 
 export type IServiceProviderClass = {
     new(app: Application): IServiceProvider
@@ -24,7 +44,11 @@ export interface IServiceProvider {
 
 }
 
-export interface IConfig {}
+export interface IConfig {
+    prefix?:string
+    debug?:boolean
+    csrf?:string
+}
 
 export interface Macroable {
     extend?(name: string, extension: (this: this) => any): this
@@ -59,7 +83,7 @@ export interface ResizeSize {
     width: number
 }
 
-export interface PlatformIs {
+export interface IAgentIs {
     name: string
     platform: string
     version: string
@@ -98,8 +122,8 @@ export interface PlatformIs {
 
 }
 
-export interface IPlatform {
-    is?: PlatformIs
+export interface IAgent {
+    is?: IAgentIs
     has?: { touch: boolean, webStorage: boolean }
     within?: { iframe: boolean }
 }

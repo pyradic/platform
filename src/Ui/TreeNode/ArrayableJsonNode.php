@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Pyradic\Platform\Ui\TreeNode;
+namespace Pyro\Platform\Ui\TreeNode;
 
 
 trait ArrayableJsonNode

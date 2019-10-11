@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Http\Middleware;
+namespace Pyro\Platform\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;

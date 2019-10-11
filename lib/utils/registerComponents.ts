@@ -1,15 +1,16 @@
 import { kebabCase } from 'lodash';
 import Vue from 'vue';
-import { app } from '../app';
+import { app } from '@c/Application';
+
 
 const log = require('debug')('utils:registerComponents');
 
-export function prefixAndRegisterComponents(_Vue: typeof Vue, _components: Record<string,Vue>) {
-    let components = app.hooks.installComponents.call({ ..._components })
+export function prefixAndRegisterComponents(_Vue: typeof Vue, _components: Record<string,typeof Vue>) {
+    let components = app().hooks.installComponents.call({ ..._components })
     Object.keys(components).forEach(key => {
         let componentName = key;
-        if ( app.config.prefix ) {
-            componentName = `${app.config.prefix}-${kebabCase(key)}`;
+        if ( app().config.prefix ) {
+            componentName = `${app().config.prefix}-${kebabCase(key)}`;
         }
         log('prefixAndRegisterComponents componentName', componentName)
         _Vue.component(componentName, components[ key ])
@@ -18,8 +19,8 @@ export function prefixAndRegisterComponents(_Vue: typeof Vue, _components: Recor
 }
 
 
-export function registerElementComponents(_Vue: typeof Vue, _components:  Record<string,Vue>) {
-    let components = app.hooks.installComponents.call({ ..._components })
+export function registerElementComponents(_Vue: typeof Vue, _components:  Record<string,typeof Vue>) {
+    let components = app().hooks.installComponents.call({ ..._components })
 
     Object.values(components).forEach(component => {
         log('registerElementComponents component.name', component.name)

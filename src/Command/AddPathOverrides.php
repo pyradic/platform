@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Command;
+namespace Pyro\Platform\Command;
 
 use Anomaly\Streams\Platform\Addon\AddonCollection;
 use Anomaly\Streams\Platform\Support\Configurator;
@@ -24,7 +24,7 @@ class AddPathOverrides
         if (config('crvs.accept_debug_request_vars', false) && request()->has('NO_ADDON_OVERRIDES')) {
             return;
         }
-        /** @var \Pyradic\Platform\FileViewFinder $finder */
+        /** @var \Pyro\Platform\FileViewFinder $finder */
         $finder=$factory->getFinder();
         $overridePaths = glob(path_join($this->path, 'addons/*/*'), GLOB_NOSORT);
         foreach ($overridePaths as $overridePath) {

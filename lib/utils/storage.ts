@@ -1,6 +1,7 @@
 import { merge } from 'lodash'
 import lzs from 'lz-string'
 import { injectable } from 'inversify';
+import cook from 'js-cookie';
 
 const typePrefix = '__c_';
 
@@ -238,6 +239,42 @@ class StorageDriver implements StorageDriverInterface {
     public getSize() { return this.storage.length; }
 }
 
+export interface CookieOptions {
+    compression?: boolean
+    seralization?: boolean
+}
+
+
+@injectable()
+export class Cookies {
+    get defaults(): cook.CookieAttributes {return cook.defaults}
+
+    set defaults(defaults: cook.CookieAttributes) {cook.defaults = defaults}
+
+    constructor(){
+        this.defaults.expires = 30; // days
+    }
+    get(name, defaultValue?: any) {
+        if ( !this.has(name) ) {
+            return defaultValue
+        }
+        return this.get(name)
+    }
+
+    has(name) {return cook.get(name) !== undefined }
+
+    set(name: string, value: string | object, options: cook.CookieAttributes = {}) {
+        cook.set(name, value, options)
+        return this;
+    }
+
+    unset(name: string, options: cook.CookieAttributes = {}) {
+        cook.remove(name, options)
+        return this;
+    }
+}
+
+
 // let stor = window[ 'stor' ] = new Storage({
 //     driver : 'local',
 //     drivers: Storage.defaultDrivers()
@@ -277,3 +314,4 @@ class StorageDriver implements StorageDriverInterface {
 //         console.log('Sample is: ' + string);
 //     }
 // }
+

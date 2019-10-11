@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Console;
+namespace Pyro\Platform\Console;
 
 use Anomaly\Streams\Platform\Addon\AddonCollection;
 use Anomaly\Streams\Platform\Addon\Extension\ExtensionCollection;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Asset;
+namespace Pyro\Platform\Asset;
 
 class FileAssetFinder
 {

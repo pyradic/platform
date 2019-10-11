@@ -1,9 +1,9 @@
 <?php
 
-namespace Pyradic\Platform\Http;
+namespace Pyro\Platform\Http;
 
-use Illuminate\Routing\Router;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
+use Illuminate\Routing\Router;
 
 class HttpServiceProvider extends RouteServiceProvider
 {

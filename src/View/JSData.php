@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\View;
+namespace Pyro\Platform\View;
 
 use Adbar\Dot;
 

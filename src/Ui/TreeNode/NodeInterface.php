@@ -1,14 +1,14 @@
 <?php /** @noinspection PhpUnused */
 
-namespace Pyradic\Platform\Ui\TreeNode;
+namespace Pyro\Platform\Ui\TreeNode;
 
 /**
- * @mixin \Pyradic\Platform\Ui\TreeNode\NodeTrait
+ * @mixin \Pyro\Platform\Ui\TreeNode\NodeTrait
  */
 interface NodeInterface
 {
     /**
-     * @param \Pyradic\Platform\Ui\TreeNode\NodeInterface $root
+     * @param \Pyro\Platform\Ui\TreeNode\NodeInterface $root
      *
      * @return $this
      */
@@ -42,19 +42,19 @@ interface NodeInterface
     public function removeAllChildren();
 
     /**
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeInterface[]|\Pyradic\Platform\Ui\TreeNode\NodeCollection
+     * @return \Pyro\Platform\Ui\TreeNode\NodeInterface[]|\Pyro\Platform\Ui\TreeNode\NodeCollection
      */
     public function getChildren();
 
     /**
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeInterface[]|\Pyradic\Platform\Ui\TreeNode\NodeCollection
+     * @return \Pyro\Platform\Ui\TreeNode\NodeInterface[]|\Pyro\Platform\Ui\TreeNode\NodeCollection
      */
     public function getAllDescendants();
 
     /**
-     * @param array|NodeInterface[]|\Pyradic\Platform\Ui\TreeNode\NodeCollection $children
+     * @param array|NodeInterface[]|\Pyro\Platform\Ui\TreeNode\NodeCollection $children
      *
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeInterface
+     * @return \Pyro\Platform\Ui\TreeNode\NodeInterface
      */
     public function setChildren($children);
 
@@ -71,22 +71,22 @@ interface NodeInterface
     public function getParent();
 
     /**
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeInterface[]|\Pyradic\Platform\Ui\TreeNode\NodeCollection
+     * @return \Pyro\Platform\Ui\TreeNode\NodeInterface[]|\Pyro\Platform\Ui\TreeNode\NodeCollection
      */
     public function getAncestors();
 
     /**
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeInterface[]|\Pyradic\Platform\Ui\TreeNode\NodeCollection
+     * @return \Pyro\Platform\Ui\TreeNode\NodeInterface[]|\Pyro\Platform\Ui\TreeNode\NodeCollection
      */
     public function getAncestorsAndSelf();
 
     /**
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeInterface[]|\Pyradic\Platform\Ui\TreeNode\NodeCollection
+     * @return \Pyro\Platform\Ui\TreeNode\NodeInterface[]|\Pyro\Platform\Ui\TreeNode\NodeCollection
      */
     public function getNeighbors();
 
     /**
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeInterface[]|\Pyradic\Platform\Ui\TreeNode\NodeCollection
+     * @return \Pyro\Platform\Ui\TreeNode\NodeInterface[]|\Pyro\Platform\Ui\TreeNode\NodeCollection
      */
     public function getNeighborsAndSelf();
 
@@ -97,7 +97,7 @@ interface NodeInterface
     public function isChild(): bool;
 
     /**
-     * @return \Pyradic\Platform\Ui\TreeNode\NodeInterface
+     * @return \Pyro\Platform\Ui\TreeNode\NodeInterface
      */
     public function root();
 

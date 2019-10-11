@@ -1,9 +1,9 @@
 <?php
 
-namespace Pyradic\Platform\Http;
+namespace Pyro\Platform\Http;
 
-use Pyradic\Platform\Command\GatherJavascriptData;
 use Anomaly\Streams\Platform\Http\Controller\AdminController;
+use Pyro\Platform\Command\GatherJavascriptData;
 
 class JavascriptController extends AdminController
 {

@@ -3,7 +3,10 @@
 {% if config('webpack.enabled') and config('webpack.middleware.enabled') %}
     <!--WEBPACK_HERE_PLEASE-->
 {% else %}
-    {{ asset_script("platform.js") }}
+    {{ asset_public_script("assets/js/pyro__platform.js") }}
+    {{ asset_public_script("assets/js/pyro__admin_theme.js") }}
+    {{ asset_public_script("assets/js/pyro__menus.js") }}
+    {{ asset_public_script("assets/js/examples__ex2.js") }}
 {% endif %}
 
 
@@ -17,13 +20,22 @@
 
 <script>
     (function () {
-        var app = pyro.platform.Application.instance;
+        var app = this.pyro.pyro__platform.Application.instance;
         var log = app.createLog('cp_scripts');
-        var install = pyro.platform.install;
+        var install = pyro.pyro__platform.install;
+
+        log({
+            t:this,
+            pyro,
+            tpyro:this.pyro,
+            pyro_platform:pyro.pyro__platform,
+            pyro_platform_provider:pyro.pyro__platform.PlatformServiceProvider,
+            tpyro_platform_provider:this.pyro.pyro__platform.PlatformServiceProvider,
+        })
         app
             .bootstrap({
                 providers: [
-                    pyro.platform.PlatformServiceProvider
+                    this.pyro.pyro__platform.PlatformServiceProvider
                 ]
             }, {
                 config   : PLATFORM_CONFIG,
@@ -41,5 +53,5 @@
                 });
                 app.start('#main');
             });
-    }.call());
+    }.call(window,window));
 </script>

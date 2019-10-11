@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Entry;
+namespace Pyro\Platform\Entry;
 
 class EntryModel extends \Anomaly\Streams\Platform\Entry\EntryModel
 {

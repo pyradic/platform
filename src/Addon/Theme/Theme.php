@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyradic\Platform\Addon\Theme;
+namespace Pyro\Platform\Addon\Theme;
 
 class Theme extends \Anomaly\Streams\Platform\Addon\Theme\Theme
 {

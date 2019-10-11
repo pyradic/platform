@@ -1,12 +1,11 @@
 <?php
 
-namespace Pyradic\Platform\Database;
+namespace Pyro\Platform\Database;
 
-use Faker\Factory;
-use Illuminate\Support\Arr;
-use Illuminate\Log\LogManager;
-use Illuminate\Foundation\Testing\WithFaker;
 use Anomaly\Streams\Platform\Traits\FiresCallbacks;
+use Faker\Factory;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Arr;
 
 class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 {

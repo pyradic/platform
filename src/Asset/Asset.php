@@ -1,24 +1,54 @@
 <?php
 
-namespace Pyradic\Platform\Asset;
+namespace Pyro\Platform\Asset;
 
-use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class Asset extends \Anomaly\Streams\Platform\Asset\Asset
 {
     public function add($collection, $file, array $filters = [], $internal = false)
     {
         $webpack = $this->getWebpackPath($filters);
-        if($webpack === true){
+        if ($webpack === true) {
             return $this;
         }
-        if($webpack === false) {
+        if ($webpack === false) {
             return parent::add($collection, $file, $filters, $internal);
         }
         return $this;
     }
 
+    public function publicScript($relativePath, $webpackName = null)
+    {
+        $webpackName = Arr::wrap($webpackName);
+        if ($this->getWebpackPath($webpackName)) {
+            return '';
+        }
+        $attributes[ 'src' ] = $this->getPublicAssetUrl($relativePath);
+        return '<script' . $this->html->attributes($attributes) . '></script>';
+    }
+
+    public function publicStyle($relativePath, $webpackName = null)
+    {
+        $webpackName = Arr::wrap($webpackName);
+        if ($this->getWebpackPath($webpackName)) {
+            return '';
+        }
+        $attributes[ 'src' ] = $this->getPublicAssetUrl($relativePath);
+        return '<script' . $this->html->attributes($attributes) . '></script>';
+    }
+
+    protected function getPublicAssetUrl($relativePath)
+    {
+        // @todo this is workaround for weird bug with radic.dev, need to find a proper solution!
+        $url   = url()->asset($relativePath, request()->isSecure());
+        $after = Str::after($url, $relativePath);
+        if ($after !== '') {
+            $url = str_replace($relativePath . $after, $relativePath, $url);
+        }
+        return $url;
+    }
 
     protected $webpackAddedBundles = [
         'scripts' => [],
@@ -54,7 +84,7 @@ class Asset extends \Anomaly\Streams\Platform\Asset\Asset
         $webpack = null;
         foreach ($filters as $key => $value) {
 
-            if (is_string($value) && preg_match( '/^webpack:.*:(scripts|styles)$/',$value) > 0) {
+            if (is_string($value) && preg_match('/^webpack:.*:(scripts|styles)$/', $value) > 0) {
                 $value = Str::replaceFirst('webpack:', '', $value);
                 list($bundle, $type) = explode(':', $value);
                 $webpack[ 'bundle' ] = $bundle;

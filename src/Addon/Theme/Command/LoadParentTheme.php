@@ -1,16 +1,16 @@
 <?php
 
-namespace Pyradic\Platform\Addon\Theme\Command;
+namespace Pyro\Platform\Addon\Theme\Command;
 
-use Illuminate\Http\Request;
-use Illuminate\Contracts\View\Factory;
+use Anomaly\Streams\Platform\Addon\AddonProvider;
+use Anomaly\Streams\Platform\Addon\Theme\ThemeCollection;
+use Anomaly\Streams\Platform\Application\Application;
 use Anomaly\Streams\Platform\Asset\Asset;
 use Anomaly\Streams\Platform\Image\Image;
-use Illuminate\Contracts\Config\Repository;
 use Anomaly\Streams\Platform\View\ViewTemplate;
-use Anomaly\Streams\Platform\Addon\AddonProvider;
-use Anomaly\Streams\Platform\Application\Application;
-use Anomaly\Streams\Platform\Addon\Theme\ThemeCollection;
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\Request;
 
 class LoadParentTheme
 {
@@ -30,7 +30,7 @@ class LoadParentTheme
 
 
         if ($theme = $themes->current()) {
-            if ($theme instanceof \Pyradic\Platform\Addon\Theme\Theme && $theme->hasParent()) {
+            if ($theme instanceof \Pyro\Platform\Addon\Theme\Theme && $theme->hasParent()) {
                 $parent      = $themes->get($theme->getParent());
                 $parentHints = [
                     $parent->getPath('resources/views'),

@@ -1,12 +1,12 @@
 <?php
 
-namespace Pyradic\Platform\Command;
+namespace Pyro\Platform\Command;
 
-use Illuminate\Support\Collection;
-use Illuminate\Contracts\Config\Repository;
-use Illuminate\Contracts\Foundation\Application;
 use Anomaly\Streams\Platform\Addon\FieldType\FieldType;
 use Anomaly\Streams\Platform\Addon\FieldType\FieldTypeCollection;
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\Collection;
 
 class GatherJavascriptData
 {

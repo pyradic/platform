@@ -1,15 +1,15 @@
 <?php
 
-namespace Pyradic\Platform\Database;
+namespace Pyro\Platform\Database;
 
-use Anomaly\UsersModule\User\UserActivator;
-use Laradic\Support\Concerns\DispatchesJobs;
-use Anomaly\UsersModule\Role\RoleCollection;
 use Anomaly\Streams\Platform\Traits\FiresCallbacks;
 use Anomaly\UsersModule\Role\Contract\RoleInterface;
-use Anomaly\UsersModule\User\Contract\UserInterface;
 use Anomaly\UsersModule\Role\Contract\RoleRepositoryInterface;
+use Anomaly\UsersModule\Role\RoleCollection;
+use Anomaly\UsersModule\User\Contract\UserInterface;
 use Anomaly\UsersModule\User\Contract\UserRepositoryInterface;
+use Anomaly\UsersModule\User\UserActivator;
+use Laradic\Support\Concerns\DispatchesJobs;
 
 class UserSeederHelper
 {

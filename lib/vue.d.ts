@@ -1,5 +1,7 @@
 import _Vue, { ComponentOptions } from 'vue';
-import { VuePy } from './interfaces';
+import { LogConfig } from '@/interfaces';
+import { Application } from './classes/Application';
+
 
 declare module 'vue/types/vue' {
     // Global properties can be declared
@@ -7,16 +9,18 @@ declare module 'vue/types/vue' {
 
 
     interface Vue {
-        $py?: VuePy
+        $py: Application
 
         getFirstMatchingParent<T extends Vue>(isMatch: (component: T) => boolean, shouldCancel?: (component: T) => boolean): T | null
 
         getAllMatchingParents<T extends Vue>(cb: (component: T) => boolean, shouldCancel?: (component: T, matches: T[]) => boolean): T[]
 
-        // $log(...params: any[]): this
+        $log(...params: any[]): this
+
         // $events: Dispatcher
-        // __log: LogConfig
-        // __setupLog(setup: LogConfig)
+        __log: LogConfig
+
+        __setupLog(setup: LogConfig)
     }
 
     interface VueConstructor<V extends _Vue = _Vue> {

@@ -1,6 +1,6 @@
 <?php /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
 
-namespace Pyradic\Platform;
+namespace Pyro\Platform;
 
 use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
@@ -9,17 +9,16 @@ use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
-use Pyradic\Platform\Addon\Theme\Command\LoadParentTheme;
-use Pyradic\Platform\Asset\Asset;
-use Pyradic\Platform\Command\AddAddonOverrides;
-use Pyradic\Platform\Command\AddPathOverrides;
-use Pyradic\Platform\Console\AddonListCommand;
-use Pyradic\Platform\Console\IdeHelperModelsCommand;
-use Pyradic\Platform\Console\RouteListCommand;
+use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
+use Pyro\Platform\Asset\Asset;
+use Pyro\Platform\Command\AddAddonOverrides;
+use Pyro\Platform\Command\AddPathOverrides;
+use Pyro\Platform\Console\AddonListCommand;
+use Pyro\Platform\Console\RouteListCommand;
 
 class PlatformServiceProvider extends ServiceProvider
 {
@@ -33,81 +32,65 @@ class PlatformServiceProvider extends ServiceProvider
     ];
 
     protected $devProviders = [
-        \Laradic\Idea\IdeaServiceProvider::class,
-        \Pyradic\IdeHelper\IdeHelperServiceProvider::class,
-        \Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
+        \Pyro\IdeHelper\IdeHelperServiceProvider::class,
     ];
 
     public function boot(\Anomaly\Streams\Platform\Asset\Asset $assets, ViewIncludes $includes, LoginFormBuilder $loginFormBuilder)
     {
-        $includes->include('cp_scripts', 'platform::cp_scripts');
+        $this->registerCommands();
 
+        if ($this->app->config[ 'platform.cp_scripts' ]) {
+            $includes->include('cp_scripts', 'platform::cp_scripts');
+        }
+        $assets->addPath('node_modules', base_path('node_modules'));
         $assets->addPath('platform', dirname(__DIR__) . '/resources');
-        $this->app->singleton('command.route.list', function ($app) {
-            return new RouteListCommand($app[ 'router' ]);
-        });
+        $this->app->view->share('platform', $this->app->platform);
     }
 
     public function register()
     {
+        $this->mergeConfigFrom(dirname(__DIR__) . '/config/webpack.php', 'webpack');
         array_walk($this->providers, [ $this->app, 'register' ]);
         if ($this->app->environment('local')) {
             array_walk($this->devProviders, [ $this->app, 'register' ]);
-
-
-            $this->app->extend('login', function (LoginFormBuilder $login) {
-                $login->on('built', function (LoginFormBuilder $builder) {
-                    $builder->getFormField('email')->setValue(env('ADMIN_EMAIL'));
-                    $builder->getFormField('password')->setValue(env("ADMIN_PASSWORD"));
-                    return;
-                });
-                return $login;
-            });
+            $this->registerDevLoginForm();
         }
-
-        $this->mergeConfigFrom(dirname(__DIR__) . '/config/webpack.php', 'webpack');
-
-        Arr::macro('cut', function (array &$array, array $names) {
-            $res   = Arr::only($array, $names);
-            $array = Arr::except($array, $names);
-            return $res;
-        });
-
-        $this->app->singleton('platform', function ($app) {
-            return new Platform(
-                [],
-                [ 'debug' => $this->app->config[ 'app.debug' ] ],
-                [ 'pyro.platform.PlatformServiceProvider' ]
-            );
-        });
-        $this->app->alias( 'platform',Platform::class);
-
-        $this->registerCommands();
+        $this->registerPlatform();
         $this->registerMiddleware();
         $this->registerViewFinder();
-        $this->app->view->share('platform', $this->app->platform);
-
         $this->registerStreamOverrides();
     }
 
-
-    public function registerStreamOverrides()
+    protected function registerDevLoginForm()
     {
-        $this->app->bind(\Anomaly\Streams\Platform\Addon\FieldType\FieldTypeParser::class, \Pyradic\Platform\Addon\FieldType\FieldTypeParser::class);
+        $this->app->extend('login', function (LoginFormBuilder $login) {
+            $login->on('built', function (LoginFormBuilder $builder) {
+                $builder->getFormField('email')->setValue(env('ADMIN_EMAIL'));
+                $builder->getFormField('password')->setValue(env("ADMIN_PASSWORD"));
+                return;
+            });
+            return $login;
+        });
+    }
+
+    protected function registerPlatform()
+    {
+        $this->app->singleton('platform', function (Application $app) {
+            return new Platform(
+                [],
+                [ 'debug' => $this->app->config[ 'app.debug' ], 'csrf' => $app->session->token() ],
+                [ 'pyro.pyro__platform.PlatformServiceProvider' ]
+            );
+        });
+        $this->app->alias('platform', Platform::class);
+    }
+
+    protected function registerStreamOverrides()
+    {
 
         // stream compile entry model template
         $this->app->events->listen(GatherParserData::class, function (GatherParserData $event) {
-            $data   = $event->getData();
-            $stream = $event->getStream();
-            $data->put('template', file_get_contents(__DIR__ . '/Entry/entry.stub'));
-            $relations = $data->get('relations');
-
-            if ($stream->getNamespace() === 'users' && $stream->getSlug() === 'users') {
-                $with = str_replace('[', "['department'", $data->get('with', '[]'));
-                $data->put('with', $with);
-                return;
-            }
-            return;
+            $event->getData()->put('template', file_get_contents(__DIR__ . '/Entry/entry.stub'));
         });
 
         // addon paths
@@ -153,11 +136,11 @@ class PlatformServiceProvider extends ServiceProvider
 
     protected function registerCommands()
     {
-        $this->app->extend('command.ide-helper.models', function () {
-            return new IdeHelperModelsCommand($this->app[ 'files' ]);
-        });
         $this->app->singleton('command.addon.list', function ($app) {
             return new AddonListCommand();
+        });
+        $this->app->singleton('command.route.list', function ($app) {
+            return new RouteListCommand($app[ 'router' ]);
         });
         $this->commands([ 'command.ide-helper.models', 'command.addon.list' ]);
     }

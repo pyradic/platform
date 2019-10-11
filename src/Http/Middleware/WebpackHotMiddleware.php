@@ -1,4 +1,4 @@
-<?php namespace Pyradic\Platform\Http\Middleware;
+<?php namespace Pyro\Platform\Http\Middleware;
 
 use Barryvdh\Debugbar\LaravelDebugbar;
 use Closure;

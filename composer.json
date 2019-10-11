@@ -7,7 +7,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Pyradic\\Platform\\": "src"
+            "Pyro\\Platform\\": "src"
         }
     },
     "extra": {
