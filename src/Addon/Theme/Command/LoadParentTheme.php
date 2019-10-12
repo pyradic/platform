@@ -38,9 +38,12 @@ class LoadParentTheme
                         "addons/{$parent->getVendor()}/{$parent->getSlug()}-{$parent->getType()}/views/"
                     ),
                 ];
+//                trans()->getLocale()
                 $view->addNamespace($theme->getNamespace(), $parentHints);
                 $view->addNamespace('parent', $parentHints);
                 $view->addNamespace('theme', $parentHints);
+                $asset->addPath('theme', $theme->getPath('resources'));
+                $image->addPath('theme', $theme->getPath('resources'));
                 $template->set('parent', $parent);
             }
 

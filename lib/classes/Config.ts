@@ -1,6 +1,7 @@
 // noinspection ES6UnusedImports
 import { cloneDeep, get, has, merge, set, unset } from 'lodash';
 import { Application } from './Application';
+import { IConfig } from '@/interfaces';
 
 export interface Config<T> {
     get<T>(path: string, defaultValue?: any): T;
@@ -88,7 +89,7 @@ function _proxyGetter(proto, key, resolve, doCache) {
 export function configProxy(path: string): PropertyDecorator {
     return (proto, key) => {
         var resolve = function () {
-            let config = Config.app.get<Config<Application.Config>>('config');
+            let config = Config.app.get<Config<IConfig>>('config');
             return config.proxy(path);
         };
         _proxyGetter(proto, key, resolve, true);
@@ -99,7 +100,7 @@ export function configProxy(path: string): PropertyDecorator {
 export function configValue(path: string): PropertyDecorator {
     return (proto, key) => {
         var resolve = function () {
-            let config =  Config.app.get<Config<Application.Config>>('config');
+            let config =  Config.app.get<Config<IConfig>>('config');
             return config.get(path);
         };
         _proxyGetter(proto, key, resolve, false);

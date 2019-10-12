@@ -7,6 +7,20 @@ use Illuminate\Support\Str;
 
 class Asset extends \Anomaly\Streams\Platform\Asset\Asset
 {
+
+    public function publishTo($collection, $filename, $filters = [])
+    {
+        $outputPath = $this->paths->outputPath($collection);
+        $path       = path_join(path_get_directory($outputPath), $filename);
+        $this->publish($path, $collection, $filters);
+        return $path;
+    }
+
+    public function has($collection)
+    {
+        return array_key_exists($collection, $this->collections);
+    }
+
     public function add($collection, $file, array $filters = [], $internal = false)
     {
         $webpack = $this->getWebpackPath($filters);
@@ -35,8 +49,10 @@ class Asset extends \Anomaly\Streams\Platform\Asset\Asset
         if ($this->getWebpackPath($webpackName)) {
             return '';
         }
-        $attributes[ 'src' ] = $this->getPublicAssetUrl($relativePath);
-        return '<script' . $this->html->attributes($attributes) . '></script>';
+
+        $attributes = ['media' => 'all', 'type' => 'text/css', 'rel' => 'stylesheet'];
+        $attributes[ 'href' ] = $this->getPublicAssetUrl($relativePath);
+        return '<link' . $this->html->attributes($attributes) . '>';
     }
 
     protected function getPublicAssetUrl($relativePath)

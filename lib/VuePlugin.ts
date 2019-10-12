@@ -5,7 +5,7 @@ import { Application } from '@c/Application';
 import LogPlugin from '@/plugins/log';
 import HttpPlugin from '@/plugins/http';
 import { prefixAndRegisterComponents } from '@u/registerComponents';
-import { Script } from '#/Script';
+import { Script } from '#/script';
 
 const log = require('debug')('install')
 

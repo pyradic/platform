@@ -1,4 +1,5 @@
 
+import $ from 'jquery'
 $.fn.ensureClass = function (className, remove) {
     remove = remove || false;
     return this.each(function () {

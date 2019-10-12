@@ -227,7 +227,7 @@ export class Application extends Container {
         log('start', { mountPoint, options });
         this.started = true;
         this.hooks.start.call(Vue);
-        this.root = new (Vue.extend({
+        this.root = new (this.Root.extend({
             // template: '<div id="app"><slot></slot></div>',
             // render(h,ctx){     return h(this.$slots.default, this.$slots.default)
         }));

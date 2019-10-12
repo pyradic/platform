@@ -3,7 +3,7 @@
  * @copyright Quasar Framework
  */
 import { strEnsureLeft, strStripLeft } from './general';
-import { debounce } from 'lodash-decorators';
+import { debounce } from 'lodash';
 import { keyBy, map, mapValues, reverse, sortBy } from 'lodash';
 import { defer } from './promise';
 import { css } from 'jquery';
@@ -235,8 +235,7 @@ export class ScrollSpyHelper {
 
     getTargetItem(targetID: TargetID): JQuery { return this.items[ this.target2itemID(targetID) ]; }
 
-    @debounce(100, { leading: true, trailing: true })
-    getTargetPositions(): Record<TargetID, number> {
+    getTargetPositions = debounce(()=> {
         let positions = {};
 
         ''.trimLeft()
@@ -244,7 +243,7 @@ export class ScrollSpyHelper {
             positions[ targetID ] = this.getTargetPosition(targetID);
         });
         return positions;
-    }
+    },100, { leading: true, trailing: true })
 
     hasPassedTarget(targetID: TargetID, offset: number = 0) {
         let position       = this.getScrollPosition();

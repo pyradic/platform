@@ -1,5 +1,5 @@
 {
-    "name": "pyradic/platform",
+    "name": "pyro/platform",
     "require": {
         "eddiriarte/console-select": "~2.0",
         "laradic/support": "~2.0",

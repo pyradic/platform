@@ -2,6 +2,7 @@
 
 namespace Pyro\Platform;
 
+use Illuminate\Support\Arr;
 use Laradic\Support\Dot;
 
 class Platform
@@ -15,13 +16,30 @@ class Platform
     /** @var string[] */
     protected $providers = [];
 
+    /** @var \Illuminate\Contracts\Console\Application */
+    protected $app;
+
     public function __construct(array $data = [], array $config = [], array $providers = [])
     {
-        $this->data   = new Dot($data);
-        $this->config = new Dot($config);
+        $this->app       = \Illuminate\Foundation\Application::getInstance();
+        $this->data      = new Dot($data);
+        $this->config    = new Dot($config);
         $this->providers = $providers;
     }
 
+    public function set($key, $value=null)
+    {
+        $this->data->set($key, $value);
+        return $this;
+    }
+    public function get($key, $default=null)
+    {
+        return $this->data->get($key, $default);
+    }
+    public function has($key)
+    {
+        return $this->data->has($key);
+    }
 
     public function getData()
     {
@@ -62,5 +80,60 @@ class Platform
         return $this;
     }
 
+    protected $publicScripts = [];
+
+    protected $publicStyles = [];
+
+    public function getPublicScripts()
+    {
+        return $this->publicScripts;
+    }
+
+    public function setPublicScripts(array $publicScripts)
+    {
+        $this->publicScripts = $publicScripts;
+        return $this;
+    }
+
+    public function getPublicStyles()
+    {
+        return $this->publicStyles;
+    }
+
+    public function setPublicStyles(array $publicStyles)
+    {
+        $this->publicStyles = $publicStyles;
+        return $this;
+    }
+
+    /**
+     * @param string|string[] $publicScript
+     *
+     * @return $this
+     */
+    public function addPublicScript($publicScript)
+    {
+        $this->publicScripts = array_merge($this->publicScripts, Arr::wrap($publicScript));
+        return $this;
+    }
+
+    /**
+     * @param string|string[] $publicStyle
+     *
+     * @return $this
+     */
+    public function addPublicStyle($publicStyle)
+    {
+        $this->publicStyles = array_merge($this->publicStyles, Arr::wrap($publicStyle));
+        return $this;
+    }
 
 }
+
+/*
+
+addScript('pyro/
+
+
+
+ */

@@ -1,17 +1,29 @@
-{{ asset_add('platform.js', 'platform::js/platform.js', [ 'webpack:core:scripts' ]) }}
+{{ asset_add('platform.js', 'platform::js/platform.js', [ 'webpack:pyro__platform:scripts' ]) }}
 
 {% if config('webpack.enabled') and config('webpack.middleware.enabled') %}
     <!--WEBPACK_HERE_PLEASE-->
 {% else %}
     {{ asset_public_script("assets/js/pyro__platform.js") }}
-    {{ asset_public_script("assets/js/pyro__admin_theme.js") }}
-    {{ asset_public_script("assets/js/pyro__menus.js") }}
-    {{ asset_public_script("assets/js/examples__ex2.js") }}
+
+    {% for script in platform.publicScripts %}
+        {{ asset_public_script(script) }}
+    {% endfor %}
+    {% for style in platform.publicStyles %}
+        {{ asset_public_style(style) }}
+    {% endfor %}
+
+{#    {{ asset_public_script("assets/js/pyro__admin_theme.js") }}#}
+{#    {{ asset_public_script("assets/js/pyro__permission_tree.js") }}#}
+{#    {{ asset_public_script("assets/js/pyro__menus.js") }}#}
 {% endif %}
 
-
+<!-- PLATFORM_DATA -->
 <script>
     var PLATFORM_DATA = JSON.parse('{{ platform.data.toJson | raw }}');
+</script>
+
+<!-- PLATFORM_CONFIG & PLATFORM_PROVIDERS -->
+<script>
     var PLATFORM_CONFIG = JSON.parse('{{ platform.config.toJson | raw }}');
     var PLATFORM_PROVIDERS = [{{ platform.providers | join(', ') }}];
 </script>

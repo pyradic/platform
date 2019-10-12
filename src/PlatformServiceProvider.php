@@ -6,7 +6,6 @@ use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
-use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Contracts\Foundation\Application;
@@ -35,7 +34,7 @@ class PlatformServiceProvider extends ServiceProvider
         \Pyro\IdeHelper\IdeHelperServiceProvider::class,
     ];
 
-    public function boot(\Anomaly\Streams\Platform\Asset\Asset $assets, ViewIncludes $includes, LoginFormBuilder $loginFormBuilder)
+    public function boot(\Anomaly\Streams\Platform\Asset\Asset $assets, ViewIncludes $includes)
     {
         $this->registerCommands();
 
@@ -49,16 +48,36 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->mergeConfigFrom(dirname(__DIR__) . '/config/webpack.php', 'webpack');
-        array_walk($this->providers, [ $this->app, 'register' ]);
+        $this->mergeConfigs();
+        $this->registerProviders();
         if ($this->app->environment('local')) {
-            array_walk($this->devProviders, [ $this->app, 'register' ]);
+            $this->registerDevProviders();
             $this->registerDevLoginForm();
         }
         $this->registerPlatform();
+        $this->registerEntryModelGeneratorStub();
+        $this->registerAddonPaths();
+        $this->registerAssetOverride();
+        $this->registerThemeInheritance();
+        $this->registerCommands();
         $this->registerMiddleware();
         $this->registerViewFinder();
-        $this->registerStreamOverrides();
+    }
+
+    protected function mergeConfigs()
+    {
+        $this->mergeConfigFrom(dirname(__DIR__) . '/config/webpack.php', 'webpack');
+        $this->mergeConfigFrom(dirname(__DIR__) . '/config/platform.php', 'platform');
+    }
+
+    protected function registerProviders()
+    {
+        array_walk($this->providers, [ $this->app, 'register' ]);
+    }
+
+    protected function registerDevProviders()
+    {
+        array_walk($this->devProviders, [ $this->app, 'register' ]);
     }
 
     protected function registerDevLoginForm()
@@ -85,14 +104,17 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->alias('platform', Platform::class);
     }
 
-    protected function registerStreamOverrides()
+    protected function registerEntryModelGeneratorStub()
     {
 
         // stream compile entry model template
         $this->app->events->listen(GatherParserData::class, function (GatherParserData $event) {
             $event->getData()->put('template', file_get_contents(__DIR__ . '/Entry/entry.stub'));
         });
+    }
 
+    protected function registerAddonPaths()
+    {
         // addon paths
         $this->app->events->listen(Ready::class, function (Ready $event) {
             $this->dispatchNow(new AddPathOverrides(path_join(__DIR__, '..', 'resources')));
@@ -106,31 +128,19 @@ class PlatformServiceProvider extends ServiceProvider
                 $this->dispatchNow(new AddAddonOverrides($addon));
             }
         });
+    }
 
-
-        // theme & assets
-        $this->app->events->listen(TemplateDataIsLoading::class, function (TemplateDataIsLoading $event) {
-            $t = $event->getTemplate();
-//            $assets = $this->app->make('Anomaly\Streams\Platform\Asset\Asset');
-//            $assets->addPath('platform', dirname(__DIR__) . '/resources');
-//            $assets->add('theme.js', 'platform::js/platform.js', [ 'webpack:platform:scripts' ]);
-            return;
+    protected function registerAssetOverride()
+    {
+        $this->app->events->listen(Booting::class, function (Booting $event) {
+            $this->app->singleton('Anomaly\Streams\Platform\Asset\Asset', Asset::class);
         });
+    }
 
+    protected function registerThemeInheritance()
+    {
         $this->app->events->listen(Ready::class, function (Ready $event) {
             $this->dispatchNow(new LoadParentTheme());
-        });
-        $this->app->events->listen(Booting::class, function (Booting $event) {
-            $bindings   = [ 'Anomaly\Streams\Platform\Addon\Theme\Command\LoadCurrentTheme' => Addon\Theme\Command\LoadParentTheme::class, ];
-            $singletons = [
-                'Anomaly\Streams\Platform\Asset\Asset' => Asset::class,
-            ];
-            foreach ($bindings as $abstract => $concrete) {
-                $this->app->bind($abstract, $concrete);
-            }
-            foreach ($singletons as $abstract => $concrete) {
-                $this->app->singleton($abstract, $concrete);
-            }
         });
     }
 

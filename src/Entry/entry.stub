@@ -1,6 +1,6 @@
 <?php namespace Anomaly\Streams\Platform\Model\{namespace};
 
-class {class} extends EntryModel
+class {class} extends \Pyro\Platform\Entry\EntryModel
 {
 
     {trashable}
