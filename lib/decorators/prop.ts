@@ -24,9 +24,9 @@ export type PropTypeDecorators = {
 }
 
 export type PropDecorator = {
-    (options: PropOptions): PropertyDecorator
+    (options?: PropOptions): PropertyDecorator
     (type: PropOptions['type'], defaultValue?: PropOptions['default'], required?: PropOptions['required'], validator?: PropOptions['validator']): PropertyDecorator
-    sync(propName: string, options: PropOptions): PropertyDecorator
+    sync(propName: string, options?: PropOptions): PropertyDecorator
     sync(propName: string, type: PropOptions['type'], defaultValue?: PropOptions['default'], required?: PropOptions['required'], validator?: PropOptions['validator']): PropertyDecorator
     classPrefix(prefix: string): PropertyDecorator
 } & PropTypeDecorators
@@ -62,7 +62,7 @@ let propTypeMap = {
     number  : Number,
     array   : Array,
     object  : Object,
-    function: Function,
+    function: Function
 };
 
 function getPropOptions(params: any[]): PropOptions {
@@ -96,7 +96,7 @@ prop.sync        = function (propName: string, ...params): PropertyDecorator {
                 set(value) {
                     // @ts-ignore
                     this.$emit(`update:${propName}`, value);
-                },
+                }
             };
         })(target, key);
     };
@@ -109,7 +109,7 @@ prop.classPrefix = function (defaultName: string): PropertyDecorator {
                 return app().config.prefix + '-' + defaultName
             }
             return defaultName
-        },
+        }
     }
     return createPropDecorator(options)
 }
@@ -124,7 +124,7 @@ Object.keys(propTypeMap).forEach(key => {
             options = {
                 type     : propTypeMap[ key ],
                 default  : params[ 0 ],
-                validator: params[ 1 ],
+                validator: params[ 1 ]
             }
         }
         return createPropDecorator(options);
@@ -146,7 +146,7 @@ Object.keys(propTypeMap).forEach(key => {
         let options: PropOptions = {
             type     : propTypeMap[ key ],
             required : true,
-            validator: params[ 0 ],
+            validator: params[ 0 ]
         };
         return createPropDecorator(options);
     };

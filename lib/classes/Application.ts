@@ -4,13 +4,16 @@ import { BootstrapOptions, IAgent, IConfig, IServiceProvider, IServiceProviderCl
 import { SyncHook, SyncWaterfallHook } from 'tapable';
 import { Config } from './Config';
 import { ServiceProvider } from './ServiceProvider';
-import Vue, { Component, ComponentOptions } from 'vue';
+import Vue, { Component, ComponentOptions, VueConstructor } from 'vue';
 import { merge } from 'lodash';
 import { Cookies, Storage } from '@u/storage';
 import debug from 'debug';
 import { AxiosStatic } from 'axios';
+import { PlatformStyleVariables } from '@/styling/export';
 
 const log = require('debug')('classes:Application');
+
+export interface Styling extends PlatformStyleVariables {}
 
 export interface Application {
     storage: Storage
@@ -18,6 +21,8 @@ export interface Application {
     http: AxiosStatic
     data: Config<any> & any
     cookies:Cookies
+    events:Dispatcher
+    styling: Config<Styling> & Styling
 }
 
 
@@ -207,9 +212,9 @@ export class Application extends Container {
 
     public Root: typeof Vue = Vue
 
-    public extendRoot(options: ComponentOptions<Vue>) {
+    public extendRoot:VueConstructor['extend'] = (options) => {
         this.Root = this.Root.extend(options)
-        return this;
+        return this.Root;
     }
 
     public createLog(namespace) {

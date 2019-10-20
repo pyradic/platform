@@ -28,7 +28,7 @@ export default class VuePlugin {
             csrf: app.config.csrf
         })
         prefixAndRegisterComponents(_Vue, {
-            'script': Script
+            // 'script': Script
         })
 
         Object.defineProperty(_Vue.prototype, '$py', {

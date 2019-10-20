@@ -24,6 +24,8 @@ class AddAddonOverrides
     {
 
         if(config('crvs.accept_debug_request_vars',false) && request()->has('NO_ADDON_OVERRIDES')){return;        }
+        /** @var \Illuminate\View\FileViewFinder $finder */
+        $finder=$factory->getFinder();
         $overridePaths = glob($this->addon->getPath('resources/addons/*/*'), GLOB_NOSORT);
         foreach ($overridePaths as $overridePath) {
             $namespace   = $this->getAddonNamespace($overridePath);
@@ -32,7 +34,7 @@ class AddAddonOverrides
             }
             $targetAddon = $addons->get($namespace);
             if ($fs->exists($viewPath = $overridePath . '/views')) {
-                $factory->getFinder()->prependNamespace($targetAddon->getNamespace(), $viewPath);
+                $finder->prependNamespace($targetAddon->getNamespace(), $viewPath);
             }
             if ($fs->exists($configPath = $overridePath . '/config')) {
                 $configurator->addNamespaceOverrides($targetAddon->getNamespace(), $configPath);
@@ -42,7 +44,16 @@ class AddAddonOverrides
         // streams::
         if ($fs->exists($streamsOverridePath = $this->addon->getPath('resources/streams'))) {
             if ($fs->exists($viewPath = $streamsOverridePath . '/views')) {
-                $factory->getFinder()->prependNamespace('streams', $viewPath);
+                $namespace = 'streams';
+                $hints = $finder->getHints()[$namespace];
+
+                // backup the original namespace hints into another namespace.
+                // this allows overriding views to still include the 'parent' by prefixing the
+                // view name with 'original/' like: original/pyrocms.theme.accelerant::partials.metadata
+                $finder->addNamespace('original/' . $namespace, $hints);
+                $finder->prependNamespace($namespace, $viewPath);
+
+                $finder->prependNamespace('streams', $viewPath);
             }
             if ($fs->exists($configPath = $streamsOverridePath . '/config')) {
                 $configurator->addNamespaceOverrides('streams', $configPath);

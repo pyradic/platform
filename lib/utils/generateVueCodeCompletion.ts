@@ -1,7 +1,9 @@
 import Vue, { PropOptions } from 'vue';
 import { mergeChildPrototypes } from './mergeChildPrototypes';
-import { kebabCase } from 'lodash';
+import { camelCase, capitalize, kebabCase } from 'lodash';
+import ElementUi from 'element-ui'
 
+Vue.use(ElementUi)
 
 const log = require('debug')('utils:generatevuecode');
 
@@ -39,7 +41,7 @@ function transformPropsData(props: Record<string, PropOptions<any>>) {
     }
     return propNames.map(name => {
         let prop = props[ name ];
-        log('transformPropsData', name, { propNames, prop });
+        // log('transformPropsData', name, { propNames, prop });
 
         let type = ``;
         if ( prop.type && prop.type[ 'name' ] ) {
@@ -75,17 +77,24 @@ export function generateVueCodeCompletion() {
     Object.keys(components).forEach(key => {
         let c    = components[ key ];
         let name = kebabCase(key);
+
+        if ( key.startsWith('El') ) {
+            name=key
+        } else if ( key.startsWith('el-') ) {
+            name = capitalize(camelCase(key))
+        }
         if ( c[ 'options' ] && c[ 'options' ][ 'props' ] ) {
             generated.push({
                 name,
-                props: transformPropsData(c[ 'options' ][ 'props' ] as any),
+                props: transformPropsData(c[ 'options' ][ 'props' ] as any)
             })
         } else if ( c[ 'props' ] ) {
             generated.push({
                 name,
-                props: transformPropsData(c[ 'props' ] as any),
+                props: transformPropsData(c[ 'props' ] as any)
             })
         }
+        log('generated', key, { name, c })
     })
     // p.components[1].options.props.value.type.name.toString()
 
@@ -98,7 +107,9 @@ export function generateVueCodeCompletion() {
 });\n`
     })
 
+    lines.unshift('import Vue from "vue";')
     let result    = lines.join('\n');
     let getResult = () => result.replace('↵', '\n');
+    console.log(result)
     return { components, lines, result, getResult };
 }

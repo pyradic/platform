@@ -18,6 +18,7 @@ use Pyro\Platform\Command\AddAddonOverrides;
 use Pyro\Platform\Command\AddPathOverrides;
 use Pyro\Platform\Console\AddonListCommand;
 use Pyro\Platform\Console\RouteListCommand;
+use Pyro\Platform\Console\SeedCommand;
 
 class PlatformServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,7 @@ class PlatformServiceProvider extends ServiceProvider
         \Laradic\Support\SupportServiceProvider::class,
         Http\HttpServiceProvider::class,
         Bus\BusServiceProvider::class,
+        Webpack\WebpackServiceProvider::class
     ];
 
     protected $devProviders = [
@@ -38,7 +40,7 @@ class PlatformServiceProvider extends ServiceProvider
     {
         $this->registerCommands();
 
-        if ($this->app->config[ 'platform.cp_scripts' ]) {
+        if ($this->app->config[ 'platform.cp_scripts.enabled' ]) {
             $includes->include('cp_scripts', 'platform::cp_scripts');
         }
         $assets->addPath('node_modules', base_path('node_modules'));
@@ -66,7 +68,6 @@ class PlatformServiceProvider extends ServiceProvider
 
     protected function mergeConfigs()
     {
-        $this->mergeConfigFrom(dirname(__DIR__) . '/config/webpack.php', 'webpack');
         $this->mergeConfigFrom(dirname(__DIR__) . '/config/platform.php', 'platform');
     }
 
@@ -95,11 +96,13 @@ class PlatformServiceProvider extends ServiceProvider
     protected function registerPlatform()
     {
         $this->app->singleton('platform', function (Application $app) {
-            return new Platform(
+            $platform= new Platform(
                 [],
                 [ 'debug' => $this->app->config[ 'app.debug' ], 'csrf' => $app->session->token() ],
                 [ 'pyro.pyro__platform.PlatformServiceProvider' ]
             );
+            $platform->addPublicScript('assets/js/pyro__platform.js');
+            return $platform;
         });
         $this->app->alias('platform', Platform::class);
     }
@@ -149,10 +152,13 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton('command.addon.list', function ($app) {
             return new AddonListCommand();
         });
+        $this->app->singleton('command.platform.seed', function ($app) {
+            return new SeedCommand();
+        });
         $this->app->singleton('command.route.list', function ($app) {
             return new RouteListCommand($app[ 'router' ]);
         });
-        $this->commands([ 'command.ide-helper.models', 'command.addon.list' ]);
+        $this->commands([ 'command.ide-helper.models','command.platform.seed', 'command.addon.list' ]);
     }
 
     protected function registerMiddleware()
@@ -161,7 +167,7 @@ class PlatformServiceProvider extends ServiceProvider
         $kernel = $this->app->make(Kernel::class);
         $kernel->prependMiddleware(Http\Middleware\DebugLoginMiddleware::class);
         if ($this->app[ 'config' ][ 'webpack.middleware.enabled' ]) {
-            $kernel->prependMiddleware($this->app[ 'config' ]->get('webpack.middleware.class', Http\Middleware\WebpackHotMiddleware::class));
+            $kernel->prependMiddleware($this->app[ 'config' ]->get('webpack.middleware.class', Webpack\WebpackHotMiddleware::class));
         }
     }
 

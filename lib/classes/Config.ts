@@ -15,7 +15,7 @@ export class Config<T> {
     set      = (path: string, value: any) => set(this.data, path, value);
     has      = (path: string) => has(this.data, path);
     unset    = (path: string) => unset(this.data, path);
-    merge    = (value: string) => merge(this.data, value);
+    merge    = (value: any) => merge(this.data, value);
     mergeAt  = (path: string, value: any) => this.set(path, merge({}, this.get(path, {}), value));
     pushTo   = (path: string, ...items: any[]) => this.set(path, this.get<Array<any>>(path, []).concat(items));
     raw      = (): T => this.data as T;

@@ -5,9 +5,13 @@ import Platform from '@u/platform';
 import Plugin from '@/VuePlugin';
 import Axios, { AxiosRequestConfig } from 'axios';
 import { Config } from '@c/Config';
+import { styleVars } from '@/styling/export';
 
 export class PlatformServiceProvider extends ServiceProvider {
     public register(): any | Promise<any> {
+
+        this.app.instance('styling', styleVars);
+        this.app.addBindingGetter('styling')
 
         this.app.bind('storage').to(Storage).inSingletonScope().onActivation((context, storage: Storage) => {
             let [ local, session ] = Storage.defaultDrivers();

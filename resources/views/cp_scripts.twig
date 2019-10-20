@@ -1,9 +1,10 @@
+{# @var \Pyro\Platform\Platform platform #}
 {{ asset_add('platform.js', 'platform::js/platform.js', [ 'webpack:pyro__platform:scripts' ]) }}
 
-{% if config('webpack.enabled') and config('webpack.middleware.enabled') %}
+{% if config('platform.webpack.enabled') and config('platform.webpack.active') %}
     <!--WEBPACK_HERE_PLEASE-->
 {% else %}
-    {{ asset_public_script("assets/js/pyro__platform.js") }}
+
 
     {% for script in platform.publicScripts %}
         {{ asset_public_script(script) }}
@@ -11,10 +12,6 @@
     {% for style in platform.publicStyles %}
         {{ asset_public_style(style) }}
     {% endfor %}
-
-{#    {{ asset_public_script("assets/js/pyro__admin_theme.js") }}#}
-{#    {{ asset_public_script("assets/js/pyro__permission_tree.js") }}#}
-{#    {{ asset_public_script("assets/js/pyro__menus.js") }}#}
 {% endif %}
 
 <!-- PLATFORM_DATA -->
@@ -30,6 +27,7 @@
 
 {{ asset_inline('platform_pre_boot') }}
 
+{% if config('platform.cp_scripts.bootstrap') %}
 <script>
     (function () {
         var app = this.pyro.pyro__platform.Application.instance;
@@ -63,7 +61,8 @@
                         $.holdReady(false);
                     }
                 });
-                app.start('#main');
+                app.start('#app');
             });
     }.call(window,window));
 </script>
+{% endif %}

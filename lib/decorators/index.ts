@@ -221,29 +221,44 @@ export function ref(refKey?: string) {
     })
 }
 
-export function inject$(id: interfaces.ServiceIdentifier<any>) {
-    return createDecorator((options, key) => {
-        (options.mixins || (options.mixins = [])).push({
-            data: function () {
-                return { [ key ]: app().get(id) }
-            },
-        });
-        // options.computed = options.computed || {};
-        // options.computed[ key ] = {
-        //     cache: false,
-        //     get(this: Vue) {return app.get(id) }
-        // }
-        //
-        // [ 'header', 'left', 'right', 'footer' ].forEach(part => {
-        // })
-        // options.computed        = options.computed || {}
-        // options.computed[ key ] = {
-        //     cache: false,
-        //     get(this: Vue) {
-        //         return this.$app.get(id);
-        //     }
-        // } as any
-    })
+export function inject$(identifier?: interfaces.ServiceIdentifier<any>) {
+    return (proto:Vue, key:string)=> {
+        let Type: any
+        if (typeof Reflect !== 'undefined' && typeof Reflect.getMetadata === 'function') {
+            Type = Reflect.getMetadata('design:type', proto, key)
+        }
+
+        return createDecorator((options, key) => {
+            // (options.mixins || (options.mixins = [])).push({
+            //     data: function () {
+            //         return { [ key ]: app().get(identifier) }
+            //     },
+            // });
+
+
+            options.computed = options.computed || {}
+
+            options.computed[key] = function(this: any) {
+                return app().get(identifier || Type)
+            }
+
+            // options.computed = options.computed || {};
+            // options.computed[ key ] = {
+            //     cache: false,
+            //     get(this: Vue) {return app.get(id) }
+            // }
+            //
+            // [ 'header', 'left', 'right', 'footer' ].forEach(part => {
+            // })
+            // options.computed        = options.computed || {}
+            // options.computed[ key ] = {
+            //     cache: false,
+            //     get(this: Vue) {
+            //         return this.$app.get(id);
+            //     }
+            // } as any
+        })(proto, key)
+    }
 }
 
 

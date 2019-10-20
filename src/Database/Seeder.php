@@ -3,6 +3,7 @@
 namespace Pyro\Platform\Database;
 
 use Anomaly\Streams\Platform\Traits\FiresCallbacks;
+use Closure;
 use Faker\Factory;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Arr;
@@ -12,15 +13,36 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
     use FiresCallbacks;
     use WithFaker;
 
+    public static $result;
+
+    public static $registered = [];
+
+    public function setResult($result)
+    {
+        static::$result = $result;
+        return $this;
+    }
+
+    public static function registerSeed($name, Closure $run)
+    {
+        $class = static::class;
+        self::$registered[$name] = compact('name','class','run');
+    }
+
+    public static function getResult()
+    {
+        return static::$result;
+    }
+
     public static function when($trigger, $callback)
     {
         $trigger = static::class . '::' . $trigger;
 
-        if (!isset(self::$listeners[$trigger])) {
-            self::$listeners[$trigger] = [];
+        if ( ! isset(self::$listeners[ $trigger ])) {
+            self::$listeners[ $trigger ] = [];
         }
 
-        self::$listeners[$trigger][] = $callback;
+        self::$listeners[ $trigger ][] = $callback;
     }
 
     public function getFaker()
@@ -62,7 +84,11 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 
             $this->fire('call', [ $this, $instance, $class, $silent ]);
 
-            $instance->__invoke();
+            $result = $instance->__invoke();
+
+            if (isset($result)) {
+                $this->setResult($result);
+            }
 
             $this->fire('called', [ $this, $instance, $class, $silent ]);
         }

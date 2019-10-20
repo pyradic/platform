@@ -1,16 +1,16 @@
 {
     "name": "@pyro/platform",
     "version": "1.0.0",
-    "main": "resources/js/admin.js",
-    "types": "lib/platform.ts",
-    "typings": "lib/platform.ts",
+    "main": "lib/index.ts",
+    "types": "lib/index.ts",
+    "typings": "lib/index.ts",
     "private": true,
     "scripts": {},
     "pyro": {
         "srcPath": "lib",
         "entry": {
-            "development": "platform.development.ts",
-            "production": "platform.production.ts"
+            "development": "index.ts",
+            "production": "index.ts"
         }
     },
     "dependencies": {

@@ -30,6 +30,7 @@ class UserSeederHelper
         $user = $users->findByUsername($username);
 
         if ($user instanceof UserInterface) {
+            $user->roles()->sync([]);
             return $user;
         }
 

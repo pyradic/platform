@@ -258,7 +258,7 @@ export class Cookies {
         if ( !this.has(name) ) {
             return defaultValue
         }
-        return this.get(name)
+        return cook.get(name)
     }
 
     has(name) {return cook.get(name) !== undefined }

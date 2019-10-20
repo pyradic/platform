@@ -1,7 +1,8 @@
-<?php namespace Pyro\Platform\Http\Middleware;
+<?php namespace Pyro\Platform\Webpack;
 
 use Barryvdh\Debugbar\LaravelDebugbar;
 use Closure;
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,8 +16,8 @@ class WebpackHotMiddleware
      */
     protected $container;
 
-    /** @var \Illuminate\Config\Repository */
-    protected $bundles;
+    /** @var \Illuminate\Contracts\Config\Repository */
+    protected $config;
 
     /**
      * Create a new middleware instance.
@@ -24,10 +25,12 @@ class WebpackHotMiddleware
      * @param Container       $container
      * @param LaravelDebugbar $debugbar
      */
-    public function __construct(Container $container)
+    public function __construct(Container $container, Repository $config)
     {
         $this->container = $container;
-        $this->bundles   = config('webpack.bundles', []);
+        $this->config    = $config;
+
+//        $this->bundles   = config('webpack.bundles', []);
 //        $themes = collect(config('webpack.themes', []));
         /** @var \Anomaly\Streams\Platform\Addon\Theme\Theme $theme */
 //        $theme = resolve(ThemeCollection::class)->active();
@@ -45,9 +48,10 @@ class WebpackHotMiddleware
      *
      * @param \Symfony\Component\HttpFoundation\Request  $request
      * @param \Symfony\Component\HttpFoundation\Response $response
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function modifyResponse(\Symfony\Component\HttpFoundation\Request $request, Response $response)
+    public function modifyResponse($bundles, Response $response)
     {
         $content = $response->getContent();
         if (stristr($content, '<!--WEBPACK_HERE_PLEASE-->') === false) {
@@ -55,7 +59,7 @@ class WebpackHotMiddleware
         }
 
         $renderedContent = '';
-        foreach ($this->bundles as $bundleName => $assets) {
+        foreach ($bundles as $bundleName => $assets) {
             foreach ($assets[ 'styles' ] as $style) {
                 $renderedContent .= "\n<link rel='stylesheet' type='text/css' href='{$style}'></link>";
             }
@@ -82,18 +86,38 @@ class WebpackHotMiddleware
      *
      * @param Request $request
      * @param Closure $next
+     *
      * @return mixed
      */
     public function handle($request, Closure $next)
     {
-        if (empty($this->bundles) || config('webpack.enabled', false) !== true) {
+
+        $enabled = $this->config->get('platform.webpack.enabled');
+
+        if ($enabled !== true) {
+            return $next($request);
+        }
+        $bundles = $this->getBundles();
+        if (empty($bundles)) {
             return $next($request);
         }
 
         $response = $next($request);
-        // Modify the response to add the Debugbar
-        $this->modifyResponse($request, $response);
-
+        $this->modifyResponse($bundles, $response);
         return $response;
+    }
+
+    protected function getPath()
+    {
+        return base_path($this->config->get('platform.webpack.path'));
+    }
+
+    protected function getBundles()
+    {
+        $path = $this->getPath();
+        if (file_exists($path)) {
+            return json_decode(file_get_contents($path), true);
+        }
+        return [];
     }
 }

@@ -10,7 +10,7 @@ import { LogConfig } from '@/interfaces';
 import { AxiosStatic } from 'axios';
 import { Application } from '@c/Application';
 
-
+export * from './styling/export'
 export * from './interfaces';
 export * from './classes/Application';
 export * from './classes/ServiceProvider';
@@ -22,6 +22,13 @@ export * from './decorators';
 export * from './utils/registerComponents'
 
 export { merge, Plugin };
+
+export async function generateVueCompletion(){
+    const mod =await import('./utils/generateVueCodeCompletion')
+    console.log({mod})
+    const completion =mod.generateVueCodeCompletion();
+    console.log({completion})
+}
 
 
 export class Component extends Vue {
