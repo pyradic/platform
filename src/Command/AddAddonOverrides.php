@@ -39,6 +39,9 @@ class AddAddonOverrides
             if ($fs->exists($configPath = $overridePath . '/config')) {
                 $configurator->addNamespaceOverrides($targetAddon->getNamespace(), $configPath);
             }
+            if($fs->exists($langPAth = $overridePath . '/lang')){
+                trans();
+            }
         }
 
         // streams::

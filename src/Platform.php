@@ -19,6 +19,24 @@ class Platform
     /** @var \Illuminate\Contracts\Console\Application */
     protected $app;
 
+    protected $preventBootstrap = false;
+
+    public function preventBootstrap($value = true)
+    {
+        $this->preventBootstrap = $value;
+        return $this;
+    }
+
+    public function shouldPreventBootstrap()
+    {
+        return $this->preventBootstrap || config('platform.cp_scripts.bootstrap') === false;
+    }
+
+    public function shouldntPreventBootstrap()
+    {
+        return ! $this->shouldPreventBootstrap();
+    }
+
     public function __construct(array $data = [], array $config = [], array $providers = [])
     {
         $this->app       = \Illuminate\Foundation\Application::getInstance();
@@ -126,6 +144,11 @@ class Platform
     {
         $this->publicStyles = array_merge($this->publicStyles, Arr::wrap($publicStyle));
         return $this;
+    }
+
+    public function __toString()
+    {
+        return '';
     }
 
 }

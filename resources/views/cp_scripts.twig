@@ -16,53 +16,54 @@
 
 <!-- PLATFORM_DATA -->
 <script>
-    var PLATFORM_DATA = JSON.parse('{{ platform.data.toJson | raw }}');
+    {#var PLATFORM_DATA = JSON.parse('{{ platform.data.toJson(null,constant('JSON_HEX_APOS') b-and constant('JSON_HEX_QUOT')) | raw }}');#}
+    var PLATFORM_DATA = JSON.parse('{{ platform.data.toJson | replace({"'": "\\'"}) | raw }}');
 </script>
 
 <!-- PLATFORM_CONFIG & PLATFORM_PROVIDERS -->
 <script>
-    var PLATFORM_CONFIG = JSON.parse('{{ platform.config.toJson | raw }}');
+    var PLATFORM_CONFIG = JSON.parse('{{ platform.config.toJson | replace({"'": "\\'"})  | raw }}');
     var PLATFORM_PROVIDERS = [{{ platform.providers | join(', ') }}];
 </script>
 
 {{ asset_inline('platform_pre_boot') }}
 
-{% if config('platform.cp_scripts.bootstrap') %}
-<script>
-    (function () {
-        var app = this.pyro.pyro__platform.Application.instance;
-        var log = app.createLog('cp_scripts');
-        var install = pyro.pyro__platform.install;
+{% if platform.shouldntPreventBootstrap %}
+    <script>
+        (function () {
+            var app = this.pyro.pyro__platform.Application.instance;
+            var log = app.createLog('cp_scripts');
+            var install = pyro.pyro__platform.install;
 
-        log({
-            t:this,
-            pyro,
-            tpyro:this.pyro,
-            pyro_platform:pyro.pyro__platform,
-            pyro_platform_provider:pyro.pyro__platform.PlatformServiceProvider,
-            tpyro_platform_provider:this.pyro.pyro__platform.PlatformServiceProvider,
-        })
-        app
-            .bootstrap({
-                providers: [
-                    this.pyro.pyro__platform.PlatformServiceProvider
-                ]
-            }, {
-                config   : PLATFORM_CONFIG,
-                providers: PLATFORM_PROVIDERS
-            })
-            .then(function (app) {
-                return app.boot();
-            })
-            .then(function (app) {
-                // Vue.use(pyro.platform.Plugin);
-                app.extendRoot({
-                    mounted: function () {
-                        $.holdReady(false);
-                    }
-                });
-                app.start('#app');
+            log({
+                t                      : this,
+                pyro,
+                tpyro                  : this.pyro,
+                pyro_platform          : pyro.pyro__platform,
+                pyro_platform_provider : pyro.pyro__platform.PlatformServiceProvider,
+                tpyro_platform_provider: this.pyro.pyro__platform.PlatformServiceProvider,
             });
-    }.call(window,window));
-</script>
+            app
+                .bootstrap({
+                    providers: [
+                        this.pyro.pyro__platform.PlatformServiceProvider
+                    ]
+                }, {
+                    config   : PLATFORM_CONFIG,
+                    providers: PLATFORM_PROVIDERS
+                })
+                .then(function (app) {
+                    return app.boot();
+                })
+                .then(function (app) {
+                    // Vue.use(pyro.platform.Plugin);
+                    app.extendRoot({
+                        mounted: function () {
+                            $.holdReady(false);
+                        }
+                    });
+                    app.start('#app');
+                });
+        }.call(window, window));
+    </script>
 {% endif %}

@@ -3,6 +3,7 @@
 namespace Pyro\Platform\Console;
 
 use Anomaly\UsersModule\User\Contract\UserRepositoryInterface;
+use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Pyro\Platform\Database\Seeder;
@@ -20,16 +21,20 @@ class SeedCommand extends Command
         auth()->loginUsingId($user->getId());
 
         $classes = [];
+        $names   = [];
         foreach ($regs as $name => $reg) {
             $classes[] = $reg[ 'class' ];
         }
-        $choices = $this->choice('seeds', $classes, null, null, true);
-        $choices = Arr::wrap($choices);
-        foreach ($choices as $class) {
-            $this->call('db:seed', [ '--class' => $class ]);
+        $names = $this->choice('seeds', array_keys($regs), null, null, true);
+        $names = Arr::wrap($names);
+        foreach ($names as $name) {
+            $reg = $regs[ $name ];
+            if ($reg[ 'run' ] instanceof Closure) {
+                $reg[ 'run' ]($this);
+            }
+            $this->call('db:seed', [ '--class' => $reg[ 'class' ] ]);
         }
 
         $this->info('Done');
-
     }
 }

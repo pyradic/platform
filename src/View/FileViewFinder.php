@@ -1,6 +1,6 @@
 <?php
 
-namespace Pyro\Platform;
+namespace Pyro\Platform\View;
 
 use Anomaly\Streams\Platform\Addon\Addon;
 use Anomaly\Streams\Platform\Addon\AddonCollection;

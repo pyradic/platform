@@ -24,7 +24,7 @@ class AddPathOverrides
         if (config('crvs.accept_debug_request_vars', false) && request()->has('NO_ADDON_OVERRIDES')) {
             return;
         }
-        /** @var \Pyro\Platform\FileViewFinder $finder */
+        /** @var \Pyro\Platform\View\FileViewFinder $finder */
         $finder=$factory->getFinder();
         $overridePaths = glob(path_join($this->path, 'addons/*/*'), GLOB_NOSORT);
         foreach ($overridePaths as $overridePath) {

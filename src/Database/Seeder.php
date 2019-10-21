@@ -5,7 +5,6 @@ namespace Pyro\Platform\Database;
 use Anomaly\Streams\Platform\Traits\FiresCallbacks;
 use Closure;
 use Faker\Factory;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Arr;
 
 class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
@@ -23,10 +22,10 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         return $this;
     }
 
-    public static function registerSeed($name, Closure $run)
+    public static function registerSeed($name, Closure $run = null)
     {
-        $class = static::class;
-        self::$registered[$name] = compact('name','class','run');
+        $class                     = static::class;
+        self::$registered[ $name ] = compact('name', 'class', 'run');
     }
 
     public static function getResult()
@@ -43,16 +42,6 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         }
 
         self::$listeners[ $trigger ][] = $callback;
-    }
-
-    public function getFaker()
-    {
-        return $this->faker;
-    }
-
-    protected function makeFaker($locale = null)
-    {
-        return Factory::create($locale ?? 'nl_NL');
     }
 
     public function __construct()
@@ -96,4 +85,6 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 
         return $this;
     }
+
+
 }

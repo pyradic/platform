@@ -19,6 +19,7 @@ use Pyro\Platform\Command\AddPathOverrides;
 use Pyro\Platform\Console\AddonListCommand;
 use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
+use Pyro\Platform\View\FileViewFinder;
 
 class PlatformServiceProvider extends ServiceProvider
 {
