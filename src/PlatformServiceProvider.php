@@ -17,6 +17,7 @@ use Pyro\Platform\Asset\Asset;
 use Pyro\Platform\Command\AddAddonOverrides;
 use Pyro\Platform\Command\AddPathOverrides;
 use Pyro\Platform\Console\AddonListCommand;
+use Pyro\Platform\Console\DatabaseTruncateCommand;
 use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
 use Pyro\Platform\View\FileViewFinder;
@@ -165,7 +166,10 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton('command.route.list', function ($app) {
             return new RouteListCommand($app[ 'router' ]);
         });
-        $this->commands([ 'command.platform.seed', 'command.addon.list' ]);
+        $this->app->singleton('command.database.truncate', function ($app) {
+            return new DatabaseTruncateCommand();
+        });
+        $this->commands([ 'command.platform.seed', 'command.addon.list','command.database.truncate' ]);
     }
 
     protected function registerViewFinder()
