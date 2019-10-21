@@ -56,6 +56,7 @@ class PlatformServiceProvider extends ServiceProvider
         if ($this->app->environment('local')) {
             $this->registerDevProviders();
             $this->registerDevLoginForm();
+            $this->registerDebugLogin();
         }
         $this->registerPlatform();
         $this->registerEntryModelGeneratorStub();
@@ -63,7 +64,6 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerAssetOverride();
         $this->registerThemeInheritance();
         $this->registerCommands();
-        $this->registerMiddleware();
         $this->registerViewFinder();
     }
 
@@ -88,10 +88,16 @@ class PlatformServiceProvider extends ServiceProvider
             $login->on('built', function (LoginFormBuilder $builder) {
                 $builder->getFormField('email')->setValue(env('ADMIN_EMAIL'));
                 $builder->getFormField('password')->setValue(env("ADMIN_PASSWORD"));
-                return;
             });
             return $login;
         });
+    }
+
+    protected function registerDebugLogin()
+    {
+        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
+        $kernel = $this->app->make(Kernel::class);
+        $kernel->prependMiddleware(Http\Middleware\DebugLoginMiddleware::class);
     }
 
     protected function registerPlatform()
@@ -159,17 +165,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton('command.route.list', function ($app) {
             return new RouteListCommand($app[ 'router' ]);
         });
-        $this->commands([ 'command.ide-helper.models','command.platform.seed', 'command.addon.list' ]);
-    }
-
-    protected function registerMiddleware()
-    {
-        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
-        $kernel = $this->app->make(Kernel::class);
-        $kernel->prependMiddleware(Http\Middleware\DebugLoginMiddleware::class);
-        if ($this->app[ 'config' ][ 'webpack.middleware.enabled' ]) {
-            $kernel->prependMiddleware($this->app[ 'config' ]->get('webpack.middleware.class', Webpack\WebpackHotMiddleware::class));
-        }
+        $this->commands([ 'command.platform.seed', 'command.addon.list' ]);
     }
 
     protected function registerViewFinder()
