@@ -18,6 +18,7 @@ use Pyro\Platform\Command\AddAddonOverrides;
 use Pyro\Platform\Command\AddPathOverrides;
 use Pyro\Platform\Console\AddonListCommand;
 use Pyro\Platform\Console\DatabaseTruncateCommand;
+use Pyro\Platform\Console\EnvSet;
 use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
 use Pyro\Platform\View\FileViewFinder;
@@ -31,7 +32,7 @@ class PlatformServiceProvider extends ServiceProvider
         \Laradic\Support\SupportServiceProvider::class,
         Http\HttpServiceProvider::class,
         Bus\BusServiceProvider::class,
-        Webpack\WebpackServiceProvider::class
+        Webpack\WebpackServiceProvider::class,
     ];
 
     protected $devProviders = [
@@ -48,6 +49,12 @@ class PlatformServiceProvider extends ServiceProvider
         $assets->addPath('node_modules', base_path('node_modules'));
         $assets->addPath('platform', dirname(__DIR__) . '/resources');
         $this->app->view->share('platform', $this->app->platform);
+        $this->app->extend(\Anomaly\Streams\Platform\Application\Console\EnvSet::class, function (\Anomaly\Streams\Platform\Application\Console\EnvSet $command) {
+            $this->mergeConfigFrom(base_path('vendor/jackiedo/dotenv-editor/src/config/config.php'), 'dotenv-editor');
+            $this->app->config->set('dotenv-editor.autoBackup', false);
+            $this->app->bind('dotenv-editor', 'Jackiedo\DotenvEditor\DotenvEditor');
+            return $this->app->make(EnvSet::class);
+        });
     }
 
     public function register()
