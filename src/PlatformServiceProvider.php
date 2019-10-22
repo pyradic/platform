@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
+<?php /** @noinspection PhpFullyQualifiedNameUsageInspection */
+
+/** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
 
 namespace Pyro\Platform;
 
@@ -30,9 +32,9 @@ class PlatformServiceProvider extends ServiceProvider
     protected $providers = [
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
-        Http\HttpServiceProvider::class,
-        Bus\BusServiceProvider::class,
-        Webpack\WebpackServiceProvider::class,
+        \Pyro\Platform\Http\HttpServiceProvider::class,
+        \Pyro\Platform\Bus\BusServiceProvider::class,
+        \Pyro\Platform\Webpack\WebpackServiceProvider::class,
     ];
 
     protected $devProviders = [
@@ -49,12 +51,6 @@ class PlatformServiceProvider extends ServiceProvider
         $assets->addPath('node_modules', base_path('node_modules'));
         $assets->addPath('platform', dirname(__DIR__) . '/resources');
         $this->app->view->share('platform', $this->app->platform);
-        $this->app->extend(\Anomaly\Streams\Platform\Application\Console\EnvSet::class, function (\Anomaly\Streams\Platform\Application\Console\EnvSet $command) {
-            $this->mergeConfigFrom(base_path('vendor/jackiedo/dotenv-editor/src/config/config.php'), 'dotenv-editor');
-            $this->app->config->set('dotenv-editor.autoBackup', false);
-            $this->app->bind('dotenv-editor', 'Jackiedo\DotenvEditor\DotenvEditor');
-            return $this->app->make(EnvSet::class);
-        });
     }
 
     public function register()
@@ -67,17 +63,25 @@ class PlatformServiceProvider extends ServiceProvider
             $this->registerDebugLogin();
         }
         $this->registerPlatform();
+        $this->registerSeeders();
         $this->registerEntryModelGeneratorStub();
         $this->registerAddonPaths();
         $this->registerAssetOverride();
         $this->registerThemeInheritance();
         $this->registerCommands();
         $this->registerViewFinder();
+        $this->registerDotenvEditor();
+        $this->registerEnvSetCommand();
     }
 
     protected function mergeConfigs()
     {
         $this->mergeConfigFrom(dirname(__DIR__) . '/config/platform.php', 'platform');
+    }
+
+    protected function registerSeeders()
+    {
+        \Pyro\Platform\Database\Seeder\UserSeeder::registerSeed('users');
     }
 
     protected function registerProviders()
@@ -111,7 +115,7 @@ class PlatformServiceProvider extends ServiceProvider
     protected function registerPlatform()
     {
         $this->app->singleton('platform', function (Application $app) {
-            $platform= new Platform(
+            $platform = new Platform(
                 [],
                 [ 'debug' => $this->app->config[ 'app.debug' ], 'csrf' => $app->session->token() ],
                 [ 'pyro.pyro__platform.PlatformServiceProvider' ]
@@ -176,7 +180,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton('command.database.truncate', function ($app) {
             return new DatabaseTruncateCommand();
         });
-        $this->commands([ 'command.platform.seed', 'command.addon.list','command.database.truncate' ]);
+        $this->commands([ 'command.platform.seed', 'command.addon.list', 'command.database.truncate' ]);
     }
 
     protected function registerViewFinder()
@@ -199,6 +203,20 @@ class PlatformServiceProvider extends ServiceProvider
         });
 
         $this->app->view->setFinder($this->app[ 'view.finder' ]);
+    }
+
+    protected function registerEnvSetCommand()
+    {
+        $this->app->extend(\Anomaly\Streams\Platform\Application\Console\EnvSet::class, function (\Anomaly\Streams\Platform\Application\Console\EnvSet $command) {
+            return $this->app->make(EnvSet::class);
+        });
+    }
+
+    protected function registerDotenvEditor()
+    {
+        $this->mergeConfigFrom(base_path('vendor/jackiedo/dotenv-editor/src/config/config.php'), 'dotenv-editor');
+        $this->app->config->set('dotenv-editor.autoBackup', false);
+        $this->app->bind('dotenv-editor', 'Jackiedo\DotenvEditor\DotenvEditor');
     }
 
 }

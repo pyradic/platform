@@ -10,28 +10,27 @@ use Pyro\Platform\Database\Seeder;
 
 class SeedCommand extends Command
 {
-    protected $signature = 'seed';
+    protected $signature = 'seed {--list}';
 
     protected $description = 'Database seeders';
 
     public function handle(UserRepositoryInterface $repository)
     {
-        $regs = Seeder::$registered;
+        $regs = collect(Seeder::$registered);
         $user = $repository->findByEmail(env('ADMIN_EMAIL'));
         auth()->loginUsingId($user->getId());
 
-        $classes = [];
-        $names   = [];
-        foreach ($regs as $name => $reg) {
-            $classes[] = $reg[ 'class' ];
+        if($this->option('list')){
+            $rows = collect($regs)->map(function($reg){
+                return [$reg['name'], $reg['description'], $reg['class']];
+            })->toArray();
+            return $this->table(['name','description','class'], $rows);
         }
-        $names = $this->choice('seeds', array_keys($regs), null, null, true);
+
+        $names = $this->choice('seeds', $regs->keys()->toArray(), null, null, true);
         $names = Arr::wrap($names);
         foreach ($names as $name) {
             $reg = $regs[ $name ];
-            if ($reg[ 'run' ] instanceof Closure) {
-                $reg[ 'run' ]($this);
-            }
             $this->call('db:seed', [ '--class' => $reg[ 'class' ] ]);
         }
 
