@@ -15,3 +15,15 @@ namespace Illuminate\Support {
         }
     }
 }
+namespace Illuminate\Console {
+    /** @mixin \Illuminate\Console\Command */
+    class Command {
+        /**
+         * @see \EddIriarte\Console\Providers\SelectServiceProvider::boot()
+         */
+        public function select(string $message = '', array $options = [], bool $allowMultiple = true)
+        {
+            return [];
+        }
+    }
+}

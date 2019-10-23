@@ -4,26 +4,14 @@
 
 namespace Pyro\Platform;
 
-use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
-use Anomaly\Streams\Platform\Event\Booting;
-use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\ServiceProvider;
-use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
-use Pyro\Platform\Asset\Asset;
-use Pyro\Platform\Command\AddAddonOverrides;
-use Pyro\Platform\Command\AddPathOverrides;
-use Pyro\Platform\Console\AddonListCommand;
-use Pyro\Platform\Console\DatabaseTruncateCommand;
-use Pyro\Platform\Console\EnvSet;
-use Pyro\Platform\Console\RouteListCommand;
-use Pyro\Platform\Console\SeedCommand;
-use Pyro\Platform\View\FileViewFinder;
+use Pyro\Platform\User\Permission\PermissionSetCollection;
 
 class PlatformServiceProvider extends ServiceProvider
 {
@@ -32,8 +20,12 @@ class PlatformServiceProvider extends ServiceProvider
     protected $providers = [
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
-        \Pyro\Platform\Http\HttpServiceProvider::class,
+        \Pyro\Platform\Asset\AssetServiceProvider::class,
         \Pyro\Platform\Bus\BusServiceProvider::class,
+        \Pyro\Platform\Console\ConsoleServiceProvider::class,
+        \Pyro\Platform\Database\DatabaseServiceProvider::class,
+        \Pyro\Platform\Http\HttpServiceProvider::class,
+        \Pyro\Platform\View\ViewServiceProvider::class,
         \Pyro\Platform\Webpack\WebpackServiceProvider::class,
     ];
 
@@ -43,7 +35,7 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function boot(\Anomaly\Streams\Platform\Asset\Asset $assets, ViewIncludes $includes)
     {
-        $this->registerCommands();
+//        $this->registerCommands();
 
         if ($this->app->config[ 'platform.cp_scripts.enabled' ]) {
             $includes->include('cp_scripts', 'platform::cp_scripts');
@@ -63,26 +55,39 @@ class PlatformServiceProvider extends ServiceProvider
             $this->registerDebugLogin();
         }
         $this->registerPlatform();
-        $this->registerSeeders();
+        $this->registerPermissionSets();
+//        $this->registerSeeders();
         $this->registerEntryModelGeneratorStub();
-        $this->registerAddonPaths();
-        $this->registerAssetOverride();
-        $this->registerThemeInheritance();
-        $this->registerCommands();
-        $this->registerViewFinder();
-        $this->registerDotenvEditor();
-        $this->registerEnvSetCommand();
+//        $this->registerAddonPaths();
+//        $this->registerAssetOverride();
+//        $this->registerThemeInheritance();
+//        $this->registerCommands();
+//        $this->registerViewFinder();
+//        $this->registerDotenvEditor();
+//        $this->registerEnvSetCommand();
     }
 
     protected function mergeConfigs()
     {
         $this->mergeConfigFrom(dirname(__DIR__) . '/config/platform.php', 'platform');
+        $this->mergeConfigFrom(dirname(__DIR__) . '/config/platform.permission_sets.php', 'platform.permission_sets');
     }
 
-    protected function registerSeeders()
+    protected function registerPermissionSets()
     {
-        \Pyro\Platform\Database\Seeder\UserSeeder::registerSeed('users');
+        $this->app->singleton('permission_set_collection', function ($app) {
+            $sets = new PermissionSetCollection();
+            $data = $this->app->config->get('platform.permission_sets', []);
+            $sets->registerFromArray($data);
+            return $sets;
+        });
+        $this->app->alias('permission_set_collection', PermissionSetCollection::class);
     }
+
+//    protected function registerSeeders()
+//    {
+//        \Pyro\Platform\Database\Seeder\UserSeeder::registerSeed('users');
+//    }
 
     protected function registerProviders()
     {
@@ -135,89 +140,91 @@ class PlatformServiceProvider extends ServiceProvider
         });
     }
 
-    protected function registerAddonPaths()
-    {
-        // addon paths
-        $this->app->events->listen(Ready::class, function (Ready $event) {
-            $this->dispatchNow(new AddPathOverrides(path_join(__DIR__, '..', 'resources')));
-
-            $active = resolve(\Anomaly\Streams\Platform\Addon\Theme\ThemeCollection::class)->active();
-            $this->dispatchNow(new AddAddonOverrides($active));
-        });
-
-        $this->app->events->listen(AddonsHaveRegistered::class, function (AddonsHaveRegistered $event) {
-            foreach ($event->getAddons()->installed()->enabled() as $addon) {
-                $this->dispatchNow(new AddAddonOverrides($addon));
-            }
-        });
-    }
-
-    protected function registerAssetOverride()
-    {
-        $this->app->events->listen(Booting::class, function (Booting $event) {
-            $this->app->singleton('Anomaly\Streams\Platform\Asset\Asset', Asset::class);
-        });
-    }
-
-    protected function registerThemeInheritance()
-    {
-        $this->app->events->listen(Ready::class, function (Ready $event) {
-            $this->dispatchNow(new LoadParentTheme());
-        });
-    }
-
-    protected function registerCommands()
-    {
-        $this->app->singleton('command.addon.list', function ($app) {
-            return new AddonListCommand();
-        });
-        $this->app->singleton('command.platform.seed', function ($app) {
-            return new SeedCommand();
-        });
-        $this->app->singleton('command.route.list', function ($app) {
-            return new RouteListCommand($app[ 'router' ]);
-        });
-        $this->app->singleton('command.database.truncate', function ($app) {
-            return new DatabaseTruncateCommand();
-        });
-        $this->commands([ 'command.platform.seed', 'command.addon.list', 'command.database.truncate' ]);
-    }
-
-    protected function registerViewFinder()
-    {
-        /** @var FileViewFinder $oldViewFinder */
-        $oldViewFinder = $this->app[ 'view.finder' ];
-
-        $this->app->bind('view.finder', function ($app) use ($oldViewFinder) {
-            $paths      = array_merge(
-                $app[ 'config' ][ 'view.paths' ],
-                $oldViewFinder->getPaths()
-            );
-            $viewFinder = new FileViewFinder($app[ 'files' ], $paths, $oldViewFinder->getExtensions());
-
-            foreach ($oldViewFinder->getHints() as $namespace => $hints) {
-                $viewFinder->addNamespace($namespace, $hints);
-            }
-            $viewFinder->addNamespace('platform', dirname(__DIR__) . '/resources/views');
-            return $viewFinder;
-        });
-
-        $this->app->view->setFinder($this->app[ 'view.finder' ]);
-    }
-
-    protected function registerEnvSetCommand()
-    {
-        $this->app->extend(\Anomaly\Streams\Platform\Application\Console\EnvSet::class, function (\Anomaly\Streams\Platform\Application\Console\EnvSet $command) {
-            return $this->app->make(EnvSet::class);
-        });
-    }
-
-    protected function registerDotenvEditor()
-    {
-        $this->mergeConfigFrom(base_path('vendor/jackiedo/dotenv-editor/src/config/config.php'), 'dotenv-editor');
-        $this->app->config->set('dotenv-editor.autoBackup', false);
-        $this->app->bind('dotenv-editor', 'Jackiedo\DotenvEditor\DotenvEditor');
-    }
+//    protected function registerAddonPaths()
+//    {
+//        // addon paths
+//        $this->app->events->listen(Ready::class, function (Ready $event) {
+//            $this->dispatchNow(new AddPathOverrides(path_join(__DIR__, '..', 'resources')));
+//
+//            $active = resolve(\Anomaly\Streams\Platform\Addon\Theme\ThemeCollection::class)->active();
+//            $this->dispatchNow(new AddAddonOverrides($active));
+//        });
+//
+//        $this->app->events->listen(AddonsHaveRegistered::class, function (AddonsHaveRegistered $event) {
+//            foreach ($event->getAddons()->installed()->enabled() as $addon) {
+//                $this->dispatchNow(new AddAddonOverrides($addon));
+//            }
+//        });
+//    }
+//    protected function registerThemeInheritance()
+//    {
+//        $this->app->events->listen(Ready::class, function (Ready $event) {
+//            $this->dispatchNow(new LoadParentTheme());
+//        });
+//    }
+//
+//    protected function registerAssetOverride()
+//    {
+//        $this->app->events->listen(Booting::class, function (Booting $event) {
+//            $this->app->singleton('Anomaly\Streams\Platform\Asset\Asset', Asset::class);
+//        });
+//    }
+//
+//    protected function registerCommands()
+//    {
+//        $this->app->singleton('command.addon.list', function ($app) {
+//            return new AddonListCommand();
+//        });
+//        $this->app->singleton('command.platform.seed', function ($app) {
+//            return new SeedCommand();
+//        });
+//        $this->app->singleton('command.route.list', function ($app) {
+//            return new RouteListCommand($app[ 'router' ]);
+//        });
+//        $this->app->singleton('command.database.truncate', function ($app) {
+//            return new DatabaseTruncateCommand();
+//        });
+//        $this->app->singleton('command.platform.permissions', function ($app) {
+//            return new PermissionsCommand();
+//        });
+//        $this->commands([ 'command.platform.seed', 'command.addon.list', 'command.database.truncate', 'command.platform.permissions' ]);
+//    }
+//
+//    protected function registerViewFinder()
+//    {
+//        /** @var FileViewFinder $oldViewFinder */
+//        $oldViewFinder = $this->app[ 'view.finder' ];
+//
+//        $this->app->bind('view.finder', function ($app) use ($oldViewFinder) {
+//            $paths      = array_merge(
+//                $app[ 'config' ][ 'view.paths' ],
+//                $oldViewFinder->getPaths()
+//            );
+//            $viewFinder = new FileViewFinder($app[ 'files' ], $paths, $oldViewFinder->getExtensions());
+//
+//            foreach ($oldViewFinder->getHints() as $namespace => $hints) {
+//                $viewFinder->addNamespace($namespace, $hints);
+//            }
+//            $viewFinder->addNamespace('platform', dirname(__DIR__) . '/resources/views');
+//            return $viewFinder;
+//        });
+//
+//        $this->app->view->setFinder($this->app[ 'view.finder' ]);
+//    }
+//
+//    protected function registerEnvSetCommand()
+//    {
+//        $this->app->extend(\Anomaly\Streams\Platform\Application\Console\EnvSet::class, function (\Anomaly\Streams\Platform\Application\Console\EnvSet $command) {
+//            return $this->app->make(EnvSet::class);
+//        });
+//    }
+//
+//    protected function registerDotenvEditor()
+//    {
+//        $this->mergeConfigFrom(base_path('vendor/jackiedo/dotenv-editor/src/config/config.php'), 'dotenv-editor');
+//        $this->app->config->set('dotenv-editor.autoBackup', false);
+//        $this->app->bind('dotenv-editor', 'Jackiedo\DotenvEditor\DotenvEditor');
+//    }
 
 }
 //if (config('app.debug')) {
