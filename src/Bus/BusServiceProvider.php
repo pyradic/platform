@@ -7,16 +7,6 @@ use Illuminate\Support\ServiceProvider;
 
 class BusServiceProvider extends ServiceProvider
 {
-    public $providers = [];
-
-    public $bindings = [];
-
-    public $singletons = [];
-
-    public function boot()
-    {
-
-    }
 
     public function register()
     {

@@ -4,14 +4,32 @@
 
 namespace Pyro\Platform;
 
+use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
+use Anomaly\Streams\Platform\Event\Booting;
+use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\ServiceProvider;
+use Jackiedo\DotenvEditor\DotenvEditor;
+use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
+use Pyro\Platform\Asset\Asset;
+use Pyro\Platform\Bus\BusServiceProvider;
+use Pyro\Platform\Command\AddAddonOverrides;
+use Pyro\Platform\Command\AddPathOverrides;
+use Pyro\Platform\Console\AddonListCommand;
+use Pyro\Platform\Console\DatabaseTruncateCommand;
+use Pyro\Platform\Console\EnvSet;
+use Pyro\Platform\Console\PermissionsCommand;
+use Pyro\Platform\Console\RouteListCommand;
+use Pyro\Platform\Console\SeedCommand;
+use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
+use Pyro\Platform\View\FileViewFinder;
+use Pyro\Platform\Webpack\WebpackServiceProvider;
 
 class PlatformServiceProvider extends ServiceProvider
 {
@@ -20,22 +38,19 @@ class PlatformServiceProvider extends ServiceProvider
     protected $providers = [
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
-        \Pyro\Platform\Asset\AssetServiceProvider::class,
-        \Pyro\Platform\Bus\BusServiceProvider::class,
-        \Pyro\Platform\Console\ConsoleServiceProvider::class,
-        \Pyro\Platform\Database\DatabaseServiceProvider::class,
-        \Pyro\Platform\Http\HttpServiceProvider::class,
-        \Pyro\Platform\View\ViewServiceProvider::class,
-        \Pyro\Platform\Webpack\WebpackServiceProvider::class,
+        \Pyro\CustomInstall\CustomInstallServiceProvider::class,
+//        \Pyro\Platform\Bus\BusServiceProvider::class,
+//        \Pyro\Platform\Webpack\WebpackServiceProvider::class,
     ];
 
     protected $devProviders = [
         \Pyro\IdeHelper\IdeHelperServiceProvider::class,
+        \Laravel\Dusk\DuskServiceProvider::class,
     ];
 
     public function boot(\Anomaly\Streams\Platform\Asset\Asset $assets, ViewIncludes $includes)
     {
-//        $this->registerCommands();
+        $this->bootConsole();
 
         if ($this->app->config[ 'platform.cp_scripts.enabled' ]) {
             $includes->include('cp_scripts', 'platform::cp_scripts');
@@ -51,13 +66,21 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerProviders();
         if ($this->app->environment('local')) {
             $this->registerDevProviders();
-            $this->registerDevLoginForm();
-            $this->registerDebugLogin();
         }
         $this->registerPlatform();
-        $this->registerPermissionSets();
+        $this->registerAddon();
+        $this->registerAsset();
+        $this->registerBus();
+        $this->registerConsole();
+        $this->registerDatabase();
+        $this->registerEntry();
+        $this->registerHttp();
+        $this->registerUi();
+        $this->registerUser();
+        $this->registerView();
+        $this->registerWebpack();
+
 //        $this->registerSeeders();
-        $this->registerEntryModelGeneratorStub();
 //        $this->registerAddonPaths();
 //        $this->registerAssetOverride();
 //        $this->registerThemeInheritance();
@@ -73,22 +96,6 @@ class PlatformServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(dirname(__DIR__) . '/config/platform.permission_sets.php', 'platform.permission_sets');
     }
 
-    protected function registerPermissionSets()
-    {
-        $this->app->singleton('permission_set_collection', function ($app) {
-            $sets = new PermissionSetCollection();
-            $data = $this->app->config->get('platform.permission_sets', []);
-            $sets->registerFromArray($data);
-            return $sets;
-        });
-        $this->app->alias('permission_set_collection', PermissionSetCollection::class);
-    }
-
-//    protected function registerSeeders()
-//    {
-//        \Pyro\Platform\Database\Seeder\UserSeeder::registerSeed('users');
-//    }
-
     protected function registerProviders()
     {
         array_walk($this->providers, [ $this->app, 'register' ]);
@@ -97,24 +104,6 @@ class PlatformServiceProvider extends ServiceProvider
     protected function registerDevProviders()
     {
         array_walk($this->devProviders, [ $this->app, 'register' ]);
-    }
-
-    protected function registerDevLoginForm()
-    {
-        $this->app->extend('login', function (LoginFormBuilder $login) {
-            $login->on('built', function (LoginFormBuilder $builder) {
-                $builder->getFormField('email')->setValue(env('ADMIN_EMAIL'));
-                $builder->getFormField('password')->setValue(env("ADMIN_PASSWORD"));
-            });
-            return $login;
-        });
-    }
-
-    protected function registerDebugLogin()
-    {
-        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
-        $kernel = $this->app->make(Kernel::class);
-        $kernel->prependMiddleware(Http\Middleware\DebugLoginMiddleware::class);
     }
 
     protected function registerPlatform()
@@ -131,15 +120,152 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->alias('platform', Platform::class);
     }
 
-    protected function registerEntryModelGeneratorStub()
+    protected function registerAddon()
     {
+        // addon paths
+        $this->app->events->listen(Ready::class, function (Ready $event) {
+            $this->dispatchNow(new AddPathOverrides(path_join(__DIR__, '..', 'resources')));
 
+            $active = resolve(\Anomaly\Streams\Platform\Addon\Theme\ThemeCollection::class)->active();
+            $this->dispatchNow(new AddAddonOverrides($active));
+        });
+
+        $this->app->events->listen(AddonsHaveRegistered::class, function (AddonsHaveRegistered $event) {
+            foreach ($event->getAddons()->installed()->enabled() as $addon) {
+                $this->dispatchNow(new AddAddonOverrides($addon));
+            }
+        });
+
+        // theme inheritance
+        $this->app->events->listen(Ready::class, function (Ready $event) {
+            $this->dispatchNow(new LoadParentTheme());
+        });
+    }
+
+    protected function registerAsset()
+    {
+        $this->app->events->listen(Booting::class, function (Booting $event) {
+            $this->app->singleton('Anomaly\Streams\Platform\Asset\Asset', Asset::class);
+        });
+    }
+
+    protected function registerBus()
+    {
+        $this->app->register(BusServiceProvider::class);
+    }
+
+    protected function registerConsole()
+    {
+        $this->app->extend(\Anomaly\Streams\Platform\Application\Console\EnvSet::class, function (\Anomaly\Streams\Platform\Application\Console\EnvSet $command) {
+            return $this->app->make(EnvSet::class);
+        });
+    }
+
+    protected function bootConsole()
+    {
+        $this->mergeConfigFrom(base_path('vendor/jackiedo/dotenv-editor/src/config/config.php'), 'dotenv-editor');
+        $this->app->config->set('dotenv-editor.autoBackup', false);
+        $this->app->bind('dotenv-editor', DotenvEditor::class);
+
+        $this->app->singleton('command.addon.list', function ($app) {
+            return new AddonListCommand();
+        });
+        $this->app->singleton('command.platform.seed', function ($app) {
+            return new SeedCommand();
+        });
+        $this->app->singleton('command.route.list', function ($app) {
+            return new RouteListCommand($app[ 'router' ]);
+        });
+        $this->app->singleton('command.database.truncate', function ($app) {
+            return new DatabaseTruncateCommand();
+        });
+        $this->app->singleton('command.platform.permissions', function ($app) {
+            return new PermissionsCommand();
+        });
+        $this->commands([ 'command.platform.seed', 'command.addon.list', 'command.database.truncate', 'command.platform.permissions' ]);
+    }
+
+    protected function registerDatabase()
+    {
+        \Pyro\Platform\Database\Seeder\UserSeeder::registerSeed('users');
+    }
+
+    protected function registerEntry()
+    {
         // stream compile entry model template
         $this->app->events->listen(GatherParserData::class, function (GatherParserData $event) {
             $event->getData()->put('template', file_get_contents(__DIR__ . '/Entry/entry.stub'));
         });
     }
 
+    protected function registerHttp()
+    {
+        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
+        $kernel = $this->app->make(Kernel::class);
+        $kernel->prependMiddleware(DebugLoginMiddleware::class);
+    }
+
+    protected function registerUi()
+    {
+        // dev login form
+        $this->app->extend('login', function (LoginFormBuilder $login) {
+            $login->on('built', function (LoginFormBuilder $builder) {
+                $builder->getFormField('email')->setValue(env('ADMIN_EMAIL'));
+                $builder->getFormField('password')->setValue(env("ADMIN_PASSWORD"));
+            });
+            return $login;
+        });
+    }
+
+    protected function registerUser()
+    {
+        $this->app->singleton('permission_set_collection', function ($app) {
+            $sets = new PermissionSetCollection();
+            $data = $this->app->config->get('platform.permission_sets', []);
+            $sets->registerFromArray($data);
+            return $sets;
+        });
+        $this->app->alias('permission_set_collection', PermissionSetCollection::class);
+    }
+
+    protected function registerView()
+    {
+        /** @var FileViewFinder $oldViewFinder */
+        $oldViewFinder = $this->app[ 'view.finder' ];
+
+        $this->app->bind('view.finder', function ($app) use ($oldViewFinder) {
+            $paths      = array_merge(
+                $app[ 'config' ][ 'view.paths' ],
+                $oldViewFinder->getPaths()
+            );
+            $viewFinder = new FileViewFinder($app[ 'files' ], $paths, $oldViewFinder->getExtensions());
+
+            foreach ($oldViewFinder->getHints() as $namespace => $hints) {
+                $viewFinder->addNamespace($namespace, $hints);
+            }
+            $viewFinder->addNamespace('platform', dirname(__DIR__) . '/resources/views');
+            return $viewFinder;
+        });
+
+        $this->app->view->setFinder($this->app[ 'view.finder' ]);
+    }
+
+    protected function registerWebpack()
+    {
+        $this->app->register(WebpackServiceProvider::class);
+    }
+
+//
+//    protected function registerDebugLogin()
+//    {
+//        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
+//        $kernel = $this->app->make(Kernel::class);
+//        $kernel->prependMiddleware(Http\Middleware\DebugLoginMiddleware::class);
+//    }
+//    protected function registerSeeders()
+//    {
+//        \Pyro\Platform\Database\Seeder\UserSeeder::registerSeed('users');
+//    }
 //    protected function registerAddonPaths()
 //    {
 //        // addon paths

@@ -20,6 +20,7 @@ export * from './classes/Collection';
 export * from './PlatformServiceProvider';
 export * from './decorators';
 export * from './utils/registerComponents'
+export * from './utils/observable'
 
 export { merge, Plugin };
 

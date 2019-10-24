@@ -35,6 +35,15 @@ export class PlatformServiceProvider extends ServiceProvider {
         this.app.instance('data', Config.proxied(PLATFORM_DATA));
         this.app.addBindingGetter('data')
 
+        this.app.extendRoot({
+            data(){
+                return this.$py.data.raw()
+            },
+            mounted(){
+                this.$py.instance('data', Config.proxied(this.$data))
+            }
+        })
+
         this.app.instance<AxiosRequestConfig>('http.config',{
 
         } as AxiosRequestConfig)
