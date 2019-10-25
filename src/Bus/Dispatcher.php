@@ -31,27 +31,31 @@ class Dispatcher extends \Illuminate\Bus\Dispatcher
      */
     public function dispatchNow($command, $handler = null)
     {
-        $this->fire(static::EVENT_BEFORE, $command);
-        $result = parent::dispatchNow($command, $handler);
+        $command = $this->fire(static::EVENT_BEFORE, $command);
+        if($command !== false) {
+            $result = parent::dispatchNow($command, $handler);
+        }
         $this->fire(static::EVENT_AFTER, $command, $result);
         config()->push('bus.' . static::EVENT_AFTER, $command); // @todo remove this
         return $result;
     }
 
-    protected function fire($name, $command, ...$args)
+    protected function fire($name, $command, $result = null)
     {
-        $inspect = function() use ($command) {
+        $inspect = function () use ($command) {
             return new CommandInspector($command);
         };
-        $class     = is_string($command) ? $command : get_class($command);
-        $payload   = array_merge([ $command, $inspect ], $args);
+        $class   = is_string($command) ? $command : get_class($command);
+        $payload = [ $command, $inspect,$result ];
 
-        $name = Str::ensureLeft($name, 'bus.');
-        $this->events->dispatch($name, $payload);
+        $name   = Str::ensureLeft($name, 'bus.');
+        $return = $this->events->dispatch($name, $payload);
 
         // event('bus.dispatch: ' . $class, $command);
-        $name = Str::ensureRight($name, ': ' . $class);
-        $this->events->dispatch($name, $payload);
+        $name   = Str::ensureRight($name, ': ' . $class);
+        $return = $this->events->dispatch($name, $payload);
+
+        return !$return || empty($return) ? $command : head($return);
     }
 
     protected static function listen($eventName, $listener)
@@ -78,7 +82,8 @@ class Dispatcher extends \Illuminate\Bus\Dispatcher
      * Dispatcher::after(BootApp::class, function(CommandInspector $inspector, $result=null){
      * });
      * ```
-     * @param string|callable $command Either a listener function or a FQCN string
+     *
+     * @param string|callable $command  Either a listener function or a FQCN string
      * @param null|callable   $listener If you used a FQCN string for $command then this should be a listener function
      *
      * @return void

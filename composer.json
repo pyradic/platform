@@ -9,8 +9,14 @@
     },
     "autoload": {
         "psr-4": {
-            "Pyro\\Platform\\": "src"
-        }
+            "Pyro\\Platform\\": "src",
+            "Anomaly\\Streams\\Platform\\": "streams"
+        },
+        "exclude-from-classmap": [
+            "vendor/anomaly/streams-platform/src/Ui/Table/Component/Action/ActionBuilder.php",
+            "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Button/ButtonBuilder.php",
+            "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Button/ButtonGuesser.php"
+        ]
     },
     "extra": {
         "branch-alias": {

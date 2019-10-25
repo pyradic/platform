@@ -14,6 +14,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Translation\Translator;
 use Jackiedo\DotenvEditor\DotenvEditor;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Asset\Asset;
@@ -39,6 +40,7 @@ class PlatformServiceProvider extends ServiceProvider
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
         \Pyro\CustomInstall\CustomInstallServiceProvider::class,
+        \Pyro\Platform\Fixes\FixesServiceProvider::class,
 //        \Pyro\Platform\Bus\BusServiceProvider::class,
 //        \Pyro\Platform\Webpack\WebpackServiceProvider::class,
     ];
@@ -58,6 +60,11 @@ class PlatformServiceProvider extends ServiceProvider
         $assets->addPath('node_modules', base_path('node_modules'));
         $assets->addPath('platform', dirname(__DIR__) . '/resources');
         $this->app->view->share('platform', $this->app->platform);
+        Translator::macro('addAddonLines', function($namespace, $locale, $group, $lines){
+            $this->loaded[$namespace][$group][$locale] = $lines;
+        });
+        $this->app->translator->addAddonLines('crvs.module.clients', 'nl', 'field', ['department'=>['name' => 'aa']]);
+        $this->app->translator->addLines(['field.department'=>['name' => 'aa']], 'nl', 'crvs.module.clients');
     }
 
     public function register()
@@ -79,15 +86,6 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerUser();
         $this->registerView();
         $this->registerWebpack();
-
-//        $this->registerSeeders();
-//        $this->registerAddonPaths();
-//        $this->registerAssetOverride();
-//        $this->registerThemeInheritance();
-//        $this->registerCommands();
-//        $this->registerViewFinder();
-//        $this->registerDotenvEditor();
-//        $this->registerEnvSetCommand();
     }
 
     protected function mergeConfigs()
@@ -255,113 +253,4 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->register(WebpackServiceProvider::class);
     }
 
-//
-//    protected function registerDebugLogin()
-//    {
-//        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
-//        $kernel = $this->app->make(Kernel::class);
-//        $kernel->prependMiddleware(Http\Middleware\DebugLoginMiddleware::class);
-//    }
-//    protected function registerSeeders()
-//    {
-//        \Pyro\Platform\Database\Seeder\UserSeeder::registerSeed('users');
-//    }
-//    protected function registerAddonPaths()
-//    {
-//        // addon paths
-//        $this->app->events->listen(Ready::class, function (Ready $event) {
-//            $this->dispatchNow(new AddPathOverrides(path_join(__DIR__, '..', 'resources')));
-//
-//            $active = resolve(\Anomaly\Streams\Platform\Addon\Theme\ThemeCollection::class)->active();
-//            $this->dispatchNow(new AddAddonOverrides($active));
-//        });
-//
-//        $this->app->events->listen(AddonsHaveRegistered::class, function (AddonsHaveRegistered $event) {
-//            foreach ($event->getAddons()->installed()->enabled() as $addon) {
-//                $this->dispatchNow(new AddAddonOverrides($addon));
-//            }
-//        });
-//    }
-//    protected function registerThemeInheritance()
-//    {
-//        $this->app->events->listen(Ready::class, function (Ready $event) {
-//            $this->dispatchNow(new LoadParentTheme());
-//        });
-//    }
-//
-//    protected function registerAssetOverride()
-//    {
-//        $this->app->events->listen(Booting::class, function (Booting $event) {
-//            $this->app->singleton('Anomaly\Streams\Platform\Asset\Asset', Asset::class);
-//        });
-//    }
-//
-//    protected function registerCommands()
-//    {
-//        $this->app->singleton('command.addon.list', function ($app) {
-//            return new AddonListCommand();
-//        });
-//        $this->app->singleton('command.platform.seed', function ($app) {
-//            return new SeedCommand();
-//        });
-//        $this->app->singleton('command.route.list', function ($app) {
-//            return new RouteListCommand($app[ 'router' ]);
-//        });
-//        $this->app->singleton('command.database.truncate', function ($app) {
-//            return new DatabaseTruncateCommand();
-//        });
-//        $this->app->singleton('command.platform.permissions', function ($app) {
-//            return new PermissionsCommand();
-//        });
-//        $this->commands([ 'command.platform.seed', 'command.addon.list', 'command.database.truncate', 'command.platform.permissions' ]);
-//    }
-//
-//    protected function registerViewFinder()
-//    {
-//        /** @var FileViewFinder $oldViewFinder */
-//        $oldViewFinder = $this->app[ 'view.finder' ];
-//
-//        $this->app->bind('view.finder', function ($app) use ($oldViewFinder) {
-//            $paths      = array_merge(
-//                $app[ 'config' ][ 'view.paths' ],
-//                $oldViewFinder->getPaths()
-//            );
-//            $viewFinder = new FileViewFinder($app[ 'files' ], $paths, $oldViewFinder->getExtensions());
-//
-//            foreach ($oldViewFinder->getHints() as $namespace => $hints) {
-//                $viewFinder->addNamespace($namespace, $hints);
-//            }
-//            $viewFinder->addNamespace('platform', dirname(__DIR__) . '/resources/views');
-//            return $viewFinder;
-//        });
-//
-//        $this->app->view->setFinder($this->app[ 'view.finder' ]);
-//    }
-//
-//    protected function registerEnvSetCommand()
-//    {
-//        $this->app->extend(\Anomaly\Streams\Platform\Application\Console\EnvSet::class, function (\Anomaly\Streams\Platform\Application\Console\EnvSet $command) {
-//            return $this->app->make(EnvSet::class);
-//        });
-//    }
-//
-//    protected function registerDotenvEditor()
-//    {
-//        $this->mergeConfigFrom(base_path('vendor/jackiedo/dotenv-editor/src/config/config.php'), 'dotenv-editor');
-//        $this->app->config->set('dotenv-editor.autoBackup', false);
-//        $this->app->bind('dotenv-editor', 'Jackiedo\DotenvEditor\DotenvEditor');
-//    }
-
 }
-//if (config('app.debug')) {
-//    $this->app->make('events')->listen(Booted::class, function () {
-////                $this->dispatchNow(new ClearAssets());
-//    });
-//}
-//$this->app->events->listen(TemplateDataIsLoading::class, function (TemplateDataIsLoading $event) {
-//    $t = $event->getTemplate();
-//    return;
-//});
-//$this->app->events->listen('creating:*', function ($view) {
-//    return;
-//});

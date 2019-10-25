@@ -16,4 +16,6 @@ declare global {
     const PLATFORM_DATA: any
     const PLATFORM_CONFIG: any
     const PLATFORM_PROVIDERS: any
+    const PROD: boolean
+    const DEV: boolean
 }
