@@ -23,4 +23,9 @@ abstract class SeederHelper
 
         self::$listeners[ $trigger ][] = $callback;
     }
+
+    public function locale()
+    {
+        return config('streams::locales.default', app()->getLocale());
+    }
 }

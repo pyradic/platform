@@ -88,9 +88,9 @@ class UserSeederHelper extends SeederHelper
         $this->roles->unguard();
 
         $role = $this->roles->create([
-            'en'          => compact('name', 'description'),
-            'slug'        => $slug,
-            'permissions' => $permissions,
+            $this->locale() => compact('name', 'description'),
+            'slug'          => $slug,
+            'permissions'   => $permissions,
         ]);
 
         $this->fire('created_role', [ $role, $this ]);
