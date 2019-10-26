@@ -39,14 +39,20 @@ class UserSeeder extends \Pyro\Platform\Database\Seeder
             'intern'             => 'Intern',
         ]);
 
+        $helper->setRolePermissions('user',[
+            'anomaly.module.dashboard::dashboards.read',
+            'anomaly.module.preferences::preferences.write',
+            'streams::control_panel.access',
+        ]);
+
         $users[] = $robin = $helper->createUser(env('ADMIN_USERNAME'), env('ADMIN_EMAIL'), env('ADMIN_PASSWORD'), [ 'admin' ], [ 'display_name' => 'Administrator' ]);
         $users[] = $robin = $helper->createUser('demo', 'demo@test.com', 'test', [ 'user' ], [ 'display_name' => 'Demo User' ]);
-        $users[] = $robin = $helper->createUser('robin', 'robin@test.com', 'test', [ 'manager', 'district_manager' ], [ 'display_name' => 'Robin' ]);
-        $users[] = $frank = $helper->createUser('frank', 'frank@test.com', 'test', [ 'district_manager', 'assignment_manager' ], [ 'display_name' => 'Frank' ]);
-        $users[] = $martha = $helper->createUser('martha', 'martha@test.com', 'test', [ 'district_manager' ], [ 'display_name' => 'Martha' ]);
-        $users[] = $don = $helper->createUser('don', 'don@test.com', 'test', [ 'statething' ]);
-        $users[] = $brook = $helper->createUser('brook', 'brook@test.com', 'test', [ 'employee' ]);
-        $users[] = $lisa = $helper->createUser('lisa', 'lisa@test.com', 'test', [ 'intern' ]);
+        $users[] = $robin = $helper->createUser('robin', 'robin@test.com', 'test', ['user', 'manager', 'district_manager' ], [ 'display_name' => 'Robin' ]);
+        $users[] = $frank = $helper->createUser('frank', 'frank@test.com', 'test', ['user', 'district_manager' ], [ 'display_name' => 'Frank' ]);
+        $users[] = $martha = $helper->createUser('martha', 'martha@test.com', 'test', [ 'user','district_manager' ], [ 'display_name' => 'Martha' ]);
+        $users[] = $don = $helper->createUser('don', 'don@test.com', 'test', [ 'user','statething' ]);
+        $users[] = $brook = $helper->createUser('brook', 'brook@test.com', 'test', [ 'user','employee' ]);
+        $users[] = $lisa = $helper->createUser('lisa', 'lisa@test.com', 'test', [ 'user','intern' ]);
 
 //        $robin->attachRole($roles[ 'manager' ]);
 //        $frank->attachRole($roles[ 'district_manager' ]);

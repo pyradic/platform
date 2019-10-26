@@ -100,6 +100,15 @@ class UserSeederHelper extends SeederHelper
         return $role;
     }
 
+    public function setRolePermissions($role, array $permissions)
+    {
+        if(!$role instanceof RoleInterface) {
+            $role = $this->roles->findBySlug($role);
+        }
+        $role->setAttribute('permissions', $permissions)->save();
+        return $role;
+    }
+
     public function getUsers()
     {
         return $this->users;
