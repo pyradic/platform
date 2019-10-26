@@ -11,7 +11,7 @@ use Illuminate\Console\Command;
 
 class AddonListCommand extends Command
 {
-    protected $signature = 'addon:list {--installed} {--uninstalled} {--enabled} {--disabled} {--modules} {--extensions} {--fields}  {--themes}';
+    protected $signature = 'addon:list {--i|installed} {--u|uninstalled} {--E|enabled} {--D|disabled} {--m|modules} {--e|extensions} {--f|fields}  {--t|themes}';
 
     /**
      * handle method
