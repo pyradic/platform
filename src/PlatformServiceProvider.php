@@ -8,6 +8,7 @@ use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
+use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Contracts\Foundation\Application;
@@ -41,6 +42,7 @@ class PlatformServiceProvider extends ServiceProvider
         \Laradic\Support\SupportServiceProvider::class,
         \Pyro\CustomInstall\CustomInstallServiceProvider::class,
         \Pyro\Platform\Fixes\FixesServiceProvider::class,
+        \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
 //        \Pyro\Platform\Bus\BusServiceProvider::class,
 //        \Pyro\Platform\Webpack\WebpackServiceProvider::class,
     ];
@@ -60,11 +62,20 @@ class PlatformServiceProvider extends ServiceProvider
         $assets->addPath('node_modules', base_path('node_modules'));
         $assets->addPath('platform', dirname(__DIR__) . '/resources');
         $this->app->view->share('platform', $this->app->platform);
-        Translator::macro('addAddonLines', function($namespace, $locale, $group, $lines){
-            $this->loaded[$namespace][$group][$locale] = $lines;
+        Translator::macro('addAddonLines', function ($namespace, $locale, $group, $lines) {
+            $this->loaded[ $namespace ][ $group ][ $locale ] = $lines;
         });
-        $this->app->translator->addAddonLines('crvs.module.clients', 'nl', 'field', ['department'=>['name' => 'aa']]);
-        $this->app->translator->addLines(['field.department'=>['name' => 'aa']], 'nl', 'crvs.module.clients');
+        $this->app->translator->addAddonLines('crvs.module.clients', 'nl', 'field', [ 'department' => [ 'name' => 'aa' ] ]);
+        $this->app->translator->addLines([ 'field.department' => [ 'name' => 'aa' ] ], 'nl', 'crvs.module.clients');
+        $this->app->events->listen(TemplateDataIsLoading::class, function () {
+            if($this->app->auth->guard()->check()) {
+                $this->app->view->share([ 'user' => $user = $this->app->auth->guard()->user() ]);
+                $userData = collect($user->toArray())
+                    ->except([ 'activation_code', 'created_at', 'created_by_id', 'deleted_at', 'password', 'updated_at', 'updated_by_id' ])
+                    ->toArray();
+                $this->app->platform->set('user', $userData);
+            }
+        });
     }
 
     public function register()

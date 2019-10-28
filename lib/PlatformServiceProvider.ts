@@ -1,14 +1,15 @@
 import { ServiceProvider } from '@c/ServiceProvider';
 import { Storage,Cookies } from '@u/storage';
 import Vue from 'vue';
-import Platform from '@u/platform';
-import Plugin from '@/VuePlugin';
+import Agent from '@u/platform';
+import PlatformVuePlugin from '@/PlatformVuePlugin';
 import Axios, { AxiosRequestConfig } from 'axios';
 import { Config } from '@c/Config';
 import { styleVars } from '@/styling/export';
 
 export class PlatformServiceProvider extends ServiceProvider {
-    public register(): any | Promise<any> {
+    public register() {
+        this.vuePlugin(PlatformVuePlugin)
 
         this.app.instance('styling', styleVars);
         this.app.addBindingGetter('styling')
@@ -22,27 +23,19 @@ export class PlatformServiceProvider extends ServiceProvider {
             return storage;
         });
         this.app.addBindingGetter('storage')
-
         this.app.singleton('cookies', Cookies)
         this.app.addBindingGetter('cookies')
 
-        this.app.instance('platform', Platform)
-        this.app.addBindingGetter('platform')
+        this.app.instance('agent', Agent)
+        this.app.addBindingGetter('agent')
+
+
 
         this.app.instance('events', new Vue);
         this.app.addBindingGetter('events')
 
         this.app.instance('data', Config.proxied(PLATFORM_DATA));
         this.app.addBindingGetter('data')
-
-        this.app.extendRoot({
-            data(){
-                return this.$py.data.raw()
-            },
-            mounted(){
-                this.$py.instance('data', Config.proxied(this.$data))
-            }
-        })
 
         this.app.instance<AxiosRequestConfig>('http.config',{
 
@@ -59,6 +52,5 @@ export class PlatformServiceProvider extends ServiceProvider {
         })
         this.app.addBindingGetter('http')
 
-        this.vuePlugin(Plugin)
     }
 }

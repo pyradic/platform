@@ -38,6 +38,22 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         self::$registered[ $name ] = compact('name', 'class', 'description');
     }
 
+    protected function option($key)
+    {
+        if($this->command) {
+            return $this->command->option($key);
+        }
+        return null;
+    }
+
+    protected function argument($key)
+    {
+        if($this->command) {
+            return $this->command->argument($key);
+        }
+        return null;
+    }
+
     public static function getResult()
     {
         return static::$result;

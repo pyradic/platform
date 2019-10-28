@@ -59,6 +59,12 @@ class Platform
         return $this->data->has($key);
     }
 
+    public function merge($key, $value = [])
+    {
+        $this->data->merge($key,$value);
+        return $this;
+    }
+
     public function getData()
     {
         return $this->data;

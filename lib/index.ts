@@ -4,7 +4,7 @@
 
 import 'reflect-metadata';
 import { merge } from 'lodash';
-import { VuePlugin as Plugin } from './VuePlugin';
+import { PlatformVuePlugin as Plugin } from './PlatformVuePlugin';
 import Vue from 'vue';
 import { LogConfig } from '@/interfaces';
 import { AxiosStatic } from 'axios';
@@ -18,10 +18,12 @@ export * from './classes/ServiceProvider';
 export * from './classes/Dispatcher';
 export * from './classes/Config';
 export * from './classes/Collection';
+export * from './classes/VuePlugin';
 export * from './PlatformServiceProvider';
 export * from './decorators';
 export * from './utils/registerComponents'
 export * from './utils/observable'
+export * from './utils/colors'
 
 export { merge, Plugin, toJS };
 if ( DEV ) {
