@@ -13,6 +13,6 @@
             "#/*": ["lib/components/*"]
         }
     },
-    "include": ["lib","lib/interfaces.ts"],
+    "include": ["lib","lib/index.ts"],
     "exclude": [ "node_modules"]
 }
