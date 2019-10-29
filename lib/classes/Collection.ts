@@ -5,6 +5,8 @@ export function collect<T>(items: T[]) {
 export class Collection<T> extends Array<T> implements Array<T> {
     filter: (callbackfn: (value: T, index: number, array: T[]) => any, thisArg?: any) => this
 
+
+
     constructor(...items: T[]) {
         super(...items);
         Object.setPrototypeOf(this, new.target.prototype);
@@ -52,7 +54,7 @@ export class Collection<T> extends Array<T> implements Array<T> {
         return result as any;
     }
 
-    mapKeyBy<K extends keyof T>(key: K | ((item: T) => string)): Map<K, T> {
+    mapKeyBy<K extends keyof T>(key: K | ((item: T) => [string,T])): Map<K, T> {
         let cb: ((item: T) => string) = key as any;
         if ( typeof key === 'string' ) {
             cb = item => item[ key as any ];

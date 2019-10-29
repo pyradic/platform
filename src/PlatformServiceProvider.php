@@ -29,6 +29,7 @@ use Pyro\Platform\Console\PermissionsCommand;
 use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
 use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
+use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
 use Pyro\Platform\View\FileViewFinder;
 use Pyro\Platform\Webpack\WebpackServiceProvider;
@@ -216,14 +217,17 @@ class PlatformServiceProvider extends ServiceProvider
 
     protected function registerUi()
     {
+        $this->app->register(UiServiceProvider::class);
         // dev login form
-        $this->app->extend('login', function (LoginFormBuilder $login) {
-            $login->on('built', function (LoginFormBuilder $builder) {
-                $builder->getFormField('email')->setValue(env('ADMIN_EMAIL'));
-                $builder->getFormField('password')->setValue(env("ADMIN_PASSWORD"));
+        if($this->app->environment('local') && $this->app->config['app.debug']) {
+            $this->app->extend('login', function (LoginFormBuilder $login) {
+                $login->on('built', function (LoginFormBuilder $builder) {
+                    $builder->getFormField('email')->setValue(env('ADMIN_EMAIL'));
+                    $builder->getFormField('password')->setValue(env("ADMIN_PASSWORD"));
+                });
+                return $login;
             });
-            return $login;
-        });
+        }
     }
 
     protected function registerUser()
