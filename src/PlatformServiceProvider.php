@@ -11,7 +11,6 @@ use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\ServiceProvider;
@@ -69,7 +68,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->translator->addAddonLines('crvs.module.clients', 'nl', 'field', [ 'department' => [ 'name' => 'aa' ] ]);
         $this->app->translator->addLines([ 'field.department' => [ 'name' => 'aa' ] ], 'nl', 'crvs.module.clients');
         $this->app->events->listen(TemplateDataIsLoading::class, function () {
-            if($this->app->auth->guard()->check()) {
+            if ($this->app->auth->guard()->check()) {
                 $this->app->view->share([ 'user' => $user = $this->app->auth->guard()->user() ]);
                 $userData = collect($user->toArray())
                     ->except([ 'activation_code', 'created_at', 'created_by_id', 'deleted_at', 'password', 'updated_at', 'updated_by_id' ])
@@ -118,16 +117,23 @@ class PlatformServiceProvider extends ServiceProvider
 
     protected function registerPlatform()
     {
-        $this->app->singleton('platform', function (Application $app) {
-            $platform = new Platform(
-                [],
-                [ 'debug' => $this->app->config[ 'app.debug' ], 'csrf' => $app->session->token() ],
-                [ 'pyro.pyro__platform.PlatformServiceProvider' ]
-            );
-            $platform->addPublicScript('assets/js/pyro__platform.js');
+        $this->app->singleton('platform', function ($app) {
+            $platform = new Platform($app, $app['webpack']);
+            $platform
+                ->addScript('@pyro/platform')
+                ->addStyle('@pyro/platform')
+                ->addProvider('@pyro/platform::PlatformServiceProvider');
             return $platform;
         });
-        $this->app->alias('platform', Platform::class);
+        $this->app->alias('platform',Platform::class);
+//        $this->app->singleton(Platform::class);
+//        $this->app->extend(Platform::class, function (Platform $platform) {
+//            $platform->getConfig()->merge([ 'debug' => $this->app->config[ 'app.debug' ], 'csrf' => $this->app->session->token() ]);
+//            $platform->addProvider('pyro.pyro__platform.PlatformServiceProvider');
+//            $platform->addPublicScript('assets/js/pyro__platform.js');
+//            return $platform;
+//        });
+//        $this->app->alias(Platform::class, 'platform');
     }
 
     protected function registerAddon()
@@ -219,7 +225,7 @@ class PlatformServiceProvider extends ServiceProvider
     {
         $this->app->register(UiServiceProvider::class);
         // dev login form
-        if($this->app->environment('local') && $this->app->config['app.debug']) {
+        if ($this->app->environment('local') && $this->app->config[ 'app.debug' ]) {
             $this->app->extend('login', function (LoginFormBuilder $login) {
                 $login->on('built', function (LoginFormBuilder $builder) {
                     $builder->getFormField('email')->setValue(env('ADMIN_EMAIL'));

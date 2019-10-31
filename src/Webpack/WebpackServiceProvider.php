@@ -2,6 +2,9 @@
 
 namespace Pyro\Platform\Webpack;
 
+use Anomaly\Streams\Platform\Addon\AddonCollection;
+use Anomaly\Streams\Platform\Event\Booted;
+use Anomaly\Streams\Platform\Event\Ready;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,10 +19,18 @@ class WebpackServiceProvider extends ServiceProvider
         }
         $path                                               = base_path($this->app[ 'config' ][ 'platform.webpack.path' ]);
         $this->app[ 'config' ][ 'platform.webpack.active' ] = file_exists($path);
-    }
 
-    public function boot()
-    {
+        $this->app->events->listen(Ready::class, function(){
+            $addons=$this->app->make(AddonCollection::class);
+            return ;
+        });
+        $this->app->singleton('webpack', function($app) {
+            $wpjson = new Webpack($app['files']);
+            $path=base_path($this->app[ 'config' ][ 'platform.webpack.path' ]);
+            $wpjson->loadFromPath($path);
+            return $wpjson;
+        });
+        $this->app->alias('webpack',Webpack::class);
 
     }
 }

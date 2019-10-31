@@ -19,13 +19,16 @@ class WebpackHotMiddleware
     /** @var \Illuminate\Contracts\Config\Repository */
     protected $config;
 
+    /** @var \Pyro\Platform\Webpack\Webpack */
+    protected $webpack;
+
     /**
      * Create a new middleware instance.
      *
      * @param Container       $container
      * @param LaravelDebugbar $debugbar
      */
-    public function __construct(Container $container, Repository $config)
+    public function __construct(Container $container, Repository $config, Webpack $webpack)
     {
         $this->container = $container;
         $this->config    = $config;
@@ -41,6 +44,7 @@ class WebpackHotMiddleware
 //            }
 //
 //        }
+        $this->webpack = $webpack;
     }
 
     /**
@@ -51,7 +55,7 @@ class WebpackHotMiddleware
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function modifyResponse($bundles, Response $response)
+    public function modifyResponse(Response $response)
     {
         $content = $response->getContent();
         if (stristr($content, '<!--WEBPACK_HERE_PLEASE-->') === false) {
@@ -59,11 +63,11 @@ class WebpackHotMiddleware
         }
 
         $renderedContent = '';
-        foreach ($bundles as $bundleName => $assets) {
-            foreach ($assets[ 'styles' ] as $style) {
+        foreach ($this->webpack->getAddons() as $addon) {
+            foreach ($addon->getStyleUrls() as $style) {
                 $renderedContent .= "\n<link rel='stylesheet' type='text/css' href='{$style}'></link>";
             }
-            foreach ($assets[ 'scripts' ] as $script) {
+            foreach ($addon->getScriptUrls() as $script) {
                 $renderedContent .= "\n<script src='{$script}'></script>";
             }
         }
@@ -94,16 +98,19 @@ class WebpackHotMiddleware
 
         $enabled = $this->config->get('platform.webpack.enabled');
 
-        if ($enabled !== true) {
+        if (
+            $enabled !== true
+            || $this->webpack->isServer() !== true
+            || $this->webpack->getAddons()->isEmpty()
+        ) {
             return $next($request);
         }
-        $bundles = $this->getBundles();
-        if (empty($bundles)) {
+        if ($this->webpack->getAddons()->isEmpty()) {
             return $next($request);
         }
 
         $response = $next($request);
-        $this->modifyResponse($bundles, $response);
+        $this->modifyResponse($response);
         return $response;
     }
 

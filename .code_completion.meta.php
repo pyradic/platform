@@ -3,17 +3,17 @@
 
 
 namespace Illuminate\Support {
-
-    /**
-     *
-     *
-     * @mixin \Illuminate\Support\Collection
-     */
-    class Collection {
-        public function cut(array $names) {
-            return \Illuminate\Support\Collection::cut($names);
-        }
-    }
+//
+//    /**
+//     *
+//     *
+//     * @mixin \Illuminate\Support\Collection
+//     */
+//    class Collection {
+//        public function cut(array $names) {
+//            return \Illuminate\Support\Collection::cut($names);
+//        }
+//    }
 }
 namespace Illuminate\Console {
     /** @mixin \Illuminate\Console\Command */

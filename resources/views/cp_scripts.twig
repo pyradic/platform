@@ -6,12 +6,12 @@
 {% else %}
 
 
-    {% for script in platform.publicScripts %}
+    {% for script in platform.renderScripts %}
         {{ asset_public_script(script) }}
     {% endfor %}
-    {% for style in platform.publicStyles %}
-        {{ asset_public_style(style) }}
-    {% endfor %}
+{#    {% for style in platform.publicStyles %}#}
+{#        {{ asset_public_style(style) }}#}
+{#    {% endfor %}#}
 {% endif %}
 
 <!-- PLATFORM_DATA -->
