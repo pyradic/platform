@@ -77,6 +77,27 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         $this->fire('constructed');
     }
 
+    protected function error($message)
+    {
+        if($this->command){
+            return $this->command->error($message);
+        }
+        throw new \RuntimeException($message);
+    }
+
+    protected function write($messages)
+    {
+        if($this->command){
+            $this->command->getOutput()->write($messages);
+        }
+    }
+    protected function line($messages)
+    {
+        if($this->command){
+            $this->command->getOutput()->writeln($messages);
+        }
+    }
+
     protected function helper($class)
     {
         if ( ! array_key_exists($class, static::$helpers)) {
