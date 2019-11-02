@@ -77,7 +77,7 @@ class WebpackAddon implements Arrayable
      *
      * @param \Pyro\Platform\Webpack\Webpack $webpack
      */
-    public function __construct(Webpack $webpack)
+    public function __construct(?Webpack $webpack = null)
     {
         $this->webpack = $webpack;
     }
@@ -241,6 +241,18 @@ class WebpackAddon implements Arrayable
     {
         return $this->isComposerType('stream-addon');
     }
+
+    public function getWebpack()
+    {
+        return $this->webpack;
+    }
+
+    public function setWebpack(\Pyro\Platform\Webpack\Webpack $webpack)
+    {
+        $this->webpack = $webpack;
+        return $this;
+    }
+
 
     public function toArray()
     {

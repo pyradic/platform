@@ -79,9 +79,6 @@ class Platform
     {
         $addon = $this->getWebpackAddon($name);
         $this->scripts->push(compact('name', 'entrySuffix', 'addon'));
-//        $scripts = $addon->getScripts()->map(function($script) use ($addon) {
-//            return $this->webpack->getPublicPath() . $script;
-//        });
         return $this;
     }
 

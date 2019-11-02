@@ -29,9 +29,12 @@ class Dispatcher extends \Illuminate\Bus\Dispatcher
      *
      * @return mixed
      */
-    public function dispatchNow($command, $handler = null)
+    public function dispatchNow($_command, $handler = null)
     {
-        $command = $this->fire(static::EVENT_BEFORE, $command);
+        $command = $this->fire(static::EVENT_BEFORE, $_command);
+        if($command === null){
+            $command = $_command;
+        }
         if($command !== false) {
             $result = parent::dispatchNow($command, $handler);
         }

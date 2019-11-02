@@ -43,6 +43,12 @@ class WebpackAddonCollection extends Collection
         return $this->filter->isStreamAddon();
     }
 
+    /** @return \Pyro\Platform\Webpack\WebpackAddon */
+    public function findByComposerName($name)
+    {
+        return $this->firstWhere('composerName', $name);
+    }
+
     public function toBase()
     {
         return new Collection($this->items);
