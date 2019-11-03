@@ -3,71 +3,20 @@
 namespace Pyro\Platform\Webpack;
 
 use Anomaly\Streams\Platform\Addon\Addon;
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
+use Laradic\Support\Dot;
 
-class WebpackAddon implements Arrayable
+class WebpackAddon extends Dot
 {
-    /** @var array|string[]|\Illuminate\Support\Collection */
-    public $scripts = [];
-
-    /** @var array|string[]|\Illuminate\Support\Collection */
-    public $styles = [];
+    protected $entries;
 
     /** @var string */
-    public $composerName;
-
-    /** @var string */
-    public $composerType;
-
-    /** @var string */
-    public $name;
-
-    /** @var string */
-    public $firstName;
-
-    /** @var string */
-    public $firstNameSnake;
-
-    /** @var string */
-    public $lastName;
-
-    /** @var string */
-    public $lastNameSnake;
-
-    /** @var string */
-    public $entryName;
-
-    /** @var string */
-    public $relativePath;
-
-    /** @var string */
-    public $streamNamespace;
+    protected $streamNamespace;
 
     /** @var \Anomaly\Streams\Platform\Addon\Addon */
-    public $streamAddon;
+    protected $streamAddon;
 
-    /** @var int */
-    public $sorted;
-
-    protected $arrayableProperties = [
-        'addon',
-        'package',
-        'scripts',
-        'styles',
-        'composerName',
-        'composerType',
-        'name',
-        'firstName',
-        'firstNameSnake',
-        'lastName',
-        'lastNameSnake',
-        'entryName',
-        'relativePath',
-        'addonNamespace',
-        'sorted',
-    ];
+    /** @var \Laradic\Support\Dot */
+    protected $data;
 
     /** @var \Pyro\Platform\Webpack\Webpack */
     protected $webpack;
@@ -77,21 +26,93 @@ class WebpackAddon implements Arrayable
      *
      * @param \Pyro\Platform\Webpack\Webpack $webpack
      */
-    public function __construct(?Webpack $webpack = null)
+    public function __construct(Webpack $webpack)
     {
+        parent::__construct();
         $this->webpack = $webpack;
     }
 
-    public function getRelativePath()
+    public function setData(array $data)
     {
-        return $this->relativePath;
+        $this->merge($data);
+
+        if ($this->isStreamAddon()) {
+            $this->setStreamNamespace($this->makeAddonNamespace($this->data[ 'path' ]));
+        }
+        $entries = new WebpackAddonEntryCollection();
+        foreach ($this->get('entries', []) as $name => $entry) {
+            $entries->put($name, new WebpackAddonEntry($this, $name, $entry));
+        }
+        $this['entries'] = $entries;
+        return $this;
     }
 
-    public function setRelativePath(string $relativePath): WebpackAddon
+    /**
+     * @return \Pyro\Platform\Webpack\WebpackAddonEntryCollection|\Pyro\Platform\Webpack\WebpackAddonEntry[]
+     */
+    public function getEntries()
     {
-        $this->relativePath = $relativePath;
-        $this->setStreamNamespace($this->makeAddonNamespace($relativePath));
-        return $this;
+        return $this['entries'];
+    }
+
+    public function getComposerName()
+    {
+        return $this[ 'composer.name' ];
+    }
+
+    public function getComposerType()
+    {
+        return $this[ 'composer.type' ];
+    }
+
+    public function isComposerType($composerType)
+    {
+        return $this->getComposerType() === $composerType;
+    }
+
+    public function isStreamAddon()
+    {
+        return $this->isComposerType('stream-addon');
+    }
+
+    public function getName()
+    {
+        return $this[ 'name' ];
+    }
+
+    public function getFirstName()
+    {
+        return $this[ 'firstName' ];
+    }
+
+    public function getFirstNameSnake()
+    {
+        return $this[ 'firstNameSnake' ];
+    }
+
+    public function getLastName()
+    {
+        return $this[ 'lastName' ];
+    }
+
+    public function getLastNameSnake()
+    {
+        return $this[ 'lastNameSnake' ];
+    }
+
+    public function getExportName()
+    {
+        return $this[ 'exportName' ];
+    }
+
+    public function getSorted()
+    {
+        return $this[ 'sorted' ];
+    }
+
+    public function getPath()
+    {
+        return base_path($this[ 'path' ]);
     }
 
     public function getStreamNamespace()
@@ -121,127 +142,6 @@ class WebpackAddon implements Arrayable
         return $this;
     }
 
-    public function getScripts()
-    {
-        return $this->scripts;
-    }
-
-    public function setScripts($scripts)
-    {
-        $this->scripts = Collection::wrap($scripts);
-        return $this;
-    }
-
-    public function getStyles()
-    {
-        return $this->styles;
-    }
-
-    public function setStyles($styles)
-    {
-        $this->styles = Collection::wrap($styles);
-        return $this;
-    }
-
-    public function getScriptUrls()
-    {
-        return $this->scripts->map(function ($script) {
-            return $this->webpack->getPublicPath() . $script;
-        });
-    }
-
-    public function getStyleUrls()
-    {
-        return $this->styles->map(function ($style) {
-            return $this->webpack->getPublicPath() . $style;
-        });
-    }
-
-    public function getComposerName()
-    {
-        return $this->composerName;
-    }
-
-    public function setComposerName(?string $composerName)
-    {
-        $this->composerName = $composerName;
-        return $this;
-    }
-
-    public function getComposerType()
-    {
-        return $this->composerType;
-    }
-
-    public function setComposerType(?string $composerType)
-    {
-        $this->composerType = $composerType;
-        return $this;
-    }
-
-    public function isComposerType($composerType)
-    {
-        return $this->composerType === $composerType;
-    }
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name)
-    {
-        $this->name = $name;
-        [ $this->firstName, $this->lastName ] = explode('/', $name);
-        $this->firstNameSnake = str_replace('@', '', Str::snake($this->firstName));
-        $this->firstNameSnake = str_replace('-', '_', $this->firstNameSnake);
-        $this->lastNameSnake  = Str::snake($this->lastName);
-        $this->lastNameSnake  = str_replace('-', '_', $this->lastNameSnake);
-        $this->entryName      = $this->firstNameSnake . '__' . $this->lastNameSnake;
-        return $this;
-    }
-
-    public function getFirstName()
-    {
-        return $this->firstName;
-    }
-
-    public function getFirstNameSnake()
-    {
-        return $this->firstNameSnake;
-    }
-
-    public function getLastName()
-    {
-        return $this->lastName;
-    }
-
-    public function getLastNameSnake()
-    {
-        return $this->lastNameSnake;
-    }
-
-    public function getEntryName()
-    {
-        return $this->entryName;
-    }
-
-    public function getSorted()
-    {
-        return $this->sorted;
-    }
-
-    public function setSorted(int $sorted)
-    {
-        $this->sorted = $sorted;
-        return $this;
-    }
-
-    public function isStreamAddon()
-    {
-        return $this->isComposerType('stream-addon');
-    }
-
     public function getWebpack()
     {
         return $this->webpack;
@@ -252,7 +152,6 @@ class WebpackAddon implements Arrayable
         $this->webpack = $webpack;
         return $this;
     }
-
 
     public function toArray()
     {

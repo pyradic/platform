@@ -10,6 +10,9 @@ import { Cookies, Storage } from '@u/storage';
 import debug from 'debug';
 import { AxiosStatic } from 'axios';
 import { PlatformStyleVariables } from '@/styling/export';
+import { Store } from 'vuex';
+import { IState } from '@/store';
+import { toJS } from '@u/toJS';
 
 const log = require('debug')('classes:Application');
 
@@ -19,10 +22,11 @@ export interface Application {
     storage: Storage
     agent: IAgent
     http: AxiosStatic
-    data: Config<any> & any
-    cookies:Cookies
-    events:Dispatcher
+    data: Config<Record<string, any>> & Record<string, any>
+    cookies: Cookies
+    events: Dispatcher
     styling: Config<Styling> & Styling
+    store: Store<IState>
 }
 
 
@@ -103,6 +107,8 @@ export class Application extends Container {
             throw new Error('Cannot create another instance of Application');
         }
         Application._instance = this;
+        log('NAMESPACE',NAMESPACE)
+        NAMESPACE['app'] = this;
         this.bind(Application).toConstantValue(this);
         this.alias(Application, 'app', true);
         this.bind('app').toConstantValue(this);
@@ -113,12 +119,19 @@ export class Application extends Container {
     public async bootstrap(_options: BootstrapOptions, ...mergeOptions: BootstrapOptions[]) {
         let options: BootstrapOptions = merge({
             providers: [],
-            config   : {}
+            config   : {},
+            data     : {}
         }, _options, ...mergeOptions);
         log('bootstrap', { options });
         this.hooks.bootstrap.call(options);
+
+        this.instance('data', Config.proxied(options.data));
+        this.addBindingGetter('data')
+
         await this.loadProviders(options.providers);
         this.configure(options.config);
+
+
         await this.registerProviders(this.providers);
         this.hooks.bootstrapped.call(options);
         return this;
@@ -210,9 +223,11 @@ export class Application extends Container {
 
     public root: Vue;
 
+    public rootJS() {return toJS(this.root)}
+
     public Root: typeof Vue = Vue
 
-    public extendRoot:VueConstructor['extend'] = (options) => {
+    public extendRoot: VueConstructor['extend'] = (options) => {
         this.Root = this.Root.extend(options)
         return this.Root;
     }
@@ -232,9 +247,10 @@ export class Application extends Container {
         log('start', { mountPoint, options });
         this.started = true;
         this.hooks.start.call(Vue);
-        this.root = new (this.Root.extend({
+        this.root  = new (this.Root.extend({
             // template: '<div id="app"><slot></slot></div>',
             // render(h,ctx){     return h(this.$slots.default, this.$slots.default)
+            // data() {return self.data.raw()            }
         }));
         this.root.$mount(mountPoint);
         await this.root.$nextTick()
@@ -243,6 +259,7 @@ export class Application extends Container {
 
         return this;
     };
+
 
     public error = async (error: any): Promise<this> => {
         log('error', { error });
@@ -287,7 +304,7 @@ export class Application extends Container {
         return this.bindIf(id, override, b => b.to(value).inSingletonScope());
     }
 
-    public binding<T>(id: interfaces.ServiceIdentifier<T>, value: any):this{
+    public binding<T>(id: interfaces.ServiceIdentifier<T>, value: any): this {
 
         return this
     }

@@ -18,6 +18,7 @@ export interface LogConfig {
 export interface BootstrapOptions {
     config?: IConfig
     providers?: Array<IServiceProviderClass>
+    data?:any
 }
 
 // export interface VuePy {

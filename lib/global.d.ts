@@ -1,9 +1,10 @@
-import * as platform from './platform'
-import {Plugin, Application } from './platform';
+import * as platform from './index'
+import {Plugin, Application } from './index';
 
 declare global {
 
-    interface PyroExports { pyro__platform: typeof platform & {Application:typeof Application, Plugin:typeof Plugin} }
+    interface PyroExports { pyro__platform: typeof platform & {
+        Application:typeof Application, Plugin:typeof Plugin} }
     interface Window {
         pyro: PyroExports
 
@@ -18,4 +19,7 @@ declare global {
     const PLATFORM_PROVIDERS: any
     const PROD: boolean
     const DEV: boolean
+    const HOT: boolean
+    const ENV: any
+    const NAMESPACE: string
 }

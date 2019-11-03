@@ -9,9 +9,9 @@
     {% for script in platform.renderScripts %}
         {{ asset_public_script(script) }}
     {% endfor %}
-{#    {% for style in platform.publicStyles %}#}
-{#        {{ asset_public_style(style) }}#}
-{#    {% endfor %}#}
+    {#    {% for style in platform.publicStyles %}#}
+    {#        {{ asset_public_style(style) }}#}
+    {#    {% endfor %}#}
 {% endif %}
 
 <!-- PLATFORM_DATA -->
@@ -23,7 +23,7 @@
 <!-- PLATFORM_CONFIG & PLATFORM_PROVIDERS -->
 <script>
     var PLATFORM_CONFIG = JSON.parse('{{ platform.config.toJson | replace({"'": "\\'"})  | raw }}');
-    var PLATFORM_PROVIDERS = [{{ platform.providers | join(', ') }}];
+    var PLATFORM_PROVIDERS = [{{ platform.providers }}];
 </script>
 
 {{ asset_inline('platform_pre_boot') }}
@@ -33,30 +33,17 @@
         (function () {
             var app = this.pyro.pyro__platform.Application.instance;
             var log = app.createLog('cp_scripts');
-            var install = pyro.pyro__platform.install;
 
-            log({
-                t                      : this,
-                pyro,
-                tpyro                  : this.pyro,
-                pyro_platform          : pyro.pyro__platform,
-                pyro_platform_provider : pyro.pyro__platform.PlatformServiceProvider,
-                tpyro_platform_provider: this.pyro.pyro__platform.PlatformServiceProvider,
-            });
             app
                 .bootstrap({
-                    providers: [
-                        this.pyro.pyro__platform.PlatformServiceProvider
-                    ]
-                }, {
                     config   : PLATFORM_CONFIG,
-                    providers: PLATFORM_PROVIDERS
+                    providers: PLATFORM_PROVIDERS,
+                    data     : PLATFORM_DATA
                 })
                 .then(function (app) {
                     return app.boot();
                 })
                 .then(function (app) {
-                    // Vue.use(pyro.platform.Plugin);
                     app.extendRoot({
                         mounted: function () {
                             $.holdReady(false);

@@ -2,13 +2,15 @@
 import { cloneDeep, get, has, merge, set, unset } from 'lodash';
 import { Application } from './Application';
 import { IConfig } from '@/interfaces';
+import { toJS } from '@/utils/toJS';
 
 export interface Config<T> {
     get<T>(path: string, defaultValue?: any): T;
 }
 
 export class Config<T> {
-    public static app:Application
+    public static app: Application
+
     constructor(protected data: Partial<T> = {}) {}
 
     get      = <T>(path: string, defaultValue?: any): T => get(this.data, path, defaultValue);
@@ -20,6 +22,7 @@ export class Config<T> {
     pushTo   = (path: string, ...items: any[]) => this.set(path, this.get<Array<any>>(path, []).concat(items));
     raw      = (): T => this.data as T;
     getClone = <T>(path?: string, defaultValue: any = {}): T => (path ? cloneDeep(this.get(path, defaultValue)) : cloneDeep(this.raw())) as any;
+    toJS     = (path?: string) => path ? toJS(get(this.data, path)) : toJS(this.data);
 
     proxy = (path: string) => {
         const prefix = (p: PropertyKey) => path + '.' + p.toString();
@@ -36,7 +39,7 @@ export class Config<T> {
             },
             has(target: Config<T>, p: PropertyKey): boolean {
                 return target.has(prefix(p));
-            },
+            }
         });
     };
 
@@ -54,7 +57,7 @@ export class Config<T> {
             },
             has(target: Config<T>, p: PropertyKey): boolean {
                 return target.has(p.toString());
-            },
+            }
         });
 
     }
@@ -64,7 +67,7 @@ var INJECTION = Symbol.for('INJECTION');
 
 function _proxyGetter(proto, key, resolve, doCache) {
     function getter() {
-        if ( doCache && ! Reflect.hasMetadata(INJECTION, this, key) ) {
+        if ( doCache && !Reflect.hasMetadata(INJECTION, this, key) ) {
             Reflect.defineMetadata(INJECTION, resolve(), this, key);
         }
         if ( Reflect.hasMetadata(INJECTION, this, key) ) {
@@ -82,7 +85,7 @@ function _proxyGetter(proto, key, resolve, doCache) {
         configurable: true,
         enumerable  : true,
         get         : getter,
-        set         : setter,
+        set         : setter
     });
 }
 
@@ -100,7 +103,7 @@ export function configProxy(path: string): PropertyDecorator {
 export function configValue(path: string): PropertyDecorator {
     return (proto, key) => {
         var resolve = function () {
-            let config =  Config.app.get<Config<IConfig>>('config');
+            let config = Config.app.get<Config<IConfig>>('config');
             return config.get(path);
         };
         _proxyGetter(proto, key, resolve, false);

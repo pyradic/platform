@@ -31,12 +31,7 @@ class LoadWebpackData
         $addons   = new WebpackAddonCollection();
         foreach (data_get($data, 'addons', []) as $addonData) {
             $addons->push($addon = new WebpackAddon($this->webpack));
-            $hydrator->hydrate($addon, $addonData);
-            $addonData = Wrap::dot($addonData);
-            $addon
-                ->setName($addonData[ 'pkg.name' ])
-                ->setComposerName($addonData[ 'composer.name' ])
-                ->setComposerType($addonData[ 'composer.type' ]);
+            $addon->setData($addonData);
         }
         data_set($data, 'addons', $addons);
 

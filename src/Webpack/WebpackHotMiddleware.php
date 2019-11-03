@@ -64,11 +64,14 @@ class WebpackHotMiddleware
 
         $renderedContent = '';
         foreach ($this->webpack->getAddons() as $addon) {
-            foreach ($addon->getStyleUrls() as $style) {
-                $renderedContent .= "\n<link rel='stylesheet' type='text/css' href='{$style}'></link>";
-            }
-            foreach ($addon->getScriptUrls() as $script) {
-                $renderedContent .= "\n<script src='{$script}'></script>";
+            foreach($addon->getEntries() as $entry) {
+
+                foreach ($entry->getStyles() as $style) {
+                    $renderedContent .= "\n<link rel='stylesheet' type='text/css' href='{$style}'></link>";
+                }
+                foreach ($entry->getScripts() as $script) {
+                    $renderedContent .= "\n<script src='{$script}'></script>";
+                }
             }
         }
 

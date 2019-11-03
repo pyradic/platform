@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import Vuex from 'vuex'
 import lang from 'element-ui/lib/locale/lang/nl';
 import locale from 'element-ui/lib/locale';
 import LogPlugin from '@/plugins/log';
@@ -27,6 +28,7 @@ export default class PlatformVuePlugin extends VuePlugin {
         _Vue.use(HttpPlugin, {
             csrf: this.app.config.csrf
         })
+
         this.prefixAndRegisterComponents(_Vue, {
             // 'script': Script
         })
@@ -37,10 +39,7 @@ export default class PlatformVuePlugin extends VuePlugin {
 
         this.app.extendRoot({
             data(){
-                return this.$py.data.raw()
-            },
-            mounted(){
-                this.$py.instance('data', Config.proxied(this.$data))
+                return this.$py.data.getClone()
             }
         })
 

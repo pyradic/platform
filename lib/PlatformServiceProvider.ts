@@ -6,6 +6,7 @@ import PlatformVuePlugin from '@/PlatformVuePlugin';
 import Axios, { AxiosRequestConfig } from 'axios';
 import { Config } from '@c/Config';
 import { styleVars } from '@/styling/export';
+import { store } from '@/store';
 
 export class PlatformServiceProvider extends ServiceProvider {
     public register() {
@@ -29,13 +30,11 @@ export class PlatformServiceProvider extends ServiceProvider {
         this.app.instance('agent', Agent)
         this.app.addBindingGetter('agent')
 
-
+        this.app.instance('store', store)
+        this.app.addBindingGetter('store')
 
         this.app.instance('events', new Vue);
         this.app.addBindingGetter('events')
-
-        this.app.instance('data', Config.proxied(PLATFORM_DATA));
-        this.app.addBindingGetter('data')
 
         this.app.instance<AxiosRequestConfig>('http.config',{
 

@@ -41,7 +41,6 @@ class PlatformServiceProvider extends ServiceProvider
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
         \Pyro\CustomInstall\CustomInstallServiceProvider::class,
-        \Pyro\Platform\Fixes\FixesServiceProvider::class,
         \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
 //        \Pyro\Platform\Bus\BusServiceProvider::class,
 //        \Pyro\Platform\Webpack\WebpackServiceProvider::class,
@@ -55,6 +54,11 @@ class PlatformServiceProvider extends ServiceProvider
     public function boot(\Anomaly\Streams\Platform\Asset\Asset $assets, ViewIncludes $includes)
     {
         $this->bootConsole();
+
+        $this->app->router->any('/asdf', function(){
+            $p=$this->app->platform->getProviders();
+            return 'aa';
+        });
 
         if ($this->app->config[ 'platform.cp_scripts.enabled' ]) {
             $includes->include('cp_scripts', 'platform::cp_scripts');
@@ -118,11 +122,9 @@ class PlatformServiceProvider extends ServiceProvider
     protected function registerPlatform()
     {
         $this->app->singleton('platform', function ($app) {
-            $platform = new Platform($app, $app['webpack']);
+            $platform = new Platform($app, $app['webpack'], $app['html']);
             $platform
-                ->addScript('@pyro/platform')
-                ->addStyle('@pyro/platform')
-                ->addProvider('@pyro/platform::PlatformServiceProvider');
+                ->addWebpackEntry('@pyro/platform');
             return $platform;
         });
         $this->app->alias('platform',Platform::class);

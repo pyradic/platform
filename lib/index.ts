@@ -11,6 +11,7 @@ import { AxiosStatic } from 'axios';
 import { Application } from '@c/Application';
 import { toJS } from './utils/toJS';
 
+
 export * from './styling/export'
 export * from './interfaces';
 export * from './classes/Application';
@@ -24,6 +25,8 @@ export * from './decorators';
 export * from './utils/registerComponents'
 export * from './utils/observable'
 export * from './utils/colors'
+export * from './streams'
+
 
 export { merge, Plugin, toJS };
 if ( DEV ) {
