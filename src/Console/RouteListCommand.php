@@ -2,6 +2,7 @@
 
 namespace Pyro\Platform\Console;
 
+use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
@@ -45,4 +46,22 @@ class RouteListCommand extends \Illuminate\Foundation\Console\RouteListCommand
         return Arr::except($route, $columns);
     }
 
+    /**
+     * Get before filters.
+     *
+     * @param \Illuminate\Routing\Route $route
+     *
+     * @return string
+     */
+    protected function getMiddleware($route)
+    {
+        try {
+            return collect($route->gatherMiddleware())->map(function ($middleware) {
+                return $middleware instanceof Closure ? 'Closure' : $middleware;
+            })->implode(',');
+        }
+        catch (\ReflectionException $e) {
+            return '';
+        }
+    }
 }

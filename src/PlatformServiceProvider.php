@@ -146,13 +146,18 @@ class PlatformServiceProvider extends ServiceProvider
 
             $active = resolve(\Anomaly\Streams\Platform\Addon\Theme\ThemeCollection::class)->active();
             $this->dispatchNow(new AddAddonOverrides($active));
-        });
 
-        $this->app->events->listen(AddonsHaveRegistered::class, function (AddonsHaveRegistered $event) {
-            foreach ($event->getAddons()->installed()->enabled() as $addon) {
+            $installed = resolve('addon.collection')->installed()->enabled();
+            foreach($installed as $addon){
                 $this->dispatchNow(new AddAddonOverrides($addon));
             }
         });
+
+//        $this->app->events->listen(AddonsHaveRegistered::class, function (AddonsHaveRegistered $event) {
+//            foreach ($event->getAddons()->installed()->enabled() as $addon) {
+//                $this->dispatchNow(new AddAddonOverrides($addon));
+//            }
+//        });
 
         // theme inheritance
         $this->app->events->listen(Ready::class, function (Ready $event) {

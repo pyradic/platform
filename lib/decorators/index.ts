@@ -5,7 +5,6 @@ import { InjectKey } from 'vue/types/options'
 import { VueClass } from 'vue-class-component/lib/declarations';
 import { interfaces } from 'inversify';
 import debug from 'debug';
-import { objectify } from '@u/objectify';
 import { app } from '@c/Application';
 
 const log = debug('decorators');
@@ -236,11 +235,14 @@ export function inject$(identifier?: interfaces.ServiceIdentifier<any>) {
             // });
 
 
-            options.computed = options.computed || {}
-
-            options.computed[key] = function(this: any) {
-                return app().get(identifier || Type)
-            }
+            // options.computed = options.computed || {}
+            //
+            // options.computed[key] = {
+            //     cache:false,
+            //     get: function(this: any) {
+            //         return app().get(identifier || Type)
+            //     }
+            // }
 
             // options.computed = options.computed || {};
             // options.computed[ key ] = {

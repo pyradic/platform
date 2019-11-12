@@ -27,16 +27,12 @@ class UserSeeder extends \Pyro\Platform\Database\Seeder
          */
         $roles = $helper->createRoles([
             'admin'              => 'Administrator',
-            'user'               => 'User',
-            'guest'              => 'Guest',
             'manager'            => 'Manager',
             'district_manager'   => 'District Manager',
-            'statething'         => 'Statusding',
             'employee'           => 'Medewerker',
-            'client_manager'     => 'Client Beheer',
-            'assignment_manager' => 'Assignment Beheer',
-            'event_manager'      => 'Evenement Beheer',
-            'intern'             => 'Intern',
+            'intern'             => 'Stagaire',
+            'user'               => 'User',
+            'guest'              => 'Guest',
         ]);
 
         $helper->setRolePermissions('user',[
@@ -50,7 +46,7 @@ class UserSeeder extends \Pyro\Platform\Database\Seeder
         $users[] = $robin = $helper->createUser('robin', 'robin@test.com', 'test', ['user', 'manager', 'district_manager' ], [ 'display_name' => 'Robin' ]);
         $users[] = $frank = $helper->createUser('frank', 'frank@test.com', 'test', ['user', 'district_manager' ], [ 'display_name' => 'Frank' ]);
         $users[] = $martha = $helper->createUser('martha', 'martha@test.com', 'test', [ 'user','district_manager' ], [ 'display_name' => 'Martha' ]);
-        $users[] = $don = $helper->createUser('don', 'don@test.com', 'test', [ 'user','statething' ]);
+        $users[] = $don = $helper->createUser('don', 'don@test.com', 'test', [ 'user','employee' ]);
         $users[] = $brook = $helper->createUser('brook', 'brook@test.com', 'test', [ 'user','employee' ]);
         $users[] = $lisa = $helper->createUser('lisa', 'lisa@test.com', 'test', [ 'user','intern' ]);
 
