@@ -1,10 +1,17 @@
 import * as platform from './index'
-import {Plugin, Application } from './index';
+import { Application, Plugin } from './index'
 
 declare global {
 
-    interface PyroExports { pyro__platform: typeof platform & {
-        Application:typeof Application, Plugin:typeof Plugin} }
+    interface PyroExports {
+        pyro__platform: typeof platform & {
+            Application: typeof Application, Plugin: typeof Plugin
+        }
+        data?:any
+        config?:any
+        providers?:any
+    }
+
     interface Window {
         pyro: PyroExports
 

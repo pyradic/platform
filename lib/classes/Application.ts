@@ -33,7 +33,8 @@ export interface Application {
 const defaultConfig: Partial<IConfig> = {
     prefix: 'py',
     debug : false,
-    csrf  : null
+    csrf  : null,
+    delimiters: ['\{\{\{', '}}}'],
 };
 
 export function loadConfigDefaults(): Config<IConfig> {

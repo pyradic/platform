@@ -1,32 +1,28 @@
 {# @var \Pyro\Platform\Platform platform #}
-{{ asset_add('platform.js', 'platform::js/platform.js', [ 'webpack:pyro__platform:scripts' ]) }}
+
 
 {% if config('platform.webpack.enabled') and config('platform.webpack.active') %}
     <!--WEBPACK_HERE_PLEASE-->
 {% else %}
 
+    {{ asset_add('platform.js', 'platform::js/platform.js', [ 'webpack:pyro__platform:scripts' ]) }}
 
     {% for script in platform.renderScripts %}
         {{ asset_public_script(script) }}
     {% endfor %}
-    {#    {% for style in platform.publicStyles %}#}
-    {#        {{ asset_public_style(style) }}#}
-    {#    {% endfor %}#}
+
+    {% for style in platform.publicStyles %}
+        {{ asset_public_style(style) }}
+    {% endfor %}
+
 {% endif %}
 
-<!-- PLATFORM_DATA -->
-<script>
-    {#var PLATFORM_DATA = JSON.parse('{{ platform.data.toJson(null,constant('JSON_HEX_APOS') b-and constant('JSON_HEX_QUOT')) | raw }}');#}
-    var PLATFORM_DATA = JSON.parse('{{ platform.data.toJson | replace({"'": "\\'"}) | raw }}');
-</script>
-
-<!-- PLATFORM_CONFIG & PLATFORM_PROVIDERS -->
-<script>
-    var PLATFORM_CONFIG = JSON.parse('{{ platform.config.toJson | replace({"'": "\\'"})  | raw }}');
-    var PLATFORM_PROVIDERS = [{{ platform.providers }}];
-</script>
-
-{{ asset_inline('platform_pre_boot') }}
+<!-- DATA -->
+<script>window['pyro'].data = JSON.parse('{{ platform.data.toJson | replace({"'": "\\'"}) | raw }}');</script>
+<!-- CONFIG -->
+<script>window['pyro'].config = JSON.parse('{{ platform.config.toJson | replace({"'": "\\'"}) | raw }}');</script>
+<!-- PROVIDERS -->
+<script>window['pyro'].providers = [{{ platform.providers }}];</script>
 
 {% if platform.shouldntPreventBootstrap %}
     <script>
@@ -36,16 +32,16 @@
 
             app
                 .bootstrap({
-                    config   : PLATFORM_CONFIG,
-                    providers: PLATFORM_PROVIDERS,
-                    data     : PLATFORM_DATA
+                    config   : pyro.config,
+                    providers: pyro.providers,
+                    data     : pyro.data
                 })
                 .then(function (app) {
                     return app.boot();
                 })
                 .then(function (app) {
                     app.extendRoot({
-                        mounted: function () {
+                        mounted   : function () {
                             $.holdReady(false);
                         }
                     });

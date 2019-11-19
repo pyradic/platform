@@ -52,7 +52,11 @@ class Platform implements ArrayAccess
         $this->webpack = $webpack;
         $this->html    = $html;
 
-        $this->config  = new Dot();
+        $this->config  = new Dot([
+'debug' => $app->config->get('app.debug'),
+'csrf' => ''
+        ]);
+
         $this->entries = new Collection();
         $this->data    = new Dot([
         ]);
