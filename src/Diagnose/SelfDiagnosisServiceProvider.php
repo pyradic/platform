@@ -32,7 +32,7 @@ class SelfDiagnosisServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'self-diagnosis');
 
-        $this->app->bind('command.selfdiagnosis', SelfDiagnosisCommand::class);
+        $this->app->bind('command.selfdiagnosis', DiagnoseCommand::class);
 
         $this->commands([
             'command.selfdiagnosis',

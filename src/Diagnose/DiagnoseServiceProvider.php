@@ -22,5 +22,10 @@ class DiagnoseServiceProvider extends ServiceProvider
 
     public function register()
     {
+        $this->app->bind('command.diagnose', DiagnoseCommand::class);
+
+        $this->commands([
+            'command.diagnose',
+        ]);
     }
 }

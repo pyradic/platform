@@ -8,7 +8,6 @@ use Anomaly\Streams\Platform\Support\Configurator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
-use Pyro\Platform\DebugRequestVars;
 
 class AddAddonOverrides
 {

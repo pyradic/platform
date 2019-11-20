@@ -22,7 +22,7 @@ class LoadWebpackData
 
     public function handle(Repository $config, Filesystem $fs)
     {
-        $path = $config['platform.webpack.path'];
+        $path = $config['platform::webpack.path'];
         $path = path_is_relative($path) ? base_path($path) : $path;
         $json = $fs->get($path);
         $data = json_decode($json, true);

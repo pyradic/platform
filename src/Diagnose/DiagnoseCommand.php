@@ -5,7 +5,7 @@ namespace Pyro\Platform\Diagnose;
 use Illuminate\Console\Command;
 use Pyro\Platform\Diagnose\Checks\Check;
 
-class SelfDiagnosisCommand extends Command
+class DiagnoseCommand extends Command
 {
     /**
      * The console command name.
@@ -25,20 +25,20 @@ class SelfDiagnosisCommand extends Command
 
     public function handle()
     {
-        $this->runChecks(config('self-diagnosis.checks', []), trans('self-diagnosis::commands.self_diagnosis.common_checks'));
+        $this->runChecks(config('platform::diagnose.checks', []), trans('platform::diagnose::commands.self_diagnosis.common_checks'));
 
         $environment = $this->argument('environment', app()->environment());
-        $environmentChecks = config('self-diagnosis.environment_checks.' . $environment, []);
+        $environmentChecks = config('platform::diagnose.environment_checks.' . $environment, []);
 
-        if (empty($environmentChecks) && array_key_exists($environment, config('self-diagnosis.environment_aliases'))) {
-            $environment = config('self-diagnosis.environment_aliases.' . $environment);
-            $environmentChecks = config('self-diagnosis.environment_checks.' . $environment, []);
+        if (empty($environmentChecks) && array_key_exists($environment, config('platform::diagnose.environment_aliases'))) {
+            $environment = config('platform::diagnose.environment_aliases.' . $environment);
+            $environmentChecks = config('platform::diagnose.environment_checks.' . $environment, []);
         }
 
-        $this->runChecks($environmentChecks, trans('self-diagnosis::commands.self_diagnosis.environment_specific_checks', ['environment' => $environment]));
+        $this->runChecks($environmentChecks, trans('platform::diagnose.commands.self_diagnosis.environment_specific_checks', ['environment' => $environment]));
 
         if (count($this->messages)) {
-            $this->error(trans('self-diagnosis::commands.self_diagnosis.failed_checks'));
+            $this->error(trans('platform::diagnose.commands.self_diagnosis.failed_checks'));
 
             foreach ($this->messages as $message) {
                 $this->output->writeln('<fg=red>'.$message.'</fg=red>');
@@ -46,7 +46,7 @@ class SelfDiagnosisCommand extends Command
             }
             return 1; // Any other return code then 0 means exit with error
         }
-        $this->info(trans('self-diagnosis::commands.self_diagnosis.success'));
+        $this->info(trans('platform::diagnose.commands.self_diagnosis.success'));
         return 0;
     }
 
@@ -67,7 +67,7 @@ class SelfDiagnosisCommand extends Command
 
             $checkClass = app($check);
 
-            $this->output->write(trans('self-diagnosis::commands.self_diagnosis.running_check', [
+            $this->output->write(trans('platform::diagnose::commands.self_diagnosis.running_check', [
                 'current' => $current,
                 'max' => $max,
                 'name' => $checkClass->name($config),

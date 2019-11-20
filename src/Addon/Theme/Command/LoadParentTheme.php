@@ -6,6 +6,7 @@ use Anomaly\Streams\Platform\Addon\AddonProvider;
 use Anomaly\Streams\Platform\Addon\Theme\ThemeCollection;
 use Anomaly\Streams\Platform\Application\Application;
 use Anomaly\Streams\Platform\Asset\Asset;
+use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\Image\Image;
 use Anomaly\Streams\Platform\View\ViewTemplate;
 use Illuminate\Contracts\Config\Repository;
@@ -14,7 +15,34 @@ use Illuminate\Http\Request;
 
 class LoadParentTheme
 {
-    public function handle(
+    /** @var \Anomaly\Streams\Platform\Asset\Asset */
+    private $asset;
+
+    /** @var \Anomaly\Streams\Platform\Image\Image */
+    private $image;
+
+    /** @var \Illuminate\Contracts\View\Factory */
+    private $view;
+
+    /** @var \Illuminate\Http\Request */
+    private $request;
+
+    /** @var \Illuminate\Contracts\Config\Repository */
+    private $config;
+
+    /** @var \Anomaly\Streams\Platform\Addon\Theme\ThemeCollection */
+    private $themes;
+
+    /** @var \Anomaly\Streams\Platform\View\ViewTemplate */
+    private $template;
+
+    /** @var \Anomaly\Streams\Platform\Application\Application */
+    private $application;
+
+    /** @var \Anomaly\Streams\Platform\Addon\AddonProvider */
+    private $provider;
+
+    public function __construct(
         Asset $asset,
         Image $image,
         Factory $view,
@@ -26,37 +54,37 @@ class LoadParentTheme
         AddonProvider $provider
     )
     {
-//        parent::handle($asset, $image, $view, $request, $config, $themes, $template, $application, $provider);
 
+        $this->asset       = $asset;
+        $this->image       = $image;
+        $this->view        = $view;
+        $this->request     = $request;
+        $this->config      = $config;
+        $this->themes      = $themes;
+        $this->template    = $template;
+        $this->application = $application;
+        $this->provider    = $provider;
+    }
 
-        if ($theme = $themes->current()) {
+    public function handle(Ready $event)
+    {
+        if ($theme = $this->themes->current()) {
             if ($theme instanceof \Pyro\Platform\Addon\Theme\Theme && $theme->hasParent()) {
-                $parent      = $themes->get($theme->getParent());
+                $parent      = $this->themes->get($theme->getParent());
                 $parentHints = [
                     $parent->getPath('resources/views'),
-                    $application->getResourcesPath(
+                    $this->application->getResourcesPath(
                         "addons/{$parent->getVendor()}/{$parent->getSlug()}-{$parent->getType()}/views/"
                     ),
                 ];
-//                trans()->getLocale()
-                $view->addNamespace($theme->getNamespace(), $parentHints);
-                $view->addNamespace('parent', $parentHints);
-                $view->addNamespace('theme', $parentHints);
-                $asset->addPath('theme', $theme->getPath('resources'));
-                $image->addPath('theme', $theme->getPath('resources'));
-                $template->set('parent', $parent);
+                $this->view->addNamespace($theme->getNamespace(), $parentHints);
+                $this->view->addNamespace('parent', $parentHints);
+                $this->view->addNamespace('theme', $parentHints);
+                $this->asset->addPath('theme', $theme->getPath('resources'));
+                $this->image->addPath('theme', $theme->getPath('resources'));
+                $this->template->set('parent', $parent);
             }
 
-//            trans()->addNamespace('theme', $theme->getPath('resources/lang'));
-//
-//            $asset->addPath('theme', $theme->getPath('resources'));
-//            $image->addPath('theme', $theme->getPath('resources'));
-//
-//            /**
-//             * Add the theme to the view template
-//             * so it can be easily accessed later.
-//             */
-//            $template->set('theme', $theme);
         }
     }
 

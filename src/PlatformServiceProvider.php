@@ -4,13 +4,13 @@
 
 namespace Pyro\Platform;
 
-use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\ServiceProvider;
@@ -19,8 +19,7 @@ use Jackiedo\DotenvEditor\DotenvEditor;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Asset\Asset;
 use Pyro\Platform\Bus\BusServiceProvider;
-use Pyro\Platform\Command\AddAddonOverrides;
-use Pyro\Platform\Command\AddPathOverrides;
+use Pyro\Platform\Command\LoadPlatformConfiguration;
 use Pyro\Platform\Console\AddonListCommand;
 use Pyro\Platform\Console\DatabaseTruncateCommand;
 use Pyro\Platform\Console\EnvSet;
@@ -28,6 +27,9 @@ use Pyro\Platform\Console\PermissionsCommand;
 use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
 use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
+use Pyro\Platform\Listener\AddUserToJavascript;
+use Pyro\Platform\Listener\OverrideAddons;
+use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
 use Pyro\Platform\View\FileViewFinder;
@@ -37,11 +39,24 @@ class PlatformServiceProvider extends ServiceProvider
 {
     use DispatchesJobs;
 
+    protected $listen = [
+        TemplateDataIsLoading::class => [
+            AddUserToJavascript::class,
+        ],
+        Ready::class                 => [
+            OverrideAddons::class,
+            LoadParentTheme::class,
+        ],
+        GatherParserData::class      => [
+            SetParserStub::class,
+        ],
+    ];
+
     protected $providers = [
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
         \Pyro\CustomInstall\CustomInstallServiceProvider::class,
-        \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
+
 //        \Pyro\Platform\Bus\BusServiceProvider::class,
 //        \Pyro\Platform\Webpack\WebpackServiceProvider::class,
     ];
@@ -51,12 +66,14 @@ class PlatformServiceProvider extends ServiceProvider
         \Laravel\Dusk\DuskServiceProvider::class,
     ];
 
-    public function boot(\Anomaly\Streams\Platform\Asset\Asset $assets, ViewIncludes $includes)
+    public function boot(\Anomaly\Streams\Platform\Asset\Asset $assets, ViewIncludes $includes, \Illuminate\Contracts\Translation\Translator $translator)
     {
         $this->bootConsole();
+        $this->dispatchNow(new LoadPlatformConfiguration());
+        $translator->addNamespace('platform', dirname(__DIR__) . '/resources/lang');
 
-        $this->app->router->any('/asdf', function(){
-            $p=$this->app->platform->getProviders();
+        $this->app->router->any('/asdf', function () {
+            $p = $this->app->platform->getProviders();
             return 'aa';
         });
 
@@ -71,23 +88,23 @@ class PlatformServiceProvider extends ServiceProvider
         });
         $this->app->translator->addAddonLines('crvs.module.clients', 'nl', 'field', [ 'department' => [ 'name' => 'aa' ] ]);
         $this->app->translator->addLines([ 'field.department' => [ 'name' => 'aa' ] ], 'nl', 'crvs.module.clients');
-        $this->app->events->listen(TemplateDataIsLoading::class, function () {
-            if ($this->app->auth->guard()->check()) {
-                $this->app->view->share([ 'user' => $user = $this->app->auth->guard()->user() ]);
-                $userData = collect($user->toArray())
-                    ->except([ 'activation_code', 'created_at', 'created_by_id', 'deleted_at', 'password', 'updated_at', 'updated_by_id' ])
-                    ->toArray();
-                $this->app->platform->set('user', $userData);
-            }
-        });
+//        $this->app->events->listen(TemplateDataIsLoading::class, function () {
+//            if ($this->app->auth->guard()->check()) {
+//                $this->app->view->share([ 'user' => $user = $this->app->auth->guard()->user() ]);
+//                $userData = collect($user->toArray())
+//                    ->except([ 'activation_code', 'created_at', 'created_by_id', 'deleted_at', 'password', 'updated_at', 'updated_by_id' ])
+//                    ->toArray();
+//                $this->app->platform->set('user', $userData);
+//            }
+//        });
     }
 
     public function register()
     {
-        $this->mergeConfigs();
-        $this->registerProviders();
+        $this->registerListeners($this->listen);
+        $this->registerProviders($this->providers);
         if ($this->app->environment('local')) {
-            $this->registerDevProviders();
+            $this->registerProviders($this->devProviders);
         }
         $this->registerPlatform();
         $this->registerAddon();
@@ -95,6 +112,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerBus();
         $this->registerConsole();
         $this->registerDatabase();
+        $this->registerDiagnose();
         $this->registerEntry();
         $this->registerHttp();
         $this->registerUi();
@@ -103,55 +121,48 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerWebpack();
     }
 
-    protected function mergeConfigs()
+    protected function registerListeners($events)
     {
-        $this->mergeConfigFrom(dirname(__DIR__) . '/config/platform.php', 'platform');
-        $this->mergeConfigFrom(dirname(__DIR__) . '/config/platform.permission_sets.php', 'platform.permission_sets');
+        $dispatcher = resolve(Dispatcher::class);
+        foreach ($events as $event => $listeners) {
+            foreach (array_unique($listeners) as $listener) {
+                $dispatcher->listen($event, $listener);
+            }
+        }
     }
 
-    protected function registerProviders()
+    protected function registerProviders($providers)
     {
-        array_walk($this->providers, [ $this->app, 'register' ]);
-    }
-
-    protected function registerDevProviders()
-    {
-        array_walk($this->devProviders, [ $this->app, 'register' ]);
+        foreach ($providers as $provider) {
+            $this->app->register($provider);
+        }
     }
 
     protected function registerPlatform()
     {
         $this->app->singleton('platform', function ($app) {
-            $platform = new Platform($app, $app['webpack'], $app['html']);
+            $platform = new Platform($app, $app[ 'webpack' ], $app[ 'html' ]);
             $platform
                 ->addWebpackEntry('@pyro/platform');
             return $platform;
         });
-        $this->app->alias('platform',Platform::class);
-//        $this->app->singleton(Platform::class);
-//        $this->app->extend(Platform::class, function (Platform $platform) {
-//            $platform->getConfig()->merge([ 'debug' => $this->app->config[ 'app.debug' ], 'csrf' => $this->app->session->token() ]);
-//            $platform->addProvider('pyro.pyro__platform.PlatformServiceProvider');
-//            $platform->addPublicScript('assets/js/pyro__platform.js');
-//            return $platform;
-//        });
-//        $this->app->alias(Platform::class, 'platform');
+        $this->app->alias('platform', Platform::class);
     }
 
     protected function registerAddon()
     {
         // addon paths
-        $this->app->events->listen(Ready::class, function (Ready $event) {
-            $this->dispatchNow(new AddPathOverrides(path_join(__DIR__, '..', 'resources')));
-
-            $active = resolve(\Anomaly\Streams\Platform\Addon\Theme\ThemeCollection::class)->active();
-            $this->dispatchNow(new AddAddonOverrides($active));
-
-            $installed = resolve('addon.collection')->installed()->enabled();
-            foreach($installed as $addon){
-                $this->dispatchNow(new AddAddonOverrides($addon));
-            }
-        });
+//        $this->app->events->listen(Ready::class, function (Ready $event) {
+//            $this->dispatchNow(new AddPathOverrides(path_join(__DIR__, '..', 'resources')));
+//
+//            $active = resolve(\Anomaly\Streams\Platform\Addon\Theme\ThemeCollection::class)->active();
+//            $this->dispatchNow(new AddAddonOverrides($active));
+//
+//            $installed = resolve('addon.collection')->installed()->enabled();
+//            foreach($installed as $addon){
+//                $this->dispatchNow(new AddAddonOverrides($addon));
+//            }
+//        });
 
 //        $this->app->events->listen(AddonsHaveRegistered::class, function (AddonsHaveRegistered $event) {
 //            foreach ($event->getAddons()->installed()->enabled() as $addon) {
@@ -160,9 +171,9 @@ class PlatformServiceProvider extends ServiceProvider
 //        });
 
         // theme inheritance
-        $this->app->events->listen(Ready::class, function (Ready $event) {
-            $this->dispatchNow(new LoadParentTheme());
-        });
+//        $this->app->events->listen(Ready::class, function (Ready $event) {
+//            $this->dispatchNow(new LoadParentTheme());
+//        });
     }
 
     protected function registerAsset()
@@ -213,11 +224,16 @@ class PlatformServiceProvider extends ServiceProvider
         \Pyro\Platform\Database\Seeder\UserSeeder::registerSeed('users');
     }
 
+    protected function registerDiagnose()
+    {
+        $this->app->register(\Pyro\Platform\Diagnose\DiagnoseServiceProvider::class);
+    }
+
     protected function registerEntry()
     {
         // stream compile entry model template
         $this->app->events->listen(GatherParserData::class, function (GatherParserData $event) {
-            $event->getData()->put('template', file_get_contents(__DIR__ . '/Entry/entry.stub'));
+//            $event->getData()->put('template', file_get_contents(__DIR__ . '/Entry/entry.stub'));
         });
     }
 
