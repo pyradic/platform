@@ -14,6 +14,8 @@ class Dispatcher extends \Illuminate\Bus\Dispatcher
     /** @var \Illuminate\Events\Dispatcher */
     protected $events;
 
+    protected static $dispatched = [];
+
     public function __construct(Container $container, Closure $queueResolver = null)
     {
         parent::__construct($container, $queueResolver);
@@ -39,7 +41,8 @@ class Dispatcher extends \Illuminate\Bus\Dispatcher
             $result = parent::dispatchNow($command, $handler);
         }
         $this->fire(static::EVENT_AFTER, $command, $result);
-        config()->push('bus.' . static::EVENT_AFTER, $command); // @todo remove this
+//        static::$dispatched['bus.' . static::EVENT_AFTER][] = $command;
+//        config()->push('bus.' . static::EVENT_AFTER, $command); // @todo remove this
         return $result;
     }
 

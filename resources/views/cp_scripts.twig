@@ -3,22 +3,39 @@
 {# @var \Pyro\Webpack\Webpack webpack #}
 
 
-{% if app.webpack.isEnabled() and app.webpack.isActive() %}
-    <!--WEBPACK_HERE_PLEASE-->
-{% else %}
+{% if webpack.isEnabled() %}
+    {#
+        Add webpack compilation output scripts & styles
+        This will render the script/style tags for entries that have been enabled prior to this point
 
-    <!-- ASSETS HERE PLX -->
-{#    {{ asset_add('platform.js', 'platform::js/platform.js', [ 'webpack:pyro__platform:scripts' ]) }}#}
-    {{ app.webpack.renderScripts|raw }}
-    {{ app.webpack.renderStyles|raw }}
+        If the webpack-dev-server is active. Instead of local paths, we point them to the dev-server. This also enables HMR
+        This will automatically include ALL scripts & styles, but still depends on providers to get executed
+
+        The line WEBPACK_HERE_PLEASE will be replaced with all the dev-server script and styles. This is being done by the middleware
+        @todo Change so this does not use a middleware anymore. Preferably combining it with the render funcs
+    #}
+
+    {% if webpack.isActive() %}
+        <!--WEBPACK_HERE_PLEASE-->
+    {% else %}
+        {{ webpack.renderScripts|raw }}
+        {{ webpack.renderStyles|raw }}
+    {% endif %}
 {% endif %}
 
-<!-- DATA -->
-<script>window['pyro'].data = JSON.parse('{{ platform.data.toJson | replace({"'": "\\'"}) | raw }}');</script>
-<!-- CONFIG -->
-<script>window['pyro'].config = JSON.parse('{{ platform.config.toJson | replace({"'": "\\'"}) | raw }}');</script>
+{# Render the service provider array to javascript. (pyro.providers) #}
 <!-- PROVIDERS -->
-<script>window['pyro'].providers = [{{ platform.providers }}];</script>
+{{ webpack.providers | raw }}
+
+{# Render data for the Vue root component's data. (pyro.data) #}
+<!-- DATA -->
+{{ platform.renderData | raw }}
+
+{# Render config for the application. (pyro.config) #}
+<!-- CONFIG -->
+{{ platform.renderConfig | raw }}
+
+
 
 {% if platform.shouldntPreventBootstrap %}
     <script>
@@ -26,6 +43,9 @@
             var app = this.pyro.pyro__platform.Application.instance;
             var log = app.createLog('cp_scripts');
 
+            // boostrap: initializes the application, registers the service providers, etc
+            // boot: boots the application, boots the service providers, etc
+            // booted: start the application by mounting the root Vue component
             app
                 .bootstrap({
                     config   : pyro.config,
@@ -37,7 +57,10 @@
                 })
                 .then(function (app) {
                     app.extendRoot({
-                        mounted   : function () {
+                        mounted: function () {
+                            // once the root component is mounted we release
+                            // jQuery's ready hold, so it fires all the
+                            // $(function(){}) / document on ready callbacks
                             $.holdReady(false);
                         }
                     });
