@@ -8,11 +8,11 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Laradic\Support\Dot;
-use Pyro\Platform\Webpack\Webpack;
+use Pyro\Webpack\Webpack;
 
 class Platform implements ArrayAccess
 {
-    /** @var \Pyro\Platform\Webpack\Webpack */
+    /** @var \Pyro\Webpack\Webpack */
     protected $webpack;
 
 //    /** @var array|string[] */
@@ -36,7 +36,7 @@ class Platform implements ArrayAccess
     /** @var bool */
     protected $preventBootstrap = false;
 
-    /** @var \Illuminate\Support\Collection|\Pyro\Platform\Webpack\WebpackAddonEntry[] */
+    /** @var \Illuminate\Support\Collection|\Pyro\Webpack\Package\EntryCollection[] */
     protected $entries;
 
     /** @var \Collective\Html\HtmlBuilder */
@@ -67,37 +67,40 @@ class Platform implements ArrayAccess
         return $this->webpack;
     }
 
-    public function getWebpackAddons()
+    public function getWebpackPackages()
     {
-        return $this->webpack->getAddons();
+        return $this->webpack->getPackages();
     }
 
-    public function getWebpackAddon($name)
+    public function getWebpackPackage($name)
     {
-        return $this->webpack->getAddons()->findByName($name);
+        return $this->webpack->getPackages()->findByName($name);
     }
 
     public function addWebpackEntry($name, $suffix = null)
     {
-        $addon   = $this->findWebpackAddon($name);
-        $entries = $addon->getEntries();
-        $entry   = $suffix === null ? $entries->main() : $entries->suffix($suffix);
-        $this->entries->put($entry->getName(), $entry);
+        $this->webpack->enableEntry($name,$suffix);
         return $this;
+//        $addon   = $this->findWebpackAddon($name);
+//        $entries = $addon->getEntries();
+//        $entry   = $suffix === null ? $entries->main() : $entries->suffix($suffix);
+//        $this->entries->put($entry->getName(), $entry);
+//        return $this;
     }
 
     public function findWebpackAddon($name)
     {
-        if ($entry = $this->getWebpackAddons()->findByName($name)) {
-            return $entry;
-        }
-        if ($entry = $this->getWebpackAddons()->findByComposerName($name)) {
-            return $entry;
-        }
-        if ($entry = $this->getWebpackAddons()->findByStreamNamespace($name)) {
-            return $entry;
-        }
-        throw new InvalidArgumentException("Could not find webpack addon with name '{$name}'");
+        return $this->webpack->findPackage($name);
+//        if ($entry = $this->getWebpackPackages()->findByName($name)) {
+//            return $entry;
+//        }
+//        if ($entry = $this->getWebpackPackages()->findByComposerName($name)) {
+//            return $entry;
+//        }
+//        if ($entry = $this->getWebpackPackages()->findByStreamNamespace($name)) {
+//            return $entry;
+//        }
+//        throw new InvalidArgumentException("Could not find webpack addon with name '{$name}'");
     }
 
     public function preventBootstrap($value = true)
@@ -162,21 +165,25 @@ class Platform implements ArrayAccess
 
     public function getProviders()
     {
-        $p = $this->entries->filter->hasProvider()->map->getProvider()->map(function ($provider, $exportName) {
+        $p = $this->webpack->getEnabledEntries()->filter->hasProvider()->map->getProvider()->map(function ($provider, $exportName) {
             $namespace = $this->webpack->getNamespace();
             return "{$namespace}.{$exportName}.{$provider}";
         })->values()->implode(', ');
+//        $p = $this->entries->filter->hasProvider()->map->getProvider()->map(function ($provider, $exportName) {
+//            $namespace = $this->webpack->getNamespace();
+//            return "{$namespace}.{$exportName}.{$provider}";
+//        })->values()->implode(', ');
 
         return $p;
     }
 
-    public function renderScripts()
-    {
-        $scripts = $this->entries->map->getScripts()->flatten()->map(function ($script) {
-            return $this->html->script($script);
-        });
-        return $scripts;
-    }
+//    public function renderScripts()
+//    {
+//        $scripts = $this->entries->map->getScripts()->flatten()->map(function ($script) {
+//            return $this->html->script($script);
+//        });
+//        return $scripts;
+//    }
 
     public function offsetExists($offset)
     {
@@ -210,7 +217,7 @@ class Platform implements ArrayAccess
 //        foreach ($this->scripts as $entry) {
 //            $name        = $entry[ 'name' ];
 //            $entrySuffix = $entry[ 'entrySuffix' ];
-//            /** @var \Pyro\Platform\Webpack\WebpackAddon $addon */
+//            /** @var \Pyro\Webpack\WebpackAddon $addon */
 //            $addon       = $entry[ 'addon' ];
 //            $scripts = $addon->getScripts()->map(function($script) use ($addon){
 //                return $this->webpack->getPublicPath() . $script;
@@ -235,11 +242,11 @@ class Platform implements ArrayAccess
 //        }
 //        if ($provider instanceof Addon) {
 //            //$this->addAddon($provider);
-//            $addon      = $this->webpack->getAddons()->findByStreamNamespace($provider->getNamespace());
+//            $addon      = $this->webpack->getPackages()->findByStreamNamespace($provider->getNamespace());
 //            $exportName = last(explode('\\',$provider->getServiceProvider()));
 //        } elseif (strpos($provider, '::') !== false) {
 //            [ $name, $exportName ] = explode('::', $provider);
-//            $addon = $this->webpack->getAddons()->findByName($name);
+//            $addon = $this->webpack->getPackages()->findByName($name);
 //        }
 //        $namespace         = $this->webpack->getNamespace();
 //        $provider          = "{$namespace}.{$addon->getEntryName()}.{$exportName}";

@@ -5,6 +5,7 @@
         "laradic/support": "~2.0",
         "laradic/generators": "~2.0",
         "laradic/dependency-sorter": "~1.0",
+        "laradic/config": "~2.0",
         "jackiedo/dotenv-editor": "^1.0"
     },
     "autoload": {

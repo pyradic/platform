@@ -3,7 +3,23 @@
 namespace Pyro\Platform\Database;
 
 use Closure;
+use Illuminate\Support\Arr;
 
+/**
+ * A class to create anonymous migrations at run-time.
+ *
+ * @example
+ * ```
+ * $migration = (new Migration())
+ *  ->addUp(function(){
+ *    Schema::create('sometable, function (Blueprint $table) {
+ *      $table->bigIncrements('id');
+ *    });
+ *  })
+ *  ->addDown(function(){
+ *  });
+ * ```
+ */
 class Migration  extends \Anomaly\Streams\Platform\Database\Migration\Migration
 {
     protected $up = [];
@@ -23,17 +39,22 @@ class Migration  extends \Anomaly\Streams\Platform\Database\Migration\Migration
 
     public function up()
     {
-        array_walk($this->up, [ $this, 'visit' ]);
+        $this->visit($this->down);
     }
 
     public function down()
     {
-        array_walk($this->down, [ $this, 'visit' ]);
+        $this->visit($this->down);
     }
 
-    public function visit(Closure $cb)
+    /**
+     * @param Closure|Closure[] $cbs
+     */
+    public function visit($cbs)
     {
-        app()->call($cb->bindTo($this));
+        foreach(Arr::wrap($cbs) as $cb) {
+            app()->call($cb->bindTo($this));
+        }
     }
 
 

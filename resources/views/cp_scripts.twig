@@ -1,20 +1,16 @@
+{# @var \Illuminate\Foundation\Application app #}
 {# @var \Pyro\Platform\Platform platform #}
+{# @var \Pyro\Webpack\Webpack webpack #}
 
 
-{% if config('platform.webpack.enabled') and config('platform.webpack.active') %}
+{% if app.webpack.isEnabled() and app.webpack.isActive() %}
     <!--WEBPACK_HERE_PLEASE-->
 {% else %}
 
-    {{ asset_add('platform.js', 'platform::js/platform.js', [ 'webpack:pyro__platform:scripts' ]) }}
-
-    {% for script in platform.renderScripts %}
-        {{ asset_public_script(script) }}
-    {% endfor %}
-
-    {% for style in platform.publicStyles %}
-        {{ asset_public_style(style) }}
-    {% endfor %}
-
+    <!-- ASSETS HERE PLX -->
+{#    {{ asset_add('platform.js', 'platform::js/platform.js', [ 'webpack:pyro__platform:scripts' ]) }}#}
+    {{ app.webpack.renderScripts|raw }}
+    {{ app.webpack.renderStyles|raw }}
 {% endif %}
 
 <!-- DATA -->

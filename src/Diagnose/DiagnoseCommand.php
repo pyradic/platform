@@ -25,14 +25,14 @@ class DiagnoseCommand extends Command
 
     public function handle()
     {
-        $this->runChecks(config('platform::diagnose.checks', []), trans('platform::diagnose::commands.self_diagnosis.common_checks'));
+        $this->runChecks(config('platform.diagnose.checks', []), trans('platform::diagnose::commands.self_diagnosis.common_checks'));
 
         $environment = $this->argument('environment', app()->environment());
-        $environmentChecks = config('platform::diagnose.environment_checks.' . $environment, []);
+        $environmentChecks = config('platform.diagnose.environment_checks.' . $environment, []);
 
-        if (empty($environmentChecks) && array_key_exists($environment, config('platform::diagnose.environment_aliases'))) {
-            $environment = config('platform::diagnose.environment_aliases.' . $environment);
-            $environmentChecks = config('platform::diagnose.environment_checks.' . $environment, []);
+        if (empty($environmentChecks) && array_key_exists($environment, config('platform.diagnose.environment_aliases'))) {
+            $environment = config('platform.diagnose.environment_aliases.' . $environment);
+            $environmentChecks = config('platform.diagnose.environment_checks.' . $environment, []);
         }
 
         $this->runChecks($environmentChecks, trans('platform::diagnose.commands.self_diagnosis.environment_specific_checks', ['environment' => $environment]));
