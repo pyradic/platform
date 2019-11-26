@@ -8,6 +8,6 @@ class SetParserStub
 {
     public function handle(GatherParserData $event)
     {
-        $event->getData()->put('template', file_get_contents(__DIR__ . '/Entry/entry.stub'));
+        $event->getData()->put('template', file_get_contents(dirname(__DIR__) . '/Entry/entry.stub'));
     }
 }

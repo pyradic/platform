@@ -1,11 +1,15 @@
 <?php
 
-namespace Pyro\Platform\Ui\ControlPanel;
+namespace Pyro\Platform\Ui\ControlPanel\Component;
 
+use ArrayAccess;
 use Illuminate\Contracts\Support\Arrayable;
+use Laradic\Support\Traits\ArrayAccessibleProperties;
 
-class Shortcut extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Shortcut\Shortcut implements Arrayable
+class Shortcut extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Shortcut\Shortcut implements Arrayable, ArrayAccess
 {
+    use ArrayAccessibleProperties;
+
     protected $children = [];
 
     public function getChildren()
@@ -13,7 +17,7 @@ class Shortcut extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Short
         return $this->children;
     }
 
-    public function setChildren(array $children)
+    public function setChildren($children)
     {
         $this->children = $children;
         return $this;

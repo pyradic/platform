@@ -1,21 +1,19 @@
-<?php
+<?php /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
+
+/** @noinspection PhpFullyQualifiedNameUsageInspection */
 
 namespace Pyro\Platform\Ui;
 
-use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Shortcut\Event\GatherShortcuts;
-use Anomaly\Streams\Platform\Ui\ControlPanel\Event\ControlPanelIsBuilding;
-use Anomaly\Streams\Platform\Ui\ControlPanel\Event\ControlPanelWasBuilt;
-use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
-use Pyro\Platform\Ui\ControlPanel\Section;
-use Pyro\Platform\Ui\ControlPanel\Shortcut;
 
 class UiServiceProvider extends ServiceProvider
 {
     public $providers = [];
 
-    public $bindings = [];
+    public $bindings = [
+        \Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanelBuilder::class => \Pyro\Platform\Ui\ControlPanel\ControlPanelBuilder::class,
+        \Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanel::class        => \Pyro\Platform\Ui\ControlPanel\ControlPanel::class,
+    ];
 
     public $singletons = [];
 
@@ -24,25 +22,29 @@ class UiServiceProvider extends ServiceProvider
 
     }
 
-    protected $controlPanel = [
-        'shortcuts' => [ 'shortcut' => Shortcut::class, ],
-        'sections'  => [ 'section' => Section::class, ],
-    ];
-
     public function register()
     {
-        $this->app->events->listen(GatherShortcuts::class, function (GatherShortcuts $event) {
-            $builder   = $event->getBuilder();
-            $shortcuts = $builder->getShortcuts();
-            $shortcuts = array_map(function ($shortcut) {
-                foreach ($this->controlPanel[ 'shortcuts' ] as $key => $value) {
-                    if ( ! Arr::has($shortcut, $key)) {
-                        Arr::set($shortcut, $key, $value);
-                    }
-                }
-                return $shortcut;
-            }, $shortcuts);
-            $builder->setShortcuts($shortcuts);
-        });
+
+//        $this->app->events->listen(GatherNavigation::class, function (GatherNavigation $event) {
+//            $event->getBuilder()->setNavigation(
+//                collect($event->getBuilder()->getNavigation())->map([ Dot::class, 'wrap' ])->each(function (Dot $section) {
+//                    $section->set('section', $section->get('section', NavigationLink::class));
+//                })->toArray()
+//            );
+//        });
+//        $this->app->events->listen(GatherSections::class, function (GatherSections $event) {
+//            $event->getBuilder()->setSections(
+//                collect($event->getBuilder()->getSections())->map([ Dot::class, 'wrap' ])->each(function (Dot $section) {
+//                    $section->set('section', $section->get('section', Section::class));
+//                })->toArray()
+//            );
+//        });
+//        $this->app->events->listen(GatherShortcuts::class, function (GatherShortcuts $event) {
+//            $event->getBuilder()->setShortcuts(
+//                collect($event->getBuilder()->getShortcuts())->map([ Dot::class, 'wrap' ])->each(function (Dot $shortcut) {
+//                    $shortcut->set('shortcut', $shortcut->get('shortcut', Shortcut::class));
+//                })->toArray()
+//            );
+//        });
     }
 }

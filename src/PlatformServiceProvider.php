@@ -8,6 +8,7 @@ use Anomaly\Streams\Platform\Asset\Asset;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
+use Anomaly\Streams\Platform\Ui\ControlPanel\Event\ControlPanelWasBuilt;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\Streams\Platform\View\ViewTemplate;
@@ -29,6 +30,7 @@ use Pyro\Platform\Console\PermissionsCommand;
 use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
 use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
+use Pyro\Platform\Listener\AddControlPanelStructure;
 use Pyro\Platform\Listener\AddUserToJavascript;
 use Pyro\Platform\Listener\OverrideAddons;
 use Pyro\Platform\Listener\SetParserStub;
@@ -45,6 +47,7 @@ class PlatformServiceProvider extends ServiceProvider
         TemplateDataIsLoading::class => [
             AddUserToJavascript::class,
             SharePlatform::class,
+            AddControlPanelStructure::class
         ],
         Ready::class                 => [
             OverrideAddons::class,
@@ -53,6 +56,10 @@ class PlatformServiceProvider extends ServiceProvider
         GatherParserData::class      => [
             SetParserStub::class,
         ],
+        ControlPanelWasBuilt::class => [
+
+//            AddControlPanelStructure::class
+        ]
     ];
 
     protected $providers = [
