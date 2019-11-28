@@ -38,18 +38,4 @@ class NavigationLink extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component
         return $this->key;
     }
 
-    /** @var \Anomaly\Streams\Platform\Addon\Module\Module */
-    protected $parent;
-
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    public function setParent($parent)
-    {
-        $this->parent = $parent;
-        return $this;
-    }
-
 }

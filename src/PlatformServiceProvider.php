@@ -8,10 +8,9 @@ use Anomaly\Streams\Platform\Asset\Asset;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
-use Anomaly\Streams\Platform\Ui\ControlPanel\Event\ControlPanelWasBuilt;
+use Anomaly\Streams\Platform\Ui\Form\Event\FormWasBuilt;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewIncludes;
-use Anomaly\Streams\Platform\View\ViewTemplate;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
@@ -20,9 +19,9 @@ use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\ServiceProvider;
 use Jackiedo\DotenvEditor\DotenvEditor;
+use Laradic\Support\MultiBench;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Command\AddPlatformAssetNamespaces;
-use Pyro\Platform\Command\LoadPlatformConfiguration;
 use Pyro\Platform\Console\AddonListCommand;
 use Pyro\Platform\Console\DatabaseTruncateCommand;
 use Pyro\Platform\Console\EnvSet;
@@ -34,6 +33,7 @@ use Pyro\Platform\Listener\AddControlPanelStructure;
 use Pyro\Platform\Listener\AddUserToJavascript;
 use Pyro\Platform\Listener\OverrideAddons;
 use Pyro\Platform\Listener\SetParserStub;
+use Pyro\Platform\Listener\SetSafeDelimiters;
 use Pyro\Platform\Listener\SharePlatform;
 use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
@@ -47,7 +47,7 @@ class PlatformServiceProvider extends ServiceProvider
         TemplateDataIsLoading::class => [
             AddUserToJavascript::class,
             SharePlatform::class,
-            AddControlPanelStructure::class
+            AddControlPanelStructure::class,
         ],
         Ready::class                 => [
             OverrideAddons::class,
@@ -56,10 +56,11 @@ class PlatformServiceProvider extends ServiceProvider
         GatherParserData::class      => [
             SetParserStub::class,
         ],
-        ControlPanelWasBuilt::class => [
 
+        FormWasBuilt ::class => [
+            SetSafeDelimiters::class
 //            AddControlPanelStructure::class
-        ]
+        ],
     ];
 
     protected $providers = [
@@ -82,6 +83,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->bootConfig();
         $this->bootConsole();
         $this->dispatchNow(new AddPlatformAssetNamespaces());
+
     }
 
     public function register()
@@ -115,7 +117,7 @@ class PlatformServiceProvider extends ServiceProvider
             dirname(__DIR__) . '/resources/config/platform.cp_scripts.php'      => config_path('platform.cp_scripts.php'),
             dirname(__DIR__) . '/resources/config/platform.diagnose.php'        => config_path('platform.diagnose.php'),
             dirname(__DIR__) . '/resources/config/platform.permission_sets.php' => config_path('platform.permission_sets.php'),
-         ], [ 'config' ]);
+        ], [ 'config' ]);
     }
 
     protected function bootConsole()

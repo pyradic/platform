@@ -1,36 +1,36 @@
-<?php /** @noinspection SuspiciousAssignmentsInspection */
+<?php /** @noinspection DisconnectedForeachInstructionInspection */
+/** @noinspection PhpUnhandledExceptionInspection */
+
+/** @noinspection SuspiciousAssignmentsInspection */
 
 namespace Pyro\Platform\Ui\ControlPanel\Command;
 
 use Anomaly\Streams\Platform\Addon\Module\Module;
 use Anomaly\Streams\Platform\Addon\Module\ModuleCollection;
-use Anomaly\Streams\Platform\Support\Authorizer;
 use Anomaly\Streams\Platform\Support\Resolver;
 use Anomaly\Streams\Platform\Ui\Button\ButtonCollection;
 use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Button\ButtonHandler;
-use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Button\ButtonInput;
 use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Button\Command\BuildButtons;
 use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\Command\BuildNavigation;
+use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\Command\SetActiveNavigationLink;
 use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\NavigationCollection;
 use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\NavigationHandler;
 use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\Command\BuildSections;
+use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\Command\SetActiveSection;
 use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\SectionCollection;
-use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\SectionFactory;
 use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\SectionHandler;
-use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\SectionInput;
 use Anomaly\Streams\Platform\Ui\ControlPanel\Component\Shortcut\ShortcutCollection;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Cache\Repository as Cache;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Support\Arr;
-use Laradic\Support\Dot;
+use Illuminate\Support\Collection;
 use Laradic\Support\MultiBench;
 use Pyro\Platform\Ui\ControlPanel\Component\Button;
 use Pyro\Platform\Ui\ControlPanel\Component\NavigationLink;
 use Pyro\Platform\Ui\ControlPanel\Component\Section;
 use Pyro\Platform\Ui\ControlPanel\ControlPanel;
 use Pyro\Platform\Ui\ControlPanel\ControlPanelBuilder;
+use Pyro\Platform\Ui\ControlPanel\ControlPanelStructure;
 
 class BuildControlPanelStructure
 {
@@ -38,8 +38,8 @@ class BuildControlPanelStructure
 
     protected $cache = true;
 
-    /** @var \Illuminate\Support\Collection */
-    protected $structure;
+    /** @var ControlPanelStructure */
+    public static $structure;
 
     public function __construct(bool $cache = true)
     {
@@ -58,14 +58,42 @@ class BuildControlPanelStructure
         return new ControlPanelBuilder($cp);
     }
 
-    public function handle(Application $app)
+    public function handle(ModuleCollection $modules, Cache $cache, Guard $guard)
     {
-        $this->structure = collect();
-        MultiBench::on('createControlPanelStructure')->start();
-        $structure = $app->call([ $this, 'build' ]);
-        MultiBench::on('createControlPanelStructure')->stop();
-        $elapsed=MultiBench::on('createControlPanelStructure')->getElapsed();
-        return $structure;
+        $cp = resolve(\Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanel::class);
+        if(static::$structure === null || $this->cache === false) {
+            debugbar()->startMeasure('control_panel_structure');
+            $key     = "cp.structure.user.{$guard->id()}";
+            $navKey  = $key . '.nav';
+            $lastKey = $key . '.last';
+            $last    = $cp->getNavigation()->map->getSlug()->implode(',');
+            if ($this->cache && $cache->has($lastKey) && $cache->has($navKey) && $cache->get($lastKey) === $last) {
+                debugbar()->startMeasure('control_panel_structure.cache');
+                $structure = $cache->get($navKey);
+                debugbar()->stopMeasure('control_panel_structure.cache');
+            } else {
+                $cache->forever($lastKey, $last);
+                debugbar()->startMeasure('control_panel_structure.build');
+                $structure = $this->build($modules);
+                debugbar()->stopMeasure('control_panel_structure.build');
+                $cache->forever($navKey, $structure);
+            }
+            static::$structure = $structure;
+            if ($activeLink = $cp->getNavigation()->active()) {
+                if ($link = static::$structure->get($activeLink->getSlug())) {
+                    $link[ 'active' ] = true;
+                }
+                if ($activeSection = $cp->getActiveSection()) {
+                    if ($section = $link[ 'children' ]->get($activeSection->getSlug())) {
+                        $section[ 'active' ] = true;
+                    }
+                }
+            }
+            debugbar()->stopMeasure('control_panel_structure');
+
+        }
+        // the real cp
+        return static::$structure;
     }
 
     /**
@@ -77,35 +105,35 @@ class BuildControlPanelStructure
      * @return mixed
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function build(Application $app, ModuleCollection $modules, Authorizer $authorizer, Cache $cache, Guard $guard)
+    public function build(ModuleCollection $modules)
     {
-        $builder=$this->createControlPanelBuilder();
-        (new NavigationHandler)->handle($builder,$modules);
-        $this->dispatchNow(new BuildNavigation($builder));
-        $key     = "cp.structure.user({$guard->id()})";
-        $navKey  = $key . '.nav';
-        $lastKey = $key . '.last';
-        $last    = $builder->getControlPanelNavigation()->map->getSlug()->implode(',');
-        if ($this->cache && $cache->has($lastKey) && $cache->has($navKey) && $cache->get($lastKey) === $last) {
-            return $cache->get($navKey);
+        MultiBench::on('createControlPanelStructure')->start();
+        $activeModule = $modules->enabled()->accessible()->active();
+        if ($activeModule) {
+            $activeModule->setActive(false);
         }
-        $cache->forever($lastKey, $last);
-        $structure = $cache->rememberForever($navKey, function () use ($modules, $authorizer, $cache) {
-            $activeModule = $modules->enabled()->accessible()->active();
-            if ($activeModule) {
-                $activeModule->setActive(false);
-            }
-            $navigation = $this->buildNavigation();
-            if ($activeModule) {
-                $activeModule->setActive(true);
-                $navigation->get($activeModule->getNamespace())->setActive(true);
-            }
-            $nav= \Pyro\Platform\Ui\ControlPanel\Component\NavigationCollection::make($navigation->all())->collect();
-            $nav = collect($nav);
-            $a=$nav->map('collect')->map->get('children')->map('collect');
-
-
+        $navigation = $this->buildNavigation();
+        if ($activeModule) {
+            $activeModule->setActive(true);
+//            $navigation->get($activeModule->getNamespace())->setActive(true);
+        }
+        $structure = ControlPanelStructure::make($navigation)->mapWithKeys(function (NavigationLink $link) {
+            return [ $link->getSlug() => $link ];
+        })->map->toArray()->map('collect')->map(function (Collection $link) {
+            $link->put('url',
+                $link->get('url',$link->dataGet('attributes.href', ''))
+            );
+            $link[ 'children' ] = $link[ 'children' ]->toBase()->map->toArray()->map('collect')->map(function (Collection $section) {
+                $section->put('url',
+                    $section->get('url',$section->dataGet('attributes.href', ''))
+                );
+                $section[ 'children' ] = $section[ 'children' ]->map->toArray()->map('collect');
+                return $section;
+            });
+            return $link;
         });
+        // same for section
+        MultiBench::on('createControlPanelStructure')->stop();
         return $structure;
     }
 
@@ -129,17 +157,17 @@ class BuildControlPanelStructure
         $builder->getControlPanel()->getNavigation()->each(function (NavigationLink $link) {
             $link->setKey($link->getSlug());
         });
-        MultiBench::on('createControlPanelStructure')->mark('structure');
+//        dispatch_now(new SetActiveNavigationLink($builder));
         $this->buildSections($builder, $modules);
-        MultiBench::on('createControlPanelStructure')->mark('structure:end');
-        $navigation= $builder->getControlPanel()->getNavigation();
-return $navigation;
+        $navigation = $builder->getControlPanel()->getNavigation();
+        return $navigation;
     }
 
     protected function buildSections(ControlPanelBuilder $builder, ModuleCollection $modules)
     {
         /** @var NavigationLink $navigation */
         /** @var Module $module */
+//        $active = $builder->getControlPanel()->getNavigation()->active();
         foreach ($builder->getControlPanel()->getNavigation() as $navigation) {
             $module = $modules->get($navigation->getSlug());
             $navigation->setActive(true);
@@ -156,6 +184,7 @@ return $navigation;
                     $item[ 'children' ] = collect();
                     if (isset($item[ 'sections' ])) {
                         foreach ($item[ 'sections' ] as $k => $v) {
+                            /** @noinspection UnsupportedStringOffsetOperationsInspection */
                             $item[ 'sections' ][ $k ][ 'section' ] = Section::class;
                         }
                     }
@@ -165,25 +194,28 @@ return $navigation;
                 })->toArray());
 
             dispatch_now(new BuildSections($builder));
-            $navigation->setActive(false);
-            $module->setActive(false);
+//            if ($navigation === $active) {
+//                dispatch_now(new SetActiveSection($builder));
+//            }
             $sections = $builder->getControlPanel()->getSections();
             $sections->each(function (Section $section) use ($navigation) {
-                $section->setParent($navigation);
                 $section->setKey($navigation->getKey() . '::' . $section->getSlug());
             });
-
             $navigation->setChildren($sections);
-            MultiBench::on('createControlPanelStructure')->mark('buttons');
             $this->buildButtons($builder, $modules);
-            MultiBench::on('createControlPanelStructure')->mark('buttons:end');
+            $navigation->setActive(false);
+            $module->setActive(false);
         }
+//        if($active) {
+//            $active->setActive(true);
+//        }
     }
 
     protected function buildButtons(ControlPanelBuilder $builder, ModuleCollection $modules)
     {
         /** @var Module $module */
         /** @var Section $section */
+//        $active = $builder->getControlPanel()->getSections()->active();
         foreach ($builder->getControlPanel()->getSections() as $section) {
             $section->setActive(true);
             $builder->getControlPanel()->setButtons(new ButtonCollection());
@@ -197,19 +229,19 @@ return $navigation;
                     }
                     $item[ 'button' ] = Button::class;
                     $item[ 'key' ]    = $section->getKey() . '.' . (isset($item[ 'slug' ]) ? $item[ 'slug' ] : $itemKey);
-                    $item[ 'parent' ] = $section;
 //                    $item[ 'title' ]      = trans($item[ 'title' ]);
 //                    $item[ 'breadcrumb' ] = trans($item[ 'breadcrumb' ]);
                     return [ $itemKey => $item ];
                 })->toArray());
             dispatch_now(new BuildButtons($builder));
             $buttons = $builder->getControlPanel()->getButtons()->toBase();
-            $b=$buttons->map->toArray();
             $section->setChildren($buttons);
             $section->setActive(false);
         }
+//        if ($active) {
+//            $active->setActive(true);
+//        }
     }
-
 }
 
 ///**

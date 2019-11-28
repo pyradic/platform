@@ -41,10 +41,9 @@ class Platform implements ArrayAccess
         $this->webpack = $webpack;
         $this->html    = $html;
 
-        $this->config = new Dot([
-            'debug' => $app->config->get('app.debug'),
-            'csrf'  => '',
-        ]);
+        $this->config = new PlatformConfig();
+        $this->config->setDefaults($app);
+
 
         $this->entries = new Collection();
         $this->data    = new Dot([
@@ -83,9 +82,15 @@ class Platform implements ArrayAccess
 
     public function renderData()
     {
-        $json = $this->data->toJson();
-        $json = str_replace("'", "\\'", $json);
-        $js   = "window['{$this->webpack->getNamespace()}'].data = JSON.parse('{$json}');";
+//        $json = $this->data->toJson();
+//        $json = str_replace("'", "\\'", $json);
+        $js   = "window['{$this->webpack->getNamespace()}'].data = window['{$this->webpack->getNamespace()}'].data || {};";// = JSON.parse('{$json}');";
+        foreach($this->data->keys() as $key){
+            $json = $this->data->toJson($key);
+            $json = str_replace("\\", "\\\\", $json);
+            $json = str_replace("'", "\\'", $json);
+            $js   .= "\nwindow['{$this->webpack->getNamespace()}'].data['{$key}'] = JSON.parse('{$json}');";
+        }
         return "<script> {$js} </script>";
     }
 
@@ -118,6 +123,12 @@ class Platform implements ArrayAccess
         return $this->data->has($key);
     }
 
+    /**
+     * @param array|string|Dot $key
+     * @param array|Dot        $value
+     *
+     * @return $this
+     */
     public function merge($key, $value = [])
     {
         $this->data->merge($key, $value);

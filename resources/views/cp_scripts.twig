@@ -1,31 +1,6 @@
 {# @var \Illuminate\Foundation\Application app #}
 {# @var \Pyro\Platform\Platform platform #}
-{# @var \Pyro\Webpack\Webpack webpack #}
 
-
-{% if webpack.isEnabled() %}
-    {#
-        Add webpack compilation output scripts & styles
-        This will render the script/style tags for entries that have been enabled prior to this point
-
-        If the webpack-dev-server is active. Instead of local paths, we point them to the dev-server. This also enables HMR
-        This will automatically include ALL scripts & styles, but still depends on providers to get executed
-
-        The line WEBPACK_HERE_PLEASE will be replaced with all the dev-server script and styles. This is being done by the middleware
-        @todo Change so this does not use a middleware anymore. Preferably combining it with the render funcs
-    #}
-
-    {% if webpack.isActive() %}
-        <!--WEBPACK_HERE_PLEASE-->
-    {% else %}
-        {{ webpack.renderScripts|raw }}
-        {{ webpack.renderStyles|raw }}
-    {% endif %}
-{% endif %}
-
-{# Render the service provider array to javascript. (pyro.providers) #}
-<!-- PROVIDERS -->
-{{ webpack.providers | raw }}
 
 {# Render data for the Vue root component's data. (pyro.data) #}
 <!-- DATA -->
@@ -43,15 +18,18 @@
             var app = this.pyro.pyro__platform.Application.instance;
             var log = app.createLog('cp_scripts');
 
+            var bootstrapOptions = {
+                config   : pyro.config,
+                providers: pyro.providers,
+                data     : pyro.data
+            };
+
+            log('bootstrapOptions',bootstrapOptions)
             // boostrap: initializes the application, registers the service providers, etc
             // boot: boots the application, boots the service providers, etc
             // booted: start the application by mounting the root Vue component
             app
-                .bootstrap({
-                    config   : pyro.config,
-                    providers: pyro.providers,
-                    data     : pyro.data
-                })
+                .bootstrap(bootstrapOptions)
                 .then(function (app) {
                     return app.boot();
                 })

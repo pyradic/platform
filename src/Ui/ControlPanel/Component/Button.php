@@ -24,20 +24,4 @@ class Button extends \Anomaly\Streams\Platform\Ui\Button\Button implements Array
     {
         return $this->key;
     }
-
-    /** @var \Pyro\Platform\Ui\ControlPanel\Component\Section */
-    protected $parent;
-
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    public function setParent($parent)
-    {
-        $this->parent = $parent;
-        return $this;
-    }
-
-
 }

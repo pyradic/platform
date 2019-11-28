@@ -25,22 +25,6 @@ class Section extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Sectio
         return $this;
     }
 
-    /** @var \Pyro\Platform\Ui\ControlPanel\Component\NavigationLink */
-    protected $parent;
-
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    public function setParent($parent)
-    {
-        $this->parent = $parent;
-        return $this;
-    }
-
-
-
     protected $key;
 
     public function setKey($key)

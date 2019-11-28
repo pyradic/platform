@@ -34,7 +34,7 @@ const defaultConfig: Partial<IConfig> = {
     prefix: 'py',
     debug : false,
     csrf  : null,
-    delimiters: ['\{\{\{', '}}}'],
+    delimiters: ['\{\{', '}}']
 };
 
 export function loadConfigDefaults(): Config<IConfig> {
@@ -249,6 +249,7 @@ export class Application extends Container {
         this.started = true;
         this.hooks.start.call(Vue);
         this.root  = new (this.Root.extend({
+            delimiters: this.config.delimiters
             // template: '<div id="app"><slot></slot></div>',
             // render(h,ctx){     return h(this.$slots.default, this.$slots.default)
             // data() {return self.data.raw()            }
