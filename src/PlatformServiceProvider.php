@@ -11,6 +11,7 @@ use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\Ui\Form\Event\FormWasBuilt;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewIncludes;
+use Anomaly\Streams\Platform\View\ViewOverrides;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
@@ -78,11 +79,12 @@ class PlatformServiceProvider extends ServiceProvider
         \Laravel\Dusk\DuskServiceProvider::class,
     ];
 
-    public function boot(Asset $assets, ViewIncludes $includes, Translator $translator)
+    public function boot(ViewOverrides $overrides)
     {
         $this->bootConfig();
         $this->bootConsole();
         $this->dispatchNow(new AddPlatformAssetNamespaces());
+//        $overrides->put('pyrocms.theme.accelerant::partials/metadata', 'platform::metadata');
 
     }
 
@@ -106,7 +108,7 @@ class PlatformServiceProvider extends ServiceProvider
     protected function mergeConfig()
     {
         ///pyro.platform.
-        $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.cp_scripts.php', 'platform.cp_scripts');
+        $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.frontend.php', 'platform.frontend');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.diagnose.php', 'platform.diagnose');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.permission_sets.php', 'platform.permission_sets');
     }
@@ -114,7 +116,7 @@ class PlatformServiceProvider extends ServiceProvider
     protected function bootConfig()
     {
         $this->publishes([
-            dirname(__DIR__) . '/resources/config/platform.cp_scripts.php'      => config_path('platform.cp_scripts.php'),
+            dirname(__DIR__) . '/resources/config/platform.frontend.php'      => config_path('platform.frontend.php'),
             dirname(__DIR__) . '/resources/config/platform.diagnose.php'        => config_path('platform.diagnose.php'),
             dirname(__DIR__) . '/resources/config/platform.permission_sets.php' => config_path('platform.permission_sets.php'),
         ], [ 'config' ]);
@@ -247,10 +249,10 @@ class PlatformServiceProvider extends ServiceProvider
             /*
              * Add cp_scripts
              */
-            $includes = $app[ ViewIncludes::class ];
-            if ($app[ 'config' ][ 'platform.cp_scripts.enabled' ]) {
-                $includes->include('cp_scripts', 'platform::cp_scripts');
-            }
+//            $includes = $app[ ViewIncludes::class ];
+//            if ($app[ 'config' ][ 'platform.cp_scripts.enabled' ]) {
+//                $includes->include('cp_scripts', 'platform::cp_scripts');
+//            }
         });
 
         /*

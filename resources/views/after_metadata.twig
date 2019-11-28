@@ -1,0 +1,10 @@
+{{ asset_script("vue.js") }}
+
+
+<script>
+    // The event handlers are lost because Vue replaces the elements that they're bound to.
+    // You can use $.holdReady to delay the $(document).ready until the component is mounted.
+    $.holdReady(true);
+    // this will be hold until the Application is started and Vue has mounted
+    // @see boot_platform_frontend.twig
+</script>

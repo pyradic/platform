@@ -67,7 +67,7 @@ class Platform implements ArrayAccess
 
     public function shouldPreventBootstrap()
     {
-        return $this->preventBootstrap || config('platform.cp_scripts.bootstrap') === false;
+        return $this->preventBootstrap || config('platform.frontend.bootstrap') === false;
     }
 
     public function shouldntPreventBootstrap()
