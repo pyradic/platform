@@ -9,8 +9,7 @@ use Laradic\Support\Traits\ArrayAccessibleProperties;
 class NavigationLink extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\NavigationLink implements Arrayable, ArrayAccess
 {
 
-    use ArrayableComponent;
-    use ArrayAccessibleProperties;
+    use ComponentTrait;
 
     protected $children = [];
 

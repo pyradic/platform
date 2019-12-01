@@ -2,6 +2,7 @@
 
 namespace Pyro\Platform\Addon\Theme\Command;
 
+use Anomaly\Streams\Platform\Addon\Addon;
 use Anomaly\Streams\Platform\Addon\AddonProvider;
 use Anomaly\Streams\Platform\Addon\Theme\ThemeCollection;
 use Anomaly\Streams\Platform\Application\Application;
@@ -12,6 +13,8 @@ use Anomaly\Streams\Platform\View\ViewTemplate;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
+use Laradic\Support\FS;
+use Symfony\Component\Finder\SplFileInfo;
 
 class LoadParentTheme
 {
@@ -71,6 +74,14 @@ class LoadParentTheme
         if ($theme = $this->themes->current()) {
             if ($theme instanceof \Pyro\Platform\Addon\Theme\Theme && $theme->hasParent()) {
                 $parent      = $this->themes->get($theme->getParent());
+
+//                $themeFiles = $this->getViewFiles($theme);
+//                $parentFiles = $this->getViewFiles($parent);
+//
+//                $overrides = $themeFiles->filter(function(SplFileInfo $file, $path) use ($parentFiles){
+//                    return $parentFiles->has($path);
+//                });
+
                 $parentHints = [
                     $parent->getPath('resources/views'),
                     $this->application->getResourcesPath(
@@ -88,4 +99,18 @@ class LoadParentTheme
         }
     }
 
+    /**
+     * @param \Anomaly\Streams\Platform\Addon\Addon $addon
+     * @param string                                $path
+     *
+     * @return \Illuminate\Support\Collection|\Symfony\Component\Finder\SplFileInfo[]
+     */
+    protected function getViewFiles(Addon $addon, $path='resources/views')
+    {
+        $files=FS::allFiles($addon->getPath($path));
+        $files = collect($files)->mapWithKeys(function(SplFileInfo $file){
+            return [$file->getRelativePathname() => $file];
+        });
+        return $files;
+    }
 }

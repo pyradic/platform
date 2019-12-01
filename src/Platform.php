@@ -2,17 +2,21 @@
 
 namespace Pyro\Platform;
 
+use Anomaly\Streams\Platform\Asset\Asset;
 use ArrayAccess;
 use Collective\Html\HtmlBuilder;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Collection;
 use Laradic\Support\Dot;
+use Pyro\Platform\Event\PlatformWillRender;
+use Pyro\Webpack\Command\RenderJSON;
 use Pyro\Webpack\Webpack;
 
 class Platform implements ArrayAccess
 {
     /** @var \Pyro\Webpack\Webpack */
     protected $webpack;
+
     /** @var \Illuminate\Contracts\Foundation\Application */
     protected $app;
 
@@ -21,6 +25,12 @@ class Platform implements ArrayAccess
 
     /** @var \Laradic\Support\Dot */
     protected $config;
+
+    /** @var \Laradic\Support\Dot */
+    protected $global;
+
+    /** @var \Laradic\Support\Dot */
+    protected $root;
 
     /** @var bool */
     protected $preventBootstrap = false;
@@ -44,14 +54,11 @@ class Platform implements ArrayAccess
         $this->config = new PlatformConfig();
         $this->config->setDefaults($app);
 
-
         $this->entries = new Collection();
-        $this->data    = new Dot([
-        ]);
+        $this->data    = new Dot([]);
+        $this->global  = new Dot([]);
+        $this->root    = new Dot([]);
     }
-
-
-
 
     public function addWebpackEntry($name, $suffix = null)
     {
@@ -77,35 +84,51 @@ class Platform implements ArrayAccess
 
     public function render()
     {
-        return $this->renderConfig() . PHP_EOL . $this->renderData();
+        event(new PlatformWillRender($this));
+        $lines = [//formatter:off
+            '<!-- GLOBAL -->',$this->renderGlobal(),PHP_EOL,
+            '<!-- CONFIG -->',$this->renderConfig(),PHP_EOL,
+            '<!-- DATA -->',$this->renderData(),PHP_EOL
+        ];//formatter:on
+        return implode(PHP_EOL, $lines);
     }
 
-    public function renderData()
+    public function renderToFile($path, $key = null)
     {
-//        $json = $this->data->toJson();
-//        $json = str_replace("'", "\\'", $json);
-        $js   = "window['{$this->webpack->getNamespace()}'].data = window['{$this->webpack->getNamespace()}'].data || {};";// = JSON.parse('{$json}');";
-        foreach($this->data->keys() as $key){
-            $json = $this->data->toJson($key);
-            $json = str_replace("\\", "\\\\", $json);
-            $json = str_replace("'", "\\'", $json);
-            $js   .= "\nwindow['{$this->webpack->getNamespace()}'].data['{$key}'] = JSON.parse('{$json}');";
+        $data = Collection::make([
+            'global' => $this->global,
+            'root'   => $this->root,
+            'data'   => $this->data,
+            'config' => $this->config,
+        ]);
+        if($key){
+            $data = $data->get($key);
         }
-        return "<script> {$js} </script>";
+        $json = $data->toJson();
+        $path = path_is_relative($path) ? base_path($path) : $path;
+        file_put_contents($path, $json);
+        return $path;
     }
 
-    public function renderConfig()
+    protected function renderGlobal()
     {
-        $json = $this->config->toJson();
-        $json = str_replace("'", "\\'", $json);
-        $js   = "window['{$this->webpack->getNamespace()}'].config = JSON.parse('{$json}');";
-        return "<script> {$js} </script>";
+        return dispatch_now(RenderJSON::global($this->global)->assignByKey());
     }
 
+    protected function renderRoot()
+    {
+        return dispatch_now(RenderJSON::namespace($this->root)->assignByKey());
+    }
 
+    protected function renderData()
+    {
+        return dispatch_now(RenderJSON::namespace($this->data, 'data')->assignByKey());
+    }
 
-
-
+    protected function renderConfig()
+    {
+        return dispatch_now(RenderJSON::namespace($this->config, 'config'));
+    }
 
     public function set($key, $value = null)
     {
@@ -135,6 +158,14 @@ class Platform implements ArrayAccess
         return $this;
     }
 
+    public function getAjaxData()
+    {
+        $assets  = resolve(Asset::class);
+        $scripts = $assets->getInCollection('scripts.js')->values()->sortBy('index');
+        $styles  = $assets->getInCollection('styles.css')->values()->sortBy('index');
+        return [ 'assets' => compact('scripts', 'styles') ];
+    }
+
     public function getData()
     {
         return $this->data;
@@ -146,6 +177,16 @@ class Platform implements ArrayAccess
         return $this;
     }
 
+    public function global()
+    {
+        return $this->global;
+    }
+
+    public function root()
+    {
+        return $this->root;
+    }
+
     public function config()
     {
         return $this->config;
@@ -153,6 +194,9 @@ class Platform implements ArrayAccess
 
     public function setConfig($config)
     {
+        if ( ! $config instanceof PlatformConfig) {
+            $config = new PlatformConfig(Collection::wrap($config)->toArray());
+        }
         $this->config = $config;
         return $this;
     }

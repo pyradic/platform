@@ -13,16 +13,21 @@ import { PlatformStyleVariables } from '@/styling/export';
 import { Store } from 'vuex';
 import { IState } from '@/store';
 import { toJS } from '@u/toJS';
+import { PlatformData } from '@/interfaces/platform.data.generated';
+import { Platform } from '@/interfaces/platform.data';
 
 const log = require('debug')('classes:Application');
 
 export interface Styling extends PlatformStyleVariables {}
 
+export interface ConfigData extends PlatformData {
+    [k:string]:any
+}
 export interface Application {
     storage: Storage
     agent: IAgent
     http: AxiosStatic
-    data: Config<Record<string, any>> & Record<string, any>
+    data: Config<Platform.Data> & Platform.Data
     cookies: Cookies
     events: Dispatcher
     styling: Config<Styling> & Styling

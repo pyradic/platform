@@ -127,9 +127,15 @@ class BuildControlPanelStructure
                 $section->put('url',
                     $section->get('url',$section->dataGet('attributes.href', ''))
                 );
-                $section[ 'children' ] = $section[ 'children' ]->map->toArray()->map('collect');
+                $section[ 'children' ] = $section[ 'children' ]->map->toArray()->map('collect')->map(function(Collection $button){
+                    $button['title'] = $button['text'];
+                    $button->put('url',
+                        $button->get('url',$button->dataGet('attributes.href', ''))
+                    );
+                    return $button;
+                })->values();
                 return $section;
-            });
+            })->values();
             return $link;
         });
         // same for section
@@ -147,8 +153,6 @@ class BuildControlPanelStructure
                 function ($item) {
                     $item[ 'link' ]     = NavigationLink::class;
                     $item[ 'children' ] = collect();
-//                    $item[ 'title' ]      = trans($item[ 'title' ]);
-//                    $item[ 'breadcrumb' ] = trans($item[ 'breadcrumb' ]);
                     return $item;
                 },
                 $builder->getNavigation())
@@ -188,15 +192,10 @@ class BuildControlPanelStructure
                             $item[ 'sections' ][ $k ][ 'section' ] = Section::class;
                         }
                     }
-//                    $item[ 'title' ]      = trans($item[ 'title' ]);
-//                    $item[ 'breadcrumb' ] = trans($item[ 'breadcrumb' ]);
                     return [ $itemKey => $item ];
                 })->toArray());
 
             dispatch_now(new BuildSections($builder));
-//            if ($navigation === $active) {
-//                dispatch_now(new SetActiveSection($builder));
-//            }
             $sections = $builder->getControlPanel()->getSections();
             $sections->each(function (Section $section) use ($navigation) {
                 $section->setKey($navigation->getKey() . '::' . $section->getSlug());
@@ -206,31 +205,24 @@ class BuildControlPanelStructure
             $navigation->setActive(false);
             $module->setActive(false);
         }
-//        if($active) {
-//            $active->setActive(true);
-//        }
     }
 
     protected function buildButtons(ControlPanelBuilder $builder, ModuleCollection $modules)
     {
         /** @var Module $module */
         /** @var Section $section */
-//        $active = $builder->getControlPanel()->getSections()->active();
         foreach ($builder->getControlPanel()->getSections() as $section) {
             $section->setActive(true);
             $builder->getControlPanel()->setButtons(new ButtonCollection());
             with(new ButtonHandler($modules, resolve(Resolver::class)))->handle($builder);
-            $builder->setButtons($section->getButtons());
             $builder->setButtons(collect($builder->getButtons())->mapWithKeys(
                 function ($item, $itemKey = null) use ($section) {
                     if (is_string($item)) {
                         $itemKey = $item;
                         $item    = [];
                     }
-                    $item[ 'button' ] = Button::class;
                     $item[ 'key' ]    = $section->getKey() . '.' . (isset($item[ 'slug' ]) ? $item[ 'slug' ] : $itemKey);
-//                    $item[ 'title' ]      = trans($item[ 'title' ]);
-//                    $item[ 'breadcrumb' ] = trans($item[ 'breadcrumb' ]);
+                    $item['enabled'] =true;
                     return [ $itemKey => $item ];
                 })->toArray());
             dispatch_now(new BuildButtons($builder));
@@ -238,9 +230,6 @@ class BuildControlPanelStructure
             $section->setChildren($buttons);
             $section->setActive(false);
         }
-//        if ($active) {
-//            $active->setActive(true);
-//        }
     }
 }
 

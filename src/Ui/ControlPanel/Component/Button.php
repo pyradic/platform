@@ -9,8 +9,7 @@ use Laradic\Support\Traits\ArrayAccessibleProperties;
 class Button extends \Anomaly\Streams\Platform\Ui\Button\Button implements Arrayable, ArrayAccess
 {
 
-    use ArrayableComponent;
-    use ArrayAccessibleProperties;
+    use ComponentTrait;
 
     protected $key;
 
@@ -23,5 +22,25 @@ class Button extends \Anomaly\Streams\Platform\Ui\Button\Button implements Array
     public function getKey()
     {
         return $this->key;
+    }
+
+    /**
+     * Get the title.
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->getText();
+    }
+
+    /**
+     * Set the title.
+     *
+     * @param string $title
+     */
+    public function setTitle($title)
+    {
+        $this->setText($title);
     }
 }

@@ -2,13 +2,19 @@
 {# @var \Pyro\Platform\Platform platform #}
 
 
+{{ platform.render | raw }}
+
+{# Render global javascript variables. (pyro.data) #}
+<!-- GLOBAL -->
+{#{{ platform.renderGlobal | raw }}#}
+
 {# Render data for the Vue root component's data. (pyro.data) #}
 <!-- DATA -->
-{{ platform.renderData | raw }}
+{#{{ platform.renderData | raw }}#}
 
 {# Render config for the application. (pyro.config) #}
 <!-- CONFIG -->
-{{ platform.renderConfig | raw }}
+{#{{ platform.renderConfig | raw }}#}
 
 
 

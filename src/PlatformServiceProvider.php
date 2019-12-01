@@ -4,12 +4,14 @@
 
 namespace Pyro\Platform;
 
+use Anomaly\Streams\Platform\Addon\Theme\Command\LoadCurrentTheme;
 use Anomaly\Streams\Platform\Asset\Asset;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\Ui\Form\Event\FormWasBuilt;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
+use Anomaly\Streams\Platform\View\Twig\Loader;
 use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\Streams\Platform\View\ViewOverrides;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
@@ -18,6 +20,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Jackiedo\DotenvEditor\DotenvEditor;
 use Laradic\Support\MultiBench;
@@ -29,9 +32,10 @@ use Pyro\Platform\Console\EnvSet;
 use Pyro\Platform\Console\PermissionsCommand;
 use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
+use Pyro\Platform\Event\PlatformWillRender;
 use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
 use Pyro\Platform\Listener\AddControlPanelStructure;
-use Pyro\Platform\Listener\AddUserToJavascript;
+use Pyro\Platform\Listener\AddJavascriptData;
 use Pyro\Platform\Listener\OverrideAddons;
 use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
@@ -46,7 +50,6 @@ class PlatformServiceProvider extends ServiceProvider
 
     protected $listen = [
         TemplateDataIsLoading::class => [
-            AddUserToJavascript::class,
             SharePlatform::class,
             AddControlPanelStructure::class,
         ],
@@ -57,7 +60,9 @@ class PlatformServiceProvider extends ServiceProvider
         GatherParserData::class      => [
             SetParserStub::class,
         ],
-
+        PlatformWillRender::class => [
+            AddJavascriptData::class,
+        ],
         FormWasBuilt ::class => [
             SetSafeDelimiters::class
 //            AddControlPanelStructure::class
@@ -79,13 +84,14 @@ class PlatformServiceProvider extends ServiceProvider
         \Laravel\Dusk\DuskServiceProvider::class,
     ];
 
-    public function boot(ViewOverrides $overrides)
+    public function boot(ViewOverrides $overrides, Request $request)
     {
         $this->bootConfig();
         $this->bootConsole();
         $this->dispatchNow(new AddPlatformAssetNamespaces());
-//        $overrides->put('pyrocms.theme.accelerant::partials/metadata', 'platform::metadata');
-
+//        $overrides->put('pyro.theme.admin::partials/assets', 'platform::assets');
+//        $overrides->put('pyrocms.theme.accelerant::partials/assets', 'platform::assets');
+        $overrides->put('theme::partials/assets', 'platform::assets');
     }
 
     public function register()
@@ -96,6 +102,9 @@ class PlatformServiceProvider extends ServiceProvider
         if ($this->app->environment('local')) {
             $this->registerProviders($this->devProviders);
         }
+        Request::macro('isAdmin', function(){
+            return $this->segment(1) === 'admin';
+        });
         $this->registerPlatform();
         $this->registerAsset();
         $this->registerHttp();
@@ -103,6 +112,8 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerUi();
         $this->registerUser();
         $this->registerView();
+
+        $this->app->make(Kernel::class)->pushMiddleware(Http\Middleware\RenderPlatformDataToFile::class);
     }
 
     protected function mergeConfig()
@@ -245,6 +256,21 @@ class PlatformServiceProvider extends ServiceProvider
 
     protected function registerView()
     {
+
+        $this->app->bind(
+            'twig.loader.viewfinder',
+            function ($app) {
+                return $app->make(
+                    View\Loader::class,
+                    [
+                        'files'     => $app['files'],
+                        'finder'    => $app['view']->getFinder(),
+                        'extension' => $app['twig.extension'],
+                    ]
+                );
+            }
+        );
+
         $this->app->booting(function (Application $app) {
             /*
              * Add cp_scripts

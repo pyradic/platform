@@ -2,7 +2,6 @@
 
 namespace Pyro\Platform\Asset;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class Asset extends \Anomaly\Streams\Platform\Asset\Asset
@@ -16,10 +15,69 @@ class Asset extends \Anomaly\Streams\Platform\Asset\Asset
         return $path;
     }
 
+    /** @return \Illuminate\Support\Collection */
+    public function getInCollection($collection)
+    {
+
+        $paths = collect($this->getPaths()->getPaths());
+        $index = 0;
+        return $this->getCollections()->collect($collection)->mapWithKeys(function ($filters, $filePath) use ($paths, &$index) {
+            $asset                = [];
+            $asset[ 'namespace' ] = $paths->flip()->first(function ($namespace, $path) use ($filePath) {
+                return Str::startsWith($filePath, $path);
+            });
+            $asset[ 'index' ]     = $index++;
+            $asset[ 'dir' ]       = $paths->get($asset[ 'namespace' ]);
+            $asset[ 'file' ]      = $filePath;
+            $asset[ 'relative' ]  = Str::removeLeft($filePath, $asset[ 'dir' ] . '/');
+            $asset[ 'key' ]       = $asset[ 'namespace' ] . '::' . $asset[ 'relative' ];
+            $asset[ 'path' ]      = $this->path($filePath, $filters);
+            $asset[ 'content' ]   = function () use ($filePath) {
+                return $this->content($filePath);
+            };
+            return [ $filePath => $asset ];
+        })->keyBy('key');
+    }
+
     public function has($collection)
     {
         return array_key_exists($collection, $this->collections);
     }
+
+    public function get($collection)
+    {
+        if ($this->has($collection)) {
+            return $this->collections[ $collection ];
+        }
+        return null;
+    }
+
+    public function getDirectory()
+    {
+        return $this->directory;
+    }
+
+    public function getCollections()
+    {
+        return collect($this->collections);
+    }
+
+    public function getPaths()
+    {
+        return $this->paths;
+    }
+
+    public function getParser()
+    {
+        return $this->parser;
+    }
+
+    public function getFilters()
+    {
+        return $this->filters;
+    }
+
+
 //
 //    public function add($collection, $file, array $filters = [], $internal = false)
 //    {

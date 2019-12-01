@@ -9,8 +9,7 @@ use Laradic\Support\Traits\ArrayAccessibleProperties;
 class Section extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\Section implements Arrayable, ArrayAccess
 {
 
-    use ArrayableComponent;
-    use ArrayAccessibleProperties;
+    use ComponentTrait;
 
     protected $children = [];
 

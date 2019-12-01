@@ -3,6 +3,7 @@
 use Anomaly\Streams\Platform\Support\Authorizer;
 use Anomaly\Streams\Platform\Ui\Button\ButtonFactory;
 use Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanelBuilder;
+use Pyro\Platform\Ui\ControlPanel\Component\Button;
 
 /**
  * Class ButtonBuilder
@@ -59,7 +60,7 @@ class ButtonBuilder
             if (!$this->authorizer->authorize(array_get($button, 'permission'))) {
                 continue;
             }
-
+            $button['button'] =Button::class;
 
             if (($button = $this->factory->make($button)) && $button->isEnabled()) {
                 $controlPanel->addButton($button);

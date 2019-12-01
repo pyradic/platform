@@ -25,7 +25,8 @@ export * from './decorators';
 export * from './utils/registerComponents'
 export * from './utils/observable'
 export * from './utils/colors'
-export * from './streams'
+export * from './utils/eventEmitter'
+export * from './interfaces/streams'
 
 
 export { merge, Plugin, toJS };
@@ -54,6 +55,36 @@ export class Component extends Vue {
     // $events: Dispatcher
     __log: LogConfig
     __setupLog: (setup: LogConfig) => void
+    b():string
+    b(element:string):string
+    b(modifiers:object):string
+    b(element:string,modifiers:object):string
+    b(element:string|false,mixin:string):string
+    b(...args):any {return ''}
+}
+import 'vue-tsx-support/enable-check'
+import * as tsx from 'vue-tsx-support'
+
+export class TsxComponent<P={}> extends tsx.Component<P> {
+
+    $py: Application
+
+    $http: AxiosStatic
+
+    getFirstMatchingParent: <T extends Vue>(isMatch: (component: T) => boolean, shouldCancel?: (component: T) => boolean) => T | null
+
+    getAllMatchingParents: <T extends Vue>(cb: (component: T) => boolean, shouldCancel?: (component: T, matches: T[]) => boolean) => T[]
+
+    $log: (...params: any[]) => this
+    // $events: Dispatcher
+    __log: LogConfig
+    __setupLog: (setup: LogConfig) => void
+    b():string
+    b(element:string):string
+    b(modifiers:object):string
+    b(element:string,modifiers:object):string
+    b(element:string|false,mixin:string):string
+    b(...args):any {return ''}
 }
 
 export async function getTreeNode() {

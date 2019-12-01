@@ -72,10 +72,10 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
             list($parent, $namespace, $view) = explode('::',$name);
             return $this->findInPaths($view, $this->pathOverrides[$namespace][0]);
         }
-        if (Str::startsWith($name, 'theme::')) {
-            $theme = resolve(ThemeCollection::class)->current();
-            $name  = Str::replaceFirst('theme::', $theme->getNamespace() . '::', $name);
-        }
+//        if (Str::startsWith($name, 'theme::')) {
+//            $theme = resolve(ThemeCollection::class)->current();
+//            $name  = Str::replaceFirst('theme::', $theme->getNamespace() . '::', $name);
+//        }
         return parent::find($name);
     }
 
