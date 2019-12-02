@@ -10,6 +10,3 @@ export * from './registerComponents'
 export * from './mergeChildPrototypes'
 export * from './toJS'
 export * from './kindOf'
-import * as TreeNode from './tree-node'
-
-export {TreeNode}

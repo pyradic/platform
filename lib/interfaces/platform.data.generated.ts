@@ -1,24 +1,23 @@
 export interface PlatformData {
     cp:          Cp;
+    menus:       Menus;
     module:      Module;
     breadcrumbs: Breadcrumbs;
     user:        User;
-    menus:       Menus;
 }
 
 export interface Breadcrumbs {
     Menus: string;
-    Links: string;
 }
 
 export interface Cp {
     structure:  Structure;
     navigation: Navigation;
-    section:    Section;
+    section:    null;
 }
 
 export interface Navigation {
-    children:   NavigationChildren;
+    children:   NavigationChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -37,13 +36,7 @@ export interface NewDocumentClass {
     href: string;
 }
 
-export interface NavigationChildren {
-    menus:  TartuGecko;
-    links:  Section;
-    fields: PurpleFields;
-}
-
-export interface PurpleFields {
+export interface NavigationChild {
     children:    PurpleChild[];
     key:         string;
     slug:        string;
@@ -53,14 +46,14 @@ export interface PurpleFields {
     class:       null;
     active:      boolean;
     matcher:     null;
-    permalink:   null;
+    permalink:   null | string;
     description: null;
     highlighted: boolean;
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     PurpleButtons;
-    attributes:  NewDocumentClass;
+    buttons:     string[] | PurpleButtons;
+    attributes:  AddFieldClass;
     permission:  string;
     breadcrumb:  null;
     hidden:      boolean;
@@ -68,14 +61,10 @@ export interface PurpleFields {
     url:         string;
 }
 
-export interface PurpleButtons {
-    add_field: AddFieldClass;
-}
-
 export interface AddFieldClass {
+    href:           string;
     "data-toggle"?: DataToggle;
     "data-target"?: DataTarget;
-    href:           string;
 }
 
 export enum DataTarget {
@@ -86,8 +75,13 @@ export enum DataToggle {
     Modal = "modal",
 }
 
+export interface PurpleButtons {
+    add_field: AddFieldClass;
+}
+
 export interface PurpleChild {
     key:        string;
+    title:      string;
     dropdown:   any[];
     dropup:     boolean;
     position:   Position;
@@ -96,22 +90,14 @@ export interface PurpleChild {
     disabled:   boolean;
     enabled:    boolean;
     entry:      null;
-    icon:       ChildIcon | null;
+    icon:       null | string;
     class:      null;
     size:       Size;
     permission: string;
-    type:       Type;
+    type:       ManageType;
     text:       string;
     url:        null;
     tag:        Tag;
-    title:      string;
-}
-
-export enum ChildIcon {
-    FaFaPlus = "fa fa-plus",
-    FaFaTable = "fa fa-table",
-    Upload = "upload",
-    Wrench = "wrench",
 }
 
 export enum Position {
@@ -126,7 +112,7 @@ export enum Tag {
     A = "a",
 }
 
-export enum Type {
+export enum ManageType {
     Default = "default",
     Info = "info",
     Success = "success",
@@ -136,8 +122,42 @@ export enum Context {
     Danger = "danger",
 }
 
-export interface Section {
-    children:    any[];
+export interface Structure {
+    "anomaly.module.dashboard":     AnomalyModuleDashboard;
+    "anomaly.module.blocks":        AnomalyModuleBlocks;
+    "crvs.module.clients":          CrvsModuleClients;
+    "anomaly.module.comments":      AnomalyModuleComments;
+    "crvs.module.departments":      CrvsModuleDepartments;
+    "anomaly.module.documentation": AnomalyModuleDocumentation;
+    "crvs.module.faq":              CrvsModuleFAQ;
+    "anomaly.module.files":         AnomalyModuleFiles;
+    "pyro.module.menus":            Navigation;
+    "pyro.module.news":             AnomalyModuleComments;
+    "anomaly.module.pages":         AnomalyModulePages;
+    "anomaly.module.posts":         AnomalyModulePosts;
+    "anomaly.module.settings":      AnomalyModuleComments;
+    "anomaly.module.system":        AnomalyModuleSystem;
+    "anomaly.module.users":         AnomalyModuleUsers;
+}
+
+export interface AnomalyModuleBlocks {
+    children:   AnomalyModuleBlocksChild[];
+    key:        string;
+    slug:       string;
+    icon:       string;
+    title:      string;
+    class:      null;
+    active:     boolean;
+    favorite:   boolean;
+    attributes: NewDocumentClass;
+    permission: null;
+    breadcrumb: string;
+    href:       string;
+    url:        string;
+}
+
+export interface AnomalyModuleBlocksChild {
+    children:    PurpleChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -146,13 +166,13 @@ export interface Section {
     class:       null;
     active:      boolean;
     matcher:     null;
-    permalink:   string;
+    permalink:   null | string;
     description: null;
     highlighted: boolean;
     context:     Context;
-    parent:      null;
+    parent:      null | string;
     subSection:  boolean;
-    buttons:     any[];
+    buttons:     string[] | FluffyButtons;
     attributes:  AddFieldClass;
     permission:  string;
     breadcrumb:  null;
@@ -161,7 +181,29 @@ export interface Section {
     url:         string;
 }
 
-export interface TartuGecko {
+export interface FluffyButtons {
+    add_block?:     AddFieldClass;
+    new_field?:     AddFieldClass;
+    assign_fields?: AddFieldClass;
+}
+
+export interface AnomalyModuleComments {
+    children:   AnomalyModuleCommentsChild[];
+    key:        string;
+    slug:       string;
+    icon:       string;
+    title:      string;
+    class:      null;
+    active:     boolean;
+    favorite:   boolean;
+    attributes: NewDocumentClass;
+    permission: null;
+    breadcrumb: string;
+    href:       string;
+    url:        string;
+}
+
+export interface AnomalyModuleCommentsChild {
     children:    FluffyChild[];
     key:         string;
     slug:        string;
@@ -172,7 +214,7 @@ export interface TartuGecko {
     active:      boolean;
     matcher:     null;
     permalink:   null;
-    description: null | string;
+    description: null;
     highlighted: boolean;
     context:     Context;
     parent:      null;
@@ -188,6 +230,7 @@ export interface TartuGecko {
 
 export interface FluffyChild {
     key:        string;
+    title:      string;
     dropdown:   any[];
     dropup:     boolean;
     position:   Position;
@@ -196,169 +239,18 @@ export interface FluffyChild {
     disabled:   boolean;
     enabled:    boolean;
     entry:      null;
-    icon:       null | string;
+    icon:       null;
     class:      null;
     size:       Size;
     permission: string;
-    type:       Type;
+    type:       ManageType;
     text:       string;
     url:        null;
     tag:        Tag;
-    title:      string;
-}
-
-export interface Structure {
-    "anomaly.module.dashboard":     AnomalyModuleDashboard;
-    "anomaly.module.blocks":        AnomalyModuleBlocks;
-    "crvs.module.clients":          CrvsModuleClients;
-    "anomaly.module.comments":      AnomalyModuleComments;
-    "crvs.module.departments":      CrvsModuleDepartments;
-    "anomaly.module.documentation": AnomalyModuleDocumentation;
-    "crvs.module.faq":              CrvsModuleFAQ;
-    "anomaly.module.files":         AnomalyModuleFiles;
-    "pyro.module.menus":            Navigation;
-    "pyro.module.news":             PyroModuleNews;
-    "anomaly.module.pages":         AnomalyModulePages;
-    "anomaly.module.posts":         AnomalyModulePosts;
-    "anomaly.module.settings":      AnomalyModuleSettings;
-    "anomaly.module.system":        AnomalyModuleSystem;
-    "anomaly.module.users":         AnomalyModuleUsers;
-}
-
-export interface AnomalyModuleBlocks {
-    children:   AnomalyModuleBlocksChildren;
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: NewDocumentClass;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface AnomalyModuleBlocksChildren {
-    areas:       TartuGecko;
-    blocks:      Blocks;
-    types:       TartuGecko;
-    fields:      FluffyFields;
-    assignments: Assignments;
-}
-
-export interface Assignments {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      string;
-    subSection:  boolean;
-    buttons:     AssignmentsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface AssignmentsButtons {
-    assign_fields: AddFieldClass;
-}
-
-export interface Blocks {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   string;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     BlocksButtons;
-    attributes:  AddFieldClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface BlocksButtons {
-    add_block: AddFieldClass;
-}
-
-export interface FluffyFields {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     FluffyButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface FluffyButtons {
-    new_field: AddFieldClass;
-}
-
-export interface AnomalyModuleComments {
-    children:   AnomalyModuleCommentsChildren;
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: NewDocumentClass;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface AnomalyModuleCommentsChildren {
-    comments:    TartuGecko;
-    discussions: TartuGecko;
 }
 
 export interface AnomalyModuleDashboard {
-    children:   AnomalyModuleDashboardChildren;
+    children:   AnomalyModuleDashboardChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -373,12 +265,7 @@ export interface AnomalyModuleDashboard {
     url:        string;
 }
 
-export interface AnomalyModuleDashboardChildren {
-    dashboards: Dashboards;
-    widgets:    Widgets;
-}
-
-export interface Dashboards {
+export interface AnomalyModuleDashboardChild {
     children:    PurpleChild[];
     key:         string;
     slug:        string;
@@ -394,7 +281,7 @@ export interface Dashboards {
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     DashboardsButtons;
+    buttons:     TentacledButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
@@ -403,17 +290,23 @@ export interface Dashboards {
     url:         string;
 }
 
-export interface DashboardsButtons {
-    new_dashboard: NewDashboard;
-    manage:        Manage;
-    new_widget:    NewWidget;
+export interface TentacledButtons {
+    new_dashboard?: NewDashboard;
+    manage?:        Manage;
+    new_widget:     NewWidget;
 }
 
 export interface Manage {
-    type:       Type;
-    icon:       ChildIcon;
+    type:       ManageType;
+    icon:       Icon;
     enabled:    string;
     permission: string;
+}
+
+export enum Icon {
+    FaFaPlay = "fa fa-play",
+    Refresh = "refresh",
+    Wrench = "wrench",
 }
 
 export interface NewDashboard {
@@ -423,42 +316,13 @@ export interface NewDashboard {
 export interface NewWidget {
     "data-toggle": DataToggle;
     "data-target": DataTarget;
-    enabled:       string;
+    enabled?:      string;
     href:          string;
-    permission:    string;
-}
-
-export interface Widgets {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     WidgetsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface WidgetsButtons {
-    new_widget: AddFieldClass;
+    permission?:   string;
 }
 
 export interface AnomalyModuleDocumentation {
-    children:   AnomalyModuleDocumentationChildren;
+    children:   AnomalyModuleDocumentationChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -473,15 +337,7 @@ export interface AnomalyModuleDocumentation {
     url:        string;
 }
 
-export interface AnomalyModuleDocumentationChildren {
-    projects:             Projects;
-    categories:           TartuGecko;
-    fields:               FluffyFields;
-    project_assignments:  Assignments;
-    category_assignments: Assignments;
-}
-
-export interface Projects {
+export interface AnomalyModuleDocumentationChild {
     children:    PurpleChild[];
     key:         string;
     slug:        string;
@@ -495,9 +351,9 @@ export interface Projects {
     description: null;
     highlighted: boolean;
     context:     Context;
-    parent:      null;
+    parent:      null | string;
     subSection:  boolean;
-    buttons:     ProjectsButtons;
+    buttons:     string[] | StickyButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
@@ -506,12 +362,14 @@ export interface Projects {
     url:         string;
 }
 
-export interface ProjectsButtons {
-    new_project: AddFieldClass;
+export interface StickyButtons {
+    new_project?:   AddFieldClass;
+    new_field?:     AddFieldClass;
+    assign_fields?: AddFieldClass;
 }
 
 export interface AnomalyModuleFiles {
-    children:   AnomalyModuleFilesChildren;
+    children:   AnomalyModuleFilesChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -526,15 +384,7 @@ export interface AnomalyModuleFiles {
     url:        string;
 }
 
-export interface AnomalyModuleFilesChildren {
-    files:       Files;
-    folders:     TartuGecko;
-    disks:       Disks;
-    fields:      FluffyFields;
-    assignments: Assignments;
-}
-
-export interface Disks {
+export interface AnomalyModuleFilesChild {
     children:    PurpleChild[];
     key:         string;
     slug:        string;
@@ -548,9 +398,9 @@ export interface Disks {
     description: null;
     highlighted: boolean;
     context:     Context;
-    parent:      null;
+    parent:      null | string;
     subSection:  boolean;
-    buttons:     DisksButtons;
+    buttons:     string[] | IndigoButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
@@ -559,49 +409,23 @@ export interface Disks {
     url:         string;
 }
 
-export interface DisksButtons {
-    new_disk: AddFieldClass;
-}
-
-export interface Files {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     FilesButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface FilesButtons {
-    upload: Upload;
+export interface IndigoButtons {
+    upload?:        Upload;
+    new_disk?:      AddFieldClass;
+    new_field?:     AddFieldClass;
+    assign_fields?: AddFieldClass;
 }
 
 export interface Upload {
     "data-toggle": DataToggle;
-    icon:          ChildIcon;
+    icon:          string;
     "data-target": DataTarget;
-    type:          Type;
+    type:          ManageType;
     href:          string;
 }
 
 export interface AnomalyModulePages {
-    children:   AnomalyModulePagesChildren;
+    children:   AnomalyModulePagesChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -616,14 +440,7 @@ export interface AnomalyModulePages {
     url:        string;
 }
 
-export interface AnomalyModulePagesChildren {
-    pages:       Pages;
-    types:       TartuGecko;
-    fields:      FluffyFields;
-    assignments: Assignments;
-}
-
-export interface Pages {
+export interface AnomalyModulePagesChild {
     children:    PurpleChild[];
     key:         string;
     slug:        string;
@@ -637,9 +454,9 @@ export interface Pages {
     description: null;
     highlighted: boolean;
     context:     Context;
-    parent:      null;
+    parent:      null | string;
     subSection:  boolean;
-    buttons:     PagesButtons;
+    buttons:     string[] | IndecentButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
@@ -648,21 +465,23 @@ export interface Pages {
     url:         string;
 }
 
-export interface PagesButtons {
-    new_page:    AddFieldClass;
-    change_view: ChangeView;
+export interface IndecentButtons {
+    new_page?:      AddFieldClass;
+    change_view?:   ChangeView;
+    new_field?:     AddFieldClass;
+    assign_fields?: AddFieldClass;
 }
 
 export interface ChangeView {
-    type:    Type;
+    type:    ManageType;
     enabled: string;
-    icon:    ChildIcon;
+    icon:    string;
     href:    string;
     text:    string;
 }
 
 export interface AnomalyModulePosts {
-    children:   AnomalyModulePostsChildren;
+    children:   AnomalyModulePostsChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -677,15 +496,7 @@ export interface AnomalyModulePosts {
     url:        string;
 }
 
-export interface AnomalyModulePostsChildren {
-    posts:       Posts;
-    categories:  TartuGecko;
-    types:       TartuGecko;
-    fields:      FluffyFields;
-    assignments: Assignments;
-}
-
-export interface Posts {
+export interface AnomalyModulePostsChild {
     children:    PurpleChild[];
     key:         string;
     slug:        string;
@@ -699,9 +510,9 @@ export interface Posts {
     description: null;
     highlighted: boolean;
     context:     Context;
-    parent:      null;
+    parent:      null | string;
     subSection:  boolean;
-    buttons:     PostsButtons;
+    buttons:     string[] | HilariousButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
@@ -710,37 +521,14 @@ export interface Posts {
     url:         string;
 }
 
-export interface PostsButtons {
-    new_post: AddFieldClass;
-}
-
-export interface AnomalyModuleSettings {
-    children:   AnomalyModuleSettingsChildren;
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: NewDocumentClass;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface AnomalyModuleSettingsChildren {
-    system:      TartuGecko;
-    modules:     TartuGecko;
-    themes:      TartuGecko;
-    extensions:  TartuGecko;
-    field_types: TartuGecko;
-    plugins:     TartuGecko;
+export interface HilariousButtons {
+    new_post?:      AddFieldClass;
+    new_field?:     AddFieldClass;
+    assign_fields?: AddFieldClass;
 }
 
 export interface AnomalyModuleSystem {
-    children:   AnomalyModuleSystemChildren;
+    children:   AnomalyModuleSystemChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -755,24 +543,8 @@ export interface AnomalyModuleSystem {
     url:        string;
 }
 
-export interface AnomalyModuleSystemChildren {
-    requests:      Requests;
-    commands:      Commands;
-    schedule:      Schedule;
-    jobs:          Jobs;
-    exceptions:    Exceptions;
-    logs:          Logs;
-    dumps:         Dumps;
-    queries:       Queries;
-    models:        Models;
-    events:        Events;
-    mail:          Mail;
-    notifications: Notifications;
-    cache:         Cache;
-}
-
-export interface Cache {
-    children:    CacheChild[];
+export interface AnomalyModuleSystemChild {
+    children:    TentacledChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -787,7 +559,7 @@ export interface Cache {
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     CacheButtons;
+    buttons:     AmbitiousButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
@@ -796,58 +568,75 @@ export interface Cache {
     url:         string;
 }
 
-export interface CacheButtons {
+export interface AmbitiousButtons {
     refresh: Refresh;
     toggle:  Toggle;
-    actions: PurpleActions;
+    actions: Actions;
 }
 
-export interface PurpleActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
+export interface Actions {
+    text:     Text;
+    icon:     Icon;
+    type:     ActionsType;
     href:     boolean;
-    dropdown: PurpleDropdown;
+    dropdown: ActionsDropdown;
 }
 
-export interface PurpleDropdown {
-    "Clear All Logs":   string;
-    "Clear Cache Logs": string;
-    "Flush Cache":      string;
+export interface ActionsDropdown {
+    "Clear All Logs":            ClearAllLogs;
+    "Clear Requests Logs"?:      string;
+    "Clear Commands Logs"?:      string;
+    "Clear Schedule Logs"?:      string;
+    "Clear Jobs Logs"?:          string;
+    "Clear Exceptions Logs"?:    string;
+    "Clear Logs Logs"?:          string;
+    "Clear Dumps Logs"?:         string;
+    "Clear Queries Logs"?:       string;
+    "Clear Models Logs"?:        string;
+    "Clear Events Logs"?:        string;
+    "Clear Mail Logs"?:          string;
+    "Clear Notifications Logs"?: string;
+    "Clear Cache Logs"?:         string;
+    "Flush Cache"?:              string;
+}
+
+export enum ClearAllLogs {
+    AdminSystemTelescopeClear = "admin/system/telescope/clear",
+}
+
+export enum Text {
+    Enable = "Enable",
+    Refresh = "Refresh",
+    Tools = "Tools",
+}
+
+export enum ActionsType {
+    Info = "info",
+    Success = "success",
+    Warning = "warning",
 }
 
 export interface Refresh {
-    type:     Type;
-    icon:     RefreshIcon;
+    type:     ManageType;
+    icon:     Icon;
     href:     HrefEnum;
     disabled: boolean;
 }
 
 export enum HrefEnum {
-    AdminMenusLinksAdminHeaderCreateCpActionLinkType = "admin/menus/links/admin_header/create/cp_action_link_type",
-}
-
-export enum RefreshIcon {
-    Refresh = "refresh",
+    AdminMenus = "admin/menus",
 }
 
 export interface Toggle {
-    type: Type;
-    icon: ToggleIcon;
+    type: ManageType;
+    icon: Icon;
     text: Text;
 }
 
-export enum ToggleIcon {
-    FaFaPlay = "fa fa-play",
-}
-
-export enum Text {
-    Enable = "Enable",
-}
-
-export interface CacheChild {
+export interface TentacledChild {
     key:        string;
-    dropdown:   any[] | FluffyDropdown;
+    title:      Text;
+    dropdown:   any[] | { [key: string]: DropdownValue };
     dropup:     boolean;
     position:   Position;
     parent:     null;
@@ -855,874 +644,27 @@ export interface CacheChild {
     disabled:   boolean;
     enabled:    boolean;
     entry:      null;
-    icon:       string;
+    icon:       Icon;
     class:      null;
     size:       Size;
     permission: string;
-    type:       string;
-    text:       string;
+    type:       ActionsType;
+    text:       Text;
     url:        null;
     tag:        Tag;
-    title:      string;
 }
 
 export interface PurpleAttributes {
     href: boolean | string;
 }
 
-export interface FluffyDropdown {
-    "Clear All Logs":   ClearAllLogs;
-    "Clear Cache Logs": ClearAllLogs;
-    "Flush Cache":      ClearAllLogs;
-}
-
-export interface ClearAllLogs {
+export interface DropdownValue {
     text:       string;
     attributes: NewDocumentClass;
-}
-
-export interface Commands {
-    children:    CommandsChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     CommandsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface CommandsButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: FluffyActions;
-}
-
-export interface FluffyActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: TentacledDropdown;
-}
-
-export interface TentacledDropdown {
-    "Clear All Logs":      string;
-    "Clear Commands Logs": string;
-}
-
-export interface CommandsChild {
-    key:        string;
-    dropdown:   any[] | StickyDropdown;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface StickyDropdown {
-    "Clear All Logs":      ClearAllLogs;
-    "Clear Commands Logs": ClearAllLogs;
-}
-
-export interface Dumps {
-    children:    DumpsChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     DumpsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface DumpsButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: TentacledActions;
-}
-
-export interface TentacledActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: IndigoDropdown;
-}
-
-export interface IndigoDropdown {
-    "Clear All Logs":   string;
-    "Clear Dumps Logs": string;
-}
-
-export interface DumpsChild {
-    key:        string;
-    dropdown:   any[] | IndecentDropdown;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface IndecentDropdown {
-    "Clear All Logs":   ClearAllLogs;
-    "Clear Dumps Logs": ClearAllLogs;
-}
-
-export interface Events {
-    children:    EventsChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     EventsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface EventsButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: StickyActions;
-}
-
-export interface StickyActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: HilariousDropdown;
-}
-
-export interface HilariousDropdown {
-    "Clear All Logs":    string;
-    "Clear Events Logs": string;
-}
-
-export interface EventsChild {
-    key:        string;
-    dropdown:   any[] | AmbitiousDropdown;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface AmbitiousDropdown {
-    "Clear All Logs":    ClearAllLogs;
-    "Clear Events Logs": ClearAllLogs;
-}
-
-export interface Exceptions {
-    children:    ExceptionsChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     ExceptionsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface ExceptionsButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: IndigoActions;
-}
-
-export interface IndigoActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: CunningDropdown;
-}
-
-export interface CunningDropdown {
-    "Clear All Logs":        string;
-    "Clear Exceptions Logs": string;
-}
-
-export interface ExceptionsChild {
-    key:        string;
-    dropdown:   any[] | MagentaDropdown;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface MagentaDropdown {
-    "Clear All Logs":        ClearAllLogs;
-    "Clear Exceptions Logs": ClearAllLogs;
-}
-
-export interface Jobs {
-    children:    JobsChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     JobsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface JobsButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: IndecentActions;
-}
-
-export interface IndecentActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: FriskyDropdown;
-}
-
-export interface FriskyDropdown {
-    "Clear All Logs":  string;
-    "Clear Jobs Logs": string;
-}
-
-export interface JobsChild {
-    key:        string;
-    dropdown:   any[] | MischievousDropdown;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface MischievousDropdown {
-    "Clear All Logs":  ClearAllLogs;
-    "Clear Jobs Logs": ClearAllLogs;
-}
-
-export interface Logs {
-    children:    LogsChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     LogsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface LogsButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: HilariousActions;
-}
-
-export interface HilariousActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: BraggadociousDropdown;
-}
-
-export interface BraggadociousDropdown {
-    "Clear All Logs":  string;
-    "Clear Logs Logs": string;
-}
-
-export interface LogsChild {
-    key:        string;
-    dropdown:   any[] | Dropdown1;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface Dropdown1 {
-    "Clear All Logs":  ClearAllLogs;
-    "Clear Logs Logs": ClearAllLogs;
-}
-
-export interface Mail {
-    children:    MailChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     MailButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface MailButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: AmbitiousActions;
-}
-
-export interface AmbitiousActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: Dropdown2;
-}
-
-export interface Dropdown2 {
-    "Clear All Logs":  string;
-    "Clear Mail Logs": string;
-}
-
-export interface MailChild {
-    key:        string;
-    dropdown:   any[] | Dropdown3;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface Dropdown3 {
-    "Clear All Logs":  ClearAllLogs;
-    "Clear Mail Logs": ClearAllLogs;
-}
-
-export interface Models {
-    children:    ModelsChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     ModelsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface ModelsButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: CunningActions;
-}
-
-export interface CunningActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: Dropdown4;
-}
-
-export interface Dropdown4 {
-    "Clear All Logs":    string;
-    "Clear Models Logs": string;
-}
-
-export interface ModelsChild {
-    key:        string;
-    dropdown:   any[] | Dropdown5;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface Dropdown5 {
-    "Clear All Logs":    ClearAllLogs;
-    "Clear Models Logs": ClearAllLogs;
-}
-
-export interface Notifications {
-    children:    NotificationsChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     NotificationsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface NotificationsButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: MagentaActions;
-}
-
-export interface MagentaActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: Dropdown6;
-}
-
-export interface Dropdown6 {
-    "Clear All Logs":           string;
-    "Clear Notifications Logs": string;
-}
-
-export interface NotificationsChild {
-    key:        string;
-    dropdown:   any[] | Dropdown7;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface Dropdown7 {
-    "Clear All Logs":           ClearAllLogs;
-    "Clear Notifications Logs": ClearAllLogs;
-}
-
-export interface Queries {
-    children:    QueriesChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     QueriesButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface QueriesButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: FriskyActions;
-}
-
-export interface FriskyActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: Dropdown8;
-}
-
-export interface Dropdown8 {
-    "Clear All Logs":     string;
-    "Clear Queries Logs": string;
-}
-
-export interface QueriesChild {
-    key:        string;
-    dropdown:   any[] | Dropdown9;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface Dropdown9 {
-    "Clear All Logs":     ClearAllLogs;
-    "Clear Queries Logs": ClearAllLogs;
-}
-
-export interface Requests {
-    children:    RequestsChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     RequestsButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface RequestsButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: MischievousActions;
-}
-
-export interface MischievousActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: Dropdown10;
-}
-
-export interface Dropdown10 {
-    "Clear All Logs":      string;
-    "Clear Requests Logs": string;
-}
-
-export interface RequestsChild {
-    key:        string;
-    dropdown:   any[] | Dropdown11;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface Dropdown11 {
-    "Clear All Logs":      ClearAllLogs;
-    "Clear Requests Logs": ClearAllLogs;
-}
-
-export interface Schedule {
-    children:    ScheduleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     ScheduleButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface ScheduleButtons {
-    refresh: Refresh;
-    toggle:  Toggle;
-    actions: BraggadociousActions;
-}
-
-export interface BraggadociousActions {
-    text:     string;
-    icon:     ChildIcon;
-    type:     string;
-    href:     boolean;
-    dropdown: Dropdown12;
-}
-
-export interface Dropdown12 {
-    "Clear All Logs":      string;
-    "Clear Schedule Logs": string;
-}
-
-export interface ScheduleChild {
-    key:        string;
-    dropdown:   any[] | Dropdown13;
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       string;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       string;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-    title:      string;
-}
-
-export interface Dropdown13 {
-    "Clear All Logs":      ClearAllLogs;
-    "Clear Schedule Logs": ClearAllLogs;
 }
 
 export interface AnomalyModuleUsers {
-    children:   AnomalyModuleUsersChildren;
+    children:   AnomalyModuleUsersChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -1737,14 +679,33 @@ export interface AnomalyModuleUsers {
     url:        string;
 }
 
-export interface AnomalyModuleUsersChildren {
-    users:  TartuGecko;
-    roles:  TartuGecko;
-    fields: PurpleFields;
+export interface AnomalyModuleUsersChild {
+    children:    PurpleChild[];
+    key:         string;
+    slug:        string;
+    icon:        null;
+    title:       string;
+    label:       null;
+    class:       null;
+    active:      boolean;
+    matcher:     null;
+    permalink:   null;
+    description: null;
+    highlighted: boolean;
+    context:     Context;
+    parent:      null;
+    subSection:  boolean;
+    buttons:     string[] | PurpleButtons;
+    attributes:  NewDocumentClass;
+    permission:  string;
+    breadcrumb:  null;
+    hidden:      boolean;
+    href:        string;
+    url:         string;
 }
 
 export interface CrvsModuleClients {
-    children:   CrvsModuleClientsChildren;
+    children:   CrvsModuleClientsChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -1759,16 +720,8 @@ export interface CrvsModuleClients {
     url:        string;
 }
 
-export interface CrvsModuleClientsChildren {
-    clients:   TartuGecko;
-    documents: Documents;
-    roles:     Roles;
-    fields:    FluffyFields;
-    settings:  TartuGecko;
-}
-
-export interface Documents {
-    children:    FluffyChild[];
+export interface CrvsModuleClientsChild {
+    children:    PurpleChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -1778,12 +731,12 @@ export interface Documents {
     active:      boolean;
     matcher:     null;
     permalink:   null;
-    description: null;
+    description: null | string;
     highlighted: boolean;
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     DocumentsButtons;
+    buttons:     string[] | CunningButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
@@ -1792,37 +745,10 @@ export interface Documents {
     url:         string;
 }
 
-export interface DocumentsButtons {
-    new_document: NewDocumentClass;
-}
-
-export interface Roles {
-    children:    FluffyChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     RolesButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface RolesButtons {
-    new_role: NewRole;
+export interface CunningButtons {
+    new_document?: NewDocumentClass;
+    new_role?:     NewRole;
+    new_field?:    AddFieldClass;
 }
 
 export interface NewRole {
@@ -1830,7 +756,7 @@ export interface NewRole {
 }
 
 export interface CrvsModuleDepartments {
-    children:   CrvsModuleDepartmentsChildren;
+    children:   CrvsModuleDepartmentsChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -1845,14 +771,7 @@ export interface CrvsModuleDepartments {
     url:        string;
 }
 
-export interface CrvsModuleDepartmentsChildren {
-    overview:     Overview;
-    associations: Associations;
-    settings:     TartuGecko;
-    preferences:  TartuGecko;
-}
-
-export interface Associations {
+export interface CrvsModuleDepartmentsChild {
     children:    FluffyChild[];
     key:         string;
     slug:        string;
@@ -1868,7 +787,7 @@ export interface Associations {
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     AssociationsButtons;
+    buttons:     any[] | MagentaButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
@@ -1877,8 +796,9 @@ export interface Associations {
     url:         string;
 }
 
-export interface AssociationsButtons {
-    new_association: New;
+export interface MagentaButtons {
+    new_department?:  New;
+    new_association?: New;
 }
 
 export interface New {
@@ -1886,37 +806,8 @@ export interface New {
     permission: string;
 }
 
-export interface Overview {
-    children:    FluffyChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     OverviewButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface OverviewButtons {
-    new_department: New;
-}
-
 export interface CrvsModuleFAQ {
-    children:   CrvsModuleFAQChildren;
+    children:   CrvsModuleFAQChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -1931,14 +822,8 @@ export interface CrvsModuleFAQ {
     url:        string;
 }
 
-export interface CrvsModuleFAQChildren {
-    overview:   TartuGecko;
-    categories: Categories;
-    questions:  TartuGecko;
-}
-
-export interface Categories {
-    children:    CategoriesChild[];
+export interface CrvsModuleFAQChild {
+    children:    StickyChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -1953,7 +838,7 @@ export interface Categories {
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     CategoriesButtons;
+    buttons:     string[] | FriskyButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
@@ -1962,13 +847,14 @@ export interface Categories {
     url:         string;
 }
 
-export interface CategoriesButtons {
+export interface FriskyButtons {
     "0":     string;
     default: string[];
 }
 
-export interface CategoriesChild {
+export interface StickyChild {
     key:        string;
+    title:      string;
     dropdown:   any[];
     dropup:     boolean;
     position:   Position;
@@ -1981,11 +867,10 @@ export interface CategoriesChild {
     class:      null;
     size:       Size;
     permission: string;
-    type:       Type;
+    type:       ManageType;
     text:       string;
     url:        null;
     tag:        Tag;
-    title:      string;
 }
 
 export interface FluffyAttributes {
@@ -1993,57 +878,45 @@ export interface FluffyAttributes {
     "0"?: string;
 }
 
-export interface PyroModuleNews {
-    children:   PyroModuleNewsChildren;
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: NewDocumentClass;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface PyroModuleNewsChildren {
-    items: TartuGecko;
-}
-
 export interface Menus {
-    admin_header: AdminHeader;
+    admin_footer:  Admin;
+    admin_header:  Admin;
+    admin_sidebar: Admin;
 }
 
-export interface AdminHeader {
-    id:            number;
-    sort_order:    number;
-    created_at:    Date;
-    created_by_id: number;
-    updated_at:    Date;
-    updated_by_id: number;
-    deleted_at:    null;
-    slug:          string;
-    locale:        string;
-    name:          string;
-    description:   string;
-    children:      AdminHeaderChild[];
+export interface Admin {
+    slug:        string;
+    locale:      string;
+    name:        string;
+    description: string;
+    children:    AdminFooterChild[];
 }
 
-export interface AdminHeaderChild {
+export interface AdminFooterChild {
     id:         number;
     sort_order: number;
-    type:       string;
+    type:       PurpleType;
     entry_id:   number;
-    target:     string;
+    target:     Target;
     class:      null;
     parent_id:  number | null;
     icon:       null | string;
     url:        null | string;
     title:      string;
-    children:   AdminHeaderChild[];
+    children:   AdminFooterChild[];
+}
+
+export enum Target {
+    Blank = "_blank",
+    Self = "_self",
+}
+
+export enum PurpleType {
+    PyroExtensionCpActionLinkType = "pyro.extension.cp_action_link_type",
+    PyroExtensionHeaderLinkType = "pyro.extension.header_link_type",
+    PyroExtensionLabelLinkType = "pyro.extension.label_link_type",
+    PyroExtensionModuleLinkType = "pyro.extension.module_link_type",
+    PyroExtensionURLLinkType = "pyro.extension.url_link_type",
 }
 
 export interface Module {

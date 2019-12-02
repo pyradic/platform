@@ -1,4 +1,5 @@
 import { AsyncContainerModule, Container, interfaces } from 'inversify';
+import getDecorators from 'inversify-inject-decorators';
 import { Dispatcher } from './Dispatcher';
 import { BootstrapOptions, IAgent, IConfig, IServiceProvider, IServiceProviderClass } from '../interfaces';
 import { SyncHook, SyncWaterfallHook } from 'tapable';
@@ -21,8 +22,9 @@ const log = require('debug')('classes:Application');
 export interface Styling extends PlatformStyleVariables {}
 
 export interface ConfigData extends PlatformData {
-    [k:string]:any
+    [ k: string ]: any
 }
+
 export interface Application {
     storage: Storage
     agent: IAgent
@@ -36,10 +38,10 @@ export interface Application {
 
 
 const defaultConfig: Partial<IConfig> = {
-    prefix: 'py',
-    debug : false,
-    csrf  : null,
-    delimiters: ['\{\{', '}}']
+    prefix    : 'py',
+    debug     : false,
+    csrf      : null,
+    delimiters: [ '\{\{', '}}' ]
 };
 
 export function loadConfigDefaults(): Config<IConfig> {
@@ -50,10 +52,18 @@ export function loadConfigDefaults(): Config<IConfig> {
     return app().get('config.defaults');
 }
 
+// let caller = {
+//     get app():Application{
+//         return Application.instance as any;
+//     }
+// }
+// const {app} = caller
+// export {app}
+
 
 export function app<T = Application>(binding: string = null): T {
     if ( binding === null ) {
-        return Application.instance as any;
+        return Application.instance as any as T;
     }
     return Application.instance.get<T>(binding);
 }
@@ -113,14 +123,16 @@ export class Application extends Container {
             throw new Error('Cannot create another instance of Application');
         }
         Application._instance = this;
-        log('NAMESPACE',NAMESPACE)
-        NAMESPACE['app'] = this;
+        log('NAMESPACE', NAMESPACE)
+        NAMESPACE[ 'app' ] = this;
         this.bind(Application).toConstantValue(this);
         this.alias(Application, 'app', true);
         this.bind('app').toConstantValue(this);
         this.bind('events').to(Dispatcher).inSingletonScope();
+        this.inject = getDecorators(this).lazyInject.bind(this)
     }
 
+    inject: (serviceIdentifier: string | symbol | interfaces.Newable<any> | interfaces.Abstract<any>) => (proto: any, key: string) => void
 
     public async bootstrap(_options: BootstrapOptions, ...mergeOptions: BootstrapOptions[]) {
         let options: BootstrapOptions = merge({
@@ -253,7 +265,7 @@ export class Application extends Container {
         log('start', { mountPoint, options });
         this.started = true;
         this.hooks.start.call(Vue);
-        this.root  = new (this.Root.extend({
+        this.root = new (this.Root.extend({
             delimiters: this.config.delimiters
             // template: '<div id="app"><slot></slot></div>',
             // render(h,ctx){     return h(this.$slots.default, this.$slots.default)

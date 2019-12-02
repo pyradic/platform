@@ -20,10 +20,7 @@ export function uniqueId() {
         .substring(1);
 }
 
-export function getRandomId(length) {
-    if ( isNumber(length) ) {
-        length = 15;
-    }
+export function getRandomId(length=15) {
     let text       = '';
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     for ( let i = 0; i < length; i ++ ) {

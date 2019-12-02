@@ -5,15 +5,15 @@ import { InjectKey } from 'vue/types/options'
 import { VueClass } from 'vue-class-component/lib/declarations';
 import { interfaces } from 'inversify';
 import debug from 'debug';
-import { app } from '@c/Application';
 
 const log = debug('decorators');
 
 export * from './prop';
+export * from './styles';
 export type Constructor<T = any> = {
     new(...args: any[]): T
 }
-export { Component, Vue, mixins as Mixins, mixins }
+export { Component as ClassComponent, Vue, mixins as Mixins, mixins }
 
 /** Used for keying reactive provide/inject properties */
 const reactiveInjectKey = '__reactiveInject__'
@@ -45,7 +45,7 @@ export function inject(options?: InjectOptions | InjectKey) {
         if ( typeof componentOptions.inject === 'undefined' ) {
             componentOptions.inject = {}
         }
-        if ( ! Array.isArray(componentOptions.inject) ) {
+        if ( !Array.isArray(componentOptions.inject) ) {
             componentOptions.inject[ key ] = options || key
         }
     })
@@ -56,10 +56,10 @@ export function rinject(options?: InjectOptions | InjectKey) {
         if ( typeof componentOptions.inject === 'undefined' ) {
             componentOptions.inject = {}
         }
-        if ( ! Array.isArray(componentOptions.inject) ) {
-            const fromKey    = !! options ? (options as any).from || options : key
-            const defaultVal = (!! options && (options as any).default) || undefined
-            if ( ! componentOptions.computed ) componentOptions.computed = {}
+        if ( !Array.isArray(componentOptions.inject) ) {
+            const fromKey    = !!options ? (options as any).from || options : key
+            const defaultVal = (!!options && (options as any).default) || undefined
+            if ( !componentOptions.computed ) componentOptions.computed = {}
             componentOptions.computed![ key ]            = function () {
                 const obj = (this as any)[ reactiveInjectKey ]
                 return obj ? obj[ fromKey ] : defaultVal
@@ -72,12 +72,12 @@ export function rinject(options?: InjectOptions | InjectKey) {
 export function provide(key?: string | symbol) {
     return createDecorator((componentOptions, k) => {
         let provide: any = componentOptions.provide
-        if ( typeof provide !== 'function' || ! provide.managed ) {
+        if ( typeof provide !== 'function' || !provide.managed ) {
             const original  = componentOptions.provide
             provide         = componentOptions.provide = function (this: any) {
                 let rv = Object.create(
                     (typeof original === 'function' ? original.call(this) : original) ||
-                    null,
+                    null
                 )
                 for ( let i in provide.managed ) rv[ provide.managed[ i ] ] = this[ i ]
                 return rv
@@ -91,19 +91,19 @@ export function provide(key?: string | symbol) {
 export function rprovide(key?: string | symbol) {
     return createDecorator((componentOptions, k) => {
         let provide: any = componentOptions.provide
-        if ( typeof provide !== 'function' || ! provide.managed ) {
+        if ( typeof provide !== 'function' || !provide.managed ) {
             const original  = componentOptions.provide
             provide         = componentOptions.provide = function (this: any) {
                 let rv                  = Object.create(
                     (typeof original === 'function' ? original.call(this) : original) ||
-                    null,
+                    null
                 )
                 rv[ reactiveInjectKey ] = {}
                 for ( let i in provide.managed ) {
                     rv[ provide.managed[ i ] ] = this[ i ] // Duplicates the behavior of `@Provide`
                     Object.defineProperty(rv[ reactiveInjectKey ], provide.managed[ i ], {
                         enumerable: true,
-                        get       : () => this[ i ],
+                        get       : () => this[ i ]
                     })
                 }
                 return rv
@@ -123,7 +123,7 @@ function isPromise(obj: any): obj is Promise<any> {
 function applyMetadata(options: PropOptions | Constructor[] | Constructor, target: Vue, key: string) {
     if ( reflectMetadataIsSupported ) {
         if (
-            ! Array.isArray(options) &&
+            !Array.isArray(options) &&
             typeof options !== 'function' &&
             typeof options.type === 'undefined'
         ) {
@@ -162,7 +162,7 @@ watch           = function (path: string, options: WatchOptions = {}) {
 
         const watch: any = componentOptions.watch
 
-        if ( typeof watch[ path ] === 'object' && ! Array.isArray(watch[ path ]) ) {
+        if ( typeof watch[ path ] === 'object' && !Array.isArray(watch[ path ]) ) {
             watch[ path ] = [ watch[ path ] ]
         } else if ( typeof watch[ path ] === 'undefined' ) {
             watch[ path ] = []
@@ -215,15 +215,15 @@ export function ref(refKey?: string) {
             cache: false,
             get(this: Vue) {
                 return this.$refs[ refKey || key ]
-            },
+            }
         } as any
     })
 }
 
 export function inject$(identifier?: interfaces.ServiceIdentifier<any>) {
-    return (proto:Vue, key:string)=> {
+    return (proto: Vue, key: string) => {
         let Type: any
-        if (typeof Reflect !== 'undefined' && typeof Reflect.getMetadata === 'function') {
+        if ( typeof Reflect !== 'undefined' && typeof Reflect.getMetadata === 'function' ) {
             Type = Reflect.getMetadata('design:type', proto, key)
         }
 
