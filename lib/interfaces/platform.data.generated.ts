@@ -900,7 +900,7 @@ export interface AdminFooterChild {
     target:     Target;
     class:      null;
     parent_id:  number | null;
-    icon:       null | string;
+    icon:       null;
     url:        null | string;
     title:      string;
     children:   AdminFooterChild[];
@@ -908,12 +908,9 @@ export interface AdminFooterChild {
 
 export enum Target {
     Blank = "_blank",
-    Self = "_self",
 }
 
 export enum PurpleType {
-    PyroExtensionCpActionLinkType = "pyro.extension.cp_action_link_type",
-    PyroExtensionHeaderLinkType = "pyro.extension.header_link_type",
     PyroExtensionLabelLinkType = "pyro.extension.label_link_type",
     PyroExtensionModuleLinkType = "pyro.extension.module_link_type",
     PyroExtensionURLLinkType = "pyro.extension.url_link_type",

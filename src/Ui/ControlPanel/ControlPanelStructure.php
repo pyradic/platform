@@ -5,6 +5,7 @@ namespace Pyro\Platform\Ui\ControlPanel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\NamespacedItemResolver;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 class ControlPanelStructure extends Collection
 {
@@ -39,8 +40,19 @@ class ControlPanelStructure extends Collection
      */
     public function getSection($key)
     {
-        [ $nav, $sectionKey, $buttonKey ] = resolve(NamespacedItemResolver::class)->parseKey($key);
-        return $this->getNavigation($key)->get('children')->firstWhere('key', $nav . '::' . $sectionKey);
+        try {
+            [ $nav, $sectionKey, $buttonKey ] = resolve(NamespacedItemResolver::class)->parseKey($key);
+
+            $navigation= $this->getNavigation($key);
+            if($navigation === null){
+                return collect();
+            }
+            return $navigation->get('children')->firstWhere('key', $nav . '::' . $sectionKey);
+
+        } catch(\Exception $e){
+
+            return collect();
+        }
     }
 
     /**

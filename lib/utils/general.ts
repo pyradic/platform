@@ -37,6 +37,10 @@ export function load(vNodeContext, cb) {
     }
 }
 
+export function copy(obj){
+    return JSON.parse(JSON.stringify(obj));
+}
+
 /**
  * Get the current viewport
  * @returns {{width: *, height: *}}

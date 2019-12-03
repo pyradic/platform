@@ -105,8 +105,8 @@ prop.classPrefix = function (defaultName: string): PropertyDecorator {
     let options: PropOptions = {
         type   : String,
         default: () => {
-            if ( app().config.prefix ) {
-                return app().config.prefix + '-' + defaultName
+            if ( app.config.prefix ) {
+                return app.config.prefix + '-' + defaultName
             }
             return defaultName
         }

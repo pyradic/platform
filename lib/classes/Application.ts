@@ -45,28 +45,20 @@ const defaultConfig: Partial<IConfig> = {
 };
 
 export function loadConfigDefaults(): Config<IConfig> {
-    if ( !app().isBound('config.defaults') ) {
+    if ( !app.isBound('config.defaults') ) {
         let cpmfog = new Config(defaultConfig);
-        app().instance('config.defaults', cpmfog);
+        app.instance('config.defaults', cpmfog);
     }
-    return app().get('config.defaults');
+    return app.get('config.defaults');
 }
 
-// let caller = {
-//     get app():Application{
-//         return Application.instance as any;
+
+// export function app<T = Application>(binding: string = null): T {
+//     if ( binding === null ) {
+//         return Application.instance as any as T;
 //     }
+//     return Application.instance.get<T>(binding);
 // }
-// const {app} = caller
-// export {app}
-
-
-export function app<T = Application>(binding: string = null): T {
-    if ( binding === null ) {
-        return Application.instance as any as T;
-    }
-    return Application.instance.get<T>(binding);
-}
 
 export class Application extends Container {
     public hooks = {
@@ -344,3 +336,10 @@ export class Application extends Container {
 
     //endregion
 }
+
+
+
+
+let caller    = { get app(): Application {return Application.instance as any as Application; } }
+const { app } = caller
+export { app }

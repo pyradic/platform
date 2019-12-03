@@ -1,13 +1,14 @@
 <style type="text/css" id="assets_styles">
-    {% for style in asset_inlines("styles.css") %}
-    {{ style|raw }}
-    {% endfor %}
+{% for style in asset_inlines("styles.css") %}
+{{ style|raw }}
+{% endfor %}
 </style>
 
 {{ template.includes.render('cp_scripts')|raw }}
 
-<script type="text/javascript" id="assets_scripts">
-    {% for script in asset_inlines("scripts.js") %}
+{% for script in asset_inlines("scripts.js") %}
+    <script type="text/javascript">
     {{ script|raw }}
-    {% endfor %}
-</script>
+    </script>
+{% endfor %}
+<script type="text/javascript" id="assets_scripts"></script>

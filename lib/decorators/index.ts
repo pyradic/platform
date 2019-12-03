@@ -5,6 +5,7 @@ import { InjectKey } from 'vue/types/options'
 import { VueClass } from 'vue-class-component/lib/declarations';
 import { interfaces } from 'inversify';
 import debug from 'debug';
+import { app } from '@c/Application';
 
 const log = debug('decorators');
 
@@ -230,19 +231,19 @@ export function inject$(identifier?: interfaces.ServiceIdentifier<any>) {
         return createDecorator((options, key) => {
             // (options.mixins || (options.mixins = [])).push({
             //     data: function () {
-            //         return { [ key ]: app().get(identifier) }
+            //         return { [ key ]: app.get(identifier) }
             //     },
             // });
 
 
-            // options.computed = options.computed || {}
-            //
-            // options.computed[key] = {
-            //     cache:false,
-            //     get: function(this: any) {
-            //         return app().get(identifier || Type)
-            //     }
-            // }
+            options.computed = options.computed || {}
+
+            options.computed[key] = {
+                cache:false,
+                get: function(this: any) {
+                    return app.get(identifier || Type)
+                }
+            }
 
             // options.computed = options.computed || {};
             // options.computed[ key ] = {

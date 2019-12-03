@@ -43,7 +43,7 @@ export function styles<COMPONENT extends Vue = Vue, THEME extends StyleTheme = S
             options.computed[ key ] = {
                 cache: false,
                 get(this: Vue) {
-                    const resolved: StylesProp = resolveStyles(config, app().get<StyleTheme>('styling.theme'), this)
+                    const resolved: StylesProp = resolveStyles(config, app.get<StyleTheme>('styling.theme'), this)
 
                     return resolved
                 }
