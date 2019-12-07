@@ -90,4 +90,9 @@ class ControlPanelStructure extends Collection
 
         return $all;
     }
+
+    public function getShortcuts()
+    {
+
+    }
 }

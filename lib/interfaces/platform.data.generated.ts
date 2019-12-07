@@ -7,13 +7,15 @@ export interface PlatformData {
 }
 
 export interface Breadcrumbs {
-    Menus: string;
+    "Gebruikers Module": string;
+    Gebruikers:          string;
+    Aanmaken:            string;
 }
 
 export interface Cp {
     structure:  Structure;
     navigation: Navigation;
-    section:    null;
+    section:    Section;
 }
 
 export interface Navigation {
@@ -46,14 +48,14 @@ export interface NavigationChild {
     class:       null;
     active:      boolean;
     matcher:     null;
-    permalink:   null | string;
+    permalink:   null;
     description: null;
     highlighted: boolean;
     context:     Context;
     parent:      null;
     subSection:  boolean;
     buttons:     string[] | PurpleButtons;
-    attributes:  AddFieldClass;
+    attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
     hidden:      boolean;
@@ -61,10 +63,14 @@ export interface NavigationChild {
     url:         string;
 }
 
+export interface PurpleButtons {
+    add_field: AddFieldClass;
+}
+
 export interface AddFieldClass {
-    href:           string;
     "data-toggle"?: DataToggle;
     "data-target"?: DataTarget;
+    href:           string;
 }
 
 export enum DataTarget {
@@ -73,10 +79,6 @@ export enum DataTarget {
 
 export enum DataToggle {
     Modal = "modal",
-}
-
-export interface PurpleButtons {
-    add_field: AddFieldClass;
 }
 
 export interface PurpleChild {
@@ -122,6 +124,52 @@ export enum Context {
     Danger = "danger",
 }
 
+export interface Section {
+    children:    SectionChild[];
+    key:         string;
+    slug:        string;
+    icon:        null;
+    title:       string;
+    label:       null;
+    class:       null;
+    active:      boolean;
+    matcher:     null;
+    permalink:   null;
+    description: null;
+    highlighted: boolean;
+    context:     Context;
+    parent:      null;
+    subSection:  boolean;
+    buttons:     string[];
+    attributes:  NewDocumentClass;
+    permission:  string;
+    breadcrumb:  null;
+    hidden:      boolean;
+    href:        string;
+    url:         string;
+}
+
+export interface SectionChild {
+    key:        string;
+    title:      string;
+    dropdown:   any[];
+    dropup:     boolean;
+    position:   Position;
+    parent:     null;
+    attributes: NewDocumentClass;
+    disabled:   boolean;
+    enabled:    boolean;
+    entry:      null;
+    icon:       null;
+    class:      null;
+    size:       Size;
+    permission: string;
+    type:       ManageType;
+    text:       string;
+    url:        null;
+    tag:        Tag;
+}
+
 export interface Structure {
     "anomaly.module.dashboard":     AnomalyModuleDashboard;
     "anomaly.module.blocks":        AnomalyModuleBlocks;
@@ -131,13 +179,13 @@ export interface Structure {
     "anomaly.module.documentation": AnomalyModuleDocumentation;
     "crvs.module.faq":              CrvsModuleFAQ;
     "anomaly.module.files":         AnomalyModuleFiles;
-    "pyro.module.menus":            Navigation;
+    "pyro.module.menus":            PyroModuleMenus;
     "pyro.module.news":             AnomalyModuleComments;
     "anomaly.module.pages":         AnomalyModulePages;
     "anomaly.module.posts":         AnomalyModulePosts;
     "anomaly.module.settings":      AnomalyModuleComments;
     "anomaly.module.system":        AnomalyModuleSystem;
-    "anomaly.module.users":         AnomalyModuleUsers;
+    "anomaly.module.users":         Navigation;
 }
 
 export interface AnomalyModuleBlocks {
@@ -188,7 +236,7 @@ export interface FluffyButtons {
 }
 
 export interface AnomalyModuleComments {
-    children:   AnomalyModuleCommentsChild[];
+    children:   Section[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -201,52 +249,6 @@ export interface AnomalyModuleComments {
     breadcrumb: string;
     href:       string;
     url:        string;
-}
-
-export interface AnomalyModuleCommentsChild {
-    children:    FluffyChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     string[];
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface FluffyChild {
-    key:        string;
-    title:      string;
-    dropdown:   any[];
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: NewDocumentClass;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       null;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       ManageType;
-    text:       string;
-    url:        null;
-    tag:        Tag;
 }
 
 export interface AnomalyModuleDashboard {
@@ -544,7 +546,7 @@ export interface AnomalyModuleSystem {
 }
 
 export interface AnomalyModuleSystemChild {
-    children:    TentacledChild[];
+    children:    FluffyChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -624,7 +626,7 @@ export interface Refresh {
 }
 
 export enum HrefEnum {
-    AdminMenus = "admin/menus",
+    AdminClientsView2 = "admin/clients/view/2",
 }
 
 export interface Toggle {
@@ -633,7 +635,7 @@ export interface Toggle {
     text: Text;
 }
 
-export interface TentacledChild {
+export interface FluffyChild {
     key:        string;
     title:      Text;
     dropdown:   any[] | { [key: string]: DropdownValue };
@@ -661,47 +663,6 @@ export interface PurpleAttributes {
 export interface DropdownValue {
     text:       string;
     attributes: NewDocumentClass;
-}
-
-export interface AnomalyModuleUsers {
-    children:   AnomalyModuleUsersChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: NewDocumentClass;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface AnomalyModuleUsersChild {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     string[] | PurpleButtons;
-    attributes:  NewDocumentClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
 }
 
 export interface CrvsModuleClients {
@@ -772,7 +733,7 @@ export interface CrvsModuleDepartments {
 }
 
 export interface CrvsModuleDepartmentsChild {
-    children:    FluffyChild[];
+    children:    SectionChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -823,7 +784,7 @@ export interface CrvsModuleFAQ {
 }
 
 export interface CrvsModuleFAQChild {
-    children:    StickyChild[];
+    children:    TentacledChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -852,7 +813,7 @@ export interface FriskyButtons {
     default: string[];
 }
 
-export interface StickyChild {
+export interface TentacledChild {
     key:        string;
     title:      string;
     dropdown:   any[];
@@ -878,6 +839,47 @@ export interface FluffyAttributes {
     "0"?: string;
 }
 
+export interface PyroModuleMenus {
+    children:   PyroModuleMenusChild[];
+    key:        string;
+    slug:       string;
+    icon:       string;
+    title:      string;
+    class:      null;
+    active:     boolean;
+    favorite:   boolean;
+    attributes: NewDocumentClass;
+    permission: null;
+    breadcrumb: string;
+    href:       string;
+    url:        string;
+}
+
+export interface PyroModuleMenusChild {
+    children:    PurpleChild[];
+    key:         string;
+    slug:        string;
+    icon:        null;
+    title:       string;
+    label:       null;
+    class:       null;
+    active:      boolean;
+    matcher:     null;
+    permalink:   null | string;
+    description: null;
+    highlighted: boolean;
+    context:     Context;
+    parent:      null;
+    subSection:  boolean;
+    buttons:     string[] | PurpleButtons;
+    attributes:  AddFieldClass;
+    permission:  string;
+    breadcrumb:  null;
+    hidden:      boolean;
+    href:        string;
+    url:         string;
+}
+
 export interface Menus {
     admin_footer:  Admin;
     admin_header:  Admin;
@@ -900,7 +902,7 @@ export interface AdminFooterChild {
     target:     Target;
     class:      null;
     parent_id:  number | null;
-    icon:       null;
+    icon:       null | string;
     url:        null | string;
     title:      string;
     children:   AdminFooterChild[];
@@ -911,6 +913,9 @@ export enum Target {
 }
 
 export enum PurpleType {
+    PyroExtensionCpActionLinkType = "pyro.extension.cp_action_link_type",
+    PyroExtensionDividerLinkType = "pyro.extension.divider_link_type",
+    PyroExtensionHeaderLinkType = "pyro.extension.header_link_type",
     PyroExtensionLabelLinkType = "pyro.extension.label_link_type",
     PyroExtensionModuleLinkType = "pyro.extension.module_link_type",
     PyroExtensionURLLinkType = "pyro.extension.url_link_type",

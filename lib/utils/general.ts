@@ -9,6 +9,7 @@
  */
 
 import { camelCase, isNumber } from 'lodash';
+import { isObject }            from './kindOf';
 
 export function warn(message: string, ...params: any[]) {
     console.warn('[codex][core] ' + message, ...params);
@@ -170,14 +171,6 @@ export function parseBool(val) {
 }
 
 
-/**
- * Quick object check - this is primarily used to tell
- * Objects from primitive values when we know the value
- * is a JSON-compliant type.
- */
-export function isObject(obj) {
-    return obj !== null && typeof obj === 'object';
-}
 
 /**
  * Check if two values are loosely equal - that is,

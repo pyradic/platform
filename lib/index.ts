@@ -8,7 +8,7 @@ import { PlatformVuePlugin as Plugin } from './PlatformVuePlugin';
 import { toJS } from '@u/toJS';
 
 
-export * from './styling/export'
+export * from './styling'
 export * from './interfaces';
 export * from './classes/Application';
 export * from './classes/ServiceProvider';
@@ -26,7 +26,7 @@ export * from './utils/colors'
 export * from './utils/eventEmitter'
 export * from './utils/slot'
 export * from './utils/general'
-
+export * from './utils/kindOf'
 
 export { merge, Plugin, toJS };
 if ( DEV ) {

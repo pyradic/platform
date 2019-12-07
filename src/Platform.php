@@ -152,7 +152,7 @@ class Platform implements ArrayAccess
      *
      * @return $this
      */
-    public function merge($key, $value = [])
+    public function merge($key, $value = null)
     {
         $this->data->merge($key, $value);
         return $this;

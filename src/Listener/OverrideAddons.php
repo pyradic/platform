@@ -27,6 +27,8 @@ class OverrideAddons
     }
     public function handle(Ready $event)
     {
+        debugbar()->startMeasure('platform.override_addons');
+
         $this->dispatchNow(new AddPathOverrides(path_join(__DIR__, '..', 'resources')));
 
         $active = $this->themes->active();
@@ -36,5 +38,7 @@ class OverrideAddons
         foreach($installed as $addon){
             $this->dispatchNow(new AddAddonOverrides($addon));
         }
+        debugbar()->stopMeasure('platform.override_addons');
+
     }
 }
