@@ -32,7 +32,9 @@ class AddControlPanelStructure
             }
 
             $shortcuts = $cp->getShortcuts()->map(function ($shortcut) {
-                return dispatch_now(new GetClassArray($shortcut));
+                $shortcut = dispatch_now(new GetClassArray($shortcut));
+                $shortcut['title'] = trans($shortcut['title']);
+                return $shortcut;
             });
 
             platform()->set('cp.navigation', $navigation);

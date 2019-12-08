@@ -45,6 +45,11 @@ class AddJavascriptData
                 ->except([ 'activation_code', 'created_at', 'created_by_id', 'deleted_at', 'password', 'updated_at', 'updated_by_id' ])
                 ->toArray();
             $this->platform->set('user', $userData);
+
+            /** @var \Anomaly\UsersModule\User\UserPresenter|\Anomaly\UsersModule\User\Contract\UserInterface $decoratred */
+            $decoratred =(new \Anomaly\Streams\Platform\Support\Decorator())->decorate($user);
+            $this->platform->set('user.gravatar',$decoratred->gravatar()->url());
+
         }
     }
 
