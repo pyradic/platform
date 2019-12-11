@@ -4,15 +4,12 @@
 
 namespace Pyro\Platform;
 
-use Anomaly\Streams\Platform\Addon\Theme\Command\LoadCurrentTheme;
 use Anomaly\Streams\Platform\Asset\Asset;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\Ui\Form\Event\FormWasBuilt;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
-use Anomaly\Streams\Platform\View\Twig\Loader;
-use Anomaly\Streams\Platform\View\ViewIncludes;
 use Anomaly\Streams\Platform\View\ViewOverrides;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -23,7 +20,6 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Jackiedo\DotenvEditor\DotenvEditor;
-use Laradic\Support\MultiBench;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Command\AddPlatformAssetNamespaces;
 use Pyro\Platform\Console\AddonListCommand;
@@ -60,10 +56,10 @@ class PlatformServiceProvider extends ServiceProvider
         GatherParserData::class      => [
             SetParserStub::class,
         ],
-        PlatformWillRender::class => [
+        PlatformWillRender::class    => [
             AddJavascriptData::class,
         ],
-        FormWasBuilt ::class => [
+        FormWasBuilt ::class         => [
             SetSafeDelimiters::class
 //            AddControlPanelStructure::class
         ],
@@ -72,6 +68,7 @@ class PlatformServiceProvider extends ServiceProvider
     protected $providers = [
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
+//        \Tightenco\Ziggy\ZiggyServiceProvider::class,
         \Pyro\CustomInstall\CustomInstallServiceProvider::class,
         \Pyro\Webpack\WebpackServiceProvider::class,
 
@@ -102,7 +99,7 @@ class PlatformServiceProvider extends ServiceProvider
         if ($this->app->environment('local')) {
             $this->registerProviders($this->devProviders);
         }
-        Request::macro('isAdmin', function(){
+        Request::macro('isAdmin', function () {
             return $this->segment(1) === 'admin';
         });
         $this->registerPlatform();
@@ -122,12 +119,13 @@ class PlatformServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.frontend.php', 'platform.frontend');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.diagnose.php', 'platform.diagnose');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.permission_sets.php', 'platform.permission_sets');
+        $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/ziggy.php', 'ziggy');
     }
 
     protected function bootConfig()
     {
         $this->publishes([
-            dirname(__DIR__) . '/resources/config/platform.frontend.php'      => config_path('platform.frontend.php'),
+            dirname(__DIR__) . '/resources/config/platform.frontend.php'        => config_path('platform.frontend.php'),
             dirname(__DIR__) . '/resources/config/platform.diagnose.php'        => config_path('platform.diagnose.php'),
             dirname(__DIR__) . '/resources/config/platform.permission_sets.php' => config_path('platform.permission_sets.php'),
         ], [ 'config' ]);
@@ -263,9 +261,9 @@ class PlatformServiceProvider extends ServiceProvider
                 return $app->make(
                     View\Loader::class,
                     [
-                        'files'     => $app['files'],
-                        'finder'    => $app['view']->getFinder(),
-                        'extension' => $app['twig.extension'],
+                        'files'     => $app[ 'files' ],
+                        'finder'    => $app[ 'view' ]->getFinder(),
+                        'extension' => $app[ 'twig.extension' ],
                     ]
                 );
             }

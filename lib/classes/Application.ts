@@ -104,6 +104,7 @@ export class Application extends Container {
     protected shuttingDown                                      = false;
 
     public get config(): Config<IConfig> & IConfig {return this.get('config');}
+    public get routes(): Record<string,{url:string,methods:string[]}> {return this.get('routes');}
 
     protected constructor() {
         super({
@@ -140,6 +141,7 @@ export class Application extends Container {
 
         await this.loadProviders(options.providers);
         this.configure(options.config);
+        this.instance('routes', options.routes);
 
 
         await this.registerProviders(this.providers);

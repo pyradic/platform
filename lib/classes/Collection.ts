@@ -14,7 +14,7 @@ export class Collection<T> extends Array<T> implements Array<T> {
 
     static make<T>(items: T[] = []) { return new (this)(...items); }
 
-    split(numOfGroups:number, balanced:boolean=false) {
+    split(numOfGroups:number, balanced:boolean=false):T[][] {
 
         if (numOfGroups < 2)
             return [this];

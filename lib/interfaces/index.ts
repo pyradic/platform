@@ -30,6 +30,8 @@ export interface BootstrapOptions {
     config?: IConfig
     providers?: Array<IServiceProviderClass>
     data?: any
+    routes?: Array<{uri:string, methods:string[], domain?:string}>
+
 }
 
 // export interface VuePy {

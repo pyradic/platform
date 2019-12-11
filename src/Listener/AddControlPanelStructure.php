@@ -5,6 +5,10 @@ namespace Pyro\Platform\Listener;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Pyro\Platform\Command\GetClassArray;
 use Pyro\Platform\Ui\ControlPanel\Command\BuildControlPanelStructure;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class AddControlPanelStructure
 {
@@ -12,6 +16,12 @@ class AddControlPanelStructure
     {
         /** @var \Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanel $cp */
         $cp = $event->getTemplate()->get('cp');
+
+        $encoders    = [ new XmlEncoder(), new JsonEncoder() ];
+        $normalizers = [ new ObjectNormalizer() ];
+
+        $serializer = new Serializer($normalizers, $encoders);
+
 
         /** @var \Pyro\Platform\Ui\ControlPanel\ControlPanelStructure $structure */
         $structure = dispatch_now(new BuildControlPanelStructure());

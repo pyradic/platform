@@ -7,7 +7,10 @@
         "laradic/dependency-sorter": "~1.0",
         "laradic/config": "~2.0",
         "eddiriarte/console-select": "~2.0",
-        "jackiedo/dotenv-editor": "^1.0"
+        "jackiedo/dotenv-editor": "^1.0",
+        "symfony/serializer": "~4.0",
+        "symfony/property-access": "~4.0",
+        "tightenco/ziggy": "~0.8"
     },
     "autoload": {
         "files": [

@@ -13,6 +13,8 @@ export * from './interfaces';
 export * from './classes/Application';
 export * from './classes/ServiceProvider';
 export * from './classes/Dispatcher';
+export * from './classes/Route';
+export * from './classes/UrlBuilder';
 export * from './classes/Config';
 export * from './classes/Collection';
 export * from './classes/VuePlugin';

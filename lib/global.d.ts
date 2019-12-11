@@ -7,6 +7,7 @@ declare global {
         pyro__platform: typeof platform & {
             Application: typeof Application, Plugin: typeof Plugin
         }
+        routes?:any
         data?:any
         config?:any
         providers?:any
@@ -27,6 +28,6 @@ declare global {
     const PROD: boolean
     const DEV: boolean
     const HOT: boolean
-    const ENV: any
+    const APP_URL: any
     const NAMESPACE: string
 }

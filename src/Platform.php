@@ -11,6 +11,7 @@ use Laradic\Support\Dot;
 use Pyro\Platform\Event\PlatformWillRender;
 use Pyro\Webpack\Command\RenderJSON;
 use Pyro\Webpack\Webpack;
+use Tightenco\Ziggy\RoutePayload;
 
 class Platform implements ArrayAccess
 {
@@ -87,6 +88,7 @@ class Platform implements ArrayAccess
         event(new PlatformWillRender($this));
         $lines = [//formatter:off
             '<!-- GLOBAL -->',$this->renderGlobal(),PHP_EOL,
+            '<!-- ROUTES -->',$this->renderRoutes(),PHP_EOL,
             '<!-- CONFIG -->',$this->renderConfig(),PHP_EOL,
             '<!-- DATA -->',$this->renderData(),PHP_EOL
         ];//formatter:on
@@ -128,6 +130,18 @@ class Platform implements ArrayAccess
     protected function renderConfig()
     {
         return dispatch_now(RenderJSON::namespace($this->config, 'config'));
+    }
+
+    protected function renderRoutes()
+    {
+        $payload = RoutePayload::compile($this->app->router);
+        return dispatch_now(RenderJSON::namespace($payload, 'routes'));
+
+    }
+
+    protected function renderTranslation()
+    {
+
     }
 
     public function set($key, $value = null)
