@@ -4,7 +4,7 @@ export interface PlatformData {
     module:      Module;
     breadcrumbs: Breadcrumbs;
     user:        User;
-    profile:     Profile;
+    ui:          UI;
 }
 
 export interface Breadcrumbs {
@@ -178,11 +178,11 @@ export interface SectionChild {
 }
 
 export interface Shortcuts {
-    department:  PreferencesClass;
-    preferences: PreferencesClass;
+    department:  Department;
+    preferences: Department;
 }
 
-export interface PreferencesClass {
+export interface Department {
     slug:        string;
     icon:        string;
     title:       string;
@@ -714,137 +714,13 @@ export interface Module {
     type:      string;
 }
 
-export interface Profile {
-    tabs:    Tab[];
-    options: Options;
-    data:    Data;
-    entry:   Entry;
+export interface UI {
+    table: Table;
 }
 
-export interface Data {
-    entry: Entry;
-}
-
-export interface Entry {
-    id:                     number;
-    sort_order:             number;
-    created_at:             Date;
-    created_by_id:          null;
-    updated_at:             Date;
-    updated_by_id:          null;
-    user_id:                null;
-    firstname:              string;
-    lastname:               string;
-    initials:               null;
-    maiden_name:            null;
-    gender:                 string;
-    birthdate:              Date;
-    address:                string;
-    housenumber:            string;
-    postcode:               string;
-    city:                   string;
-    nationality:            string;
-    marital_status:         string;
-    phone_number:           string;
-    mobile_number:          string;
-    email:                  string;
-    bank_account_number:    number;
-    receive_correspondence: number;
-    correspondence_about:   string;
-    correspondence_via:     string;
-    specials:               string;
-    signup_date:            Date;
-    memo:                   null;
-    advisor_id:             null;
-    department_id:          number;
-    roles?:                 Role[];
-    department?:            EntryDepartment;
-    activities?:            any[];
-    user?:                  null;
-    advisor?:               null;
-}
-
-export interface EntryDepartment {
-    id:            number;
-    sort_order:    number;
-    created_at:    Date;
-    created_by_id: null;
-    updated_at:    Date;
-    updated_by_id: null;
-    deleted_at:    null;
-    name:          string;
-    slug:          string;
-    description:   string;
-    enabled:       number;
-}
-
-export interface Role {
-    id:            number;
-    sort_order:    number;
-    created_at:    Date;
-    created_by_id: null;
-    updated_at:    Date;
-    updated_by_id: null;
-    name:          string;
-    slug:          string;
-    type:          string;
-    entry_id:      number;
-    entry_type:    string;
-    color:         string;
-    description:   string;
-}
-
-export interface Options {
-    profile_view: string;
-    wrapper_view: string;
-    permission:   null;
-}
-
-export interface Tab {
-    slug:    string;
-    role:    Role;
-    actions: Action[];
-    fields:  Field[];
-    widgets: Widget[];
-}
-
-export interface Action {
-    title:      string;
-    attributes: ActionAttributes;
-    visibility: Visibility;
-}
-
-export interface ActionAttributes {
-    href:    string;
-    target?: string;
-    "0"?:    The0;
-}
-
-export interface The0 {
-    "*":        boolean;
-    hulpvrager: boolean;
-}
-
-export interface Visibility {
-    "*":          boolean;
-    welzijn:      boolean;
-    hulpvrager:   boolean;
-    vrijwilliger: boolean;
-}
-
-export interface Field {
-    title:      null | string;
-    attributes: any[];
-    visibility: Visibility;
-    key:        string;
-    value:      boolean | number | null | string;
-}
-
-export interface Widget {
-    title:      string;
-    attributes: any[];
-    visibility: Visibility;
-    content:    string;
+export interface Table {
+    filters_dropdown:      boolean;
+    show_filters_dropdown: boolean;
 }
 
 export interface User {
