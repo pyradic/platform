@@ -346,7 +346,6 @@ trait NodeTrait
         return $this;
     }
 
-
     public function isFirst(): bool
     {
         return $this->hasPrevious() === false;
@@ -413,6 +412,18 @@ trait NodeTrait
             });
         }
         return 0;
+    }
+
+    public function up($times = 1)
+    {
+        $node = $this;
+        for ($time = 0; $time < $times; $time++) {
+            if ($node->isRoot()) {
+                return $node;
+            }
+            $node = $node->getParent();
+        }
+        return $node;
     }
 }
 
