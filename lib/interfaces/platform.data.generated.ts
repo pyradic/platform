@@ -4,12 +4,12 @@ export interface PlatformData {
     module:      Module;
     breadcrumbs: Breadcrumbs;
     user:        User;
-    ui:          UI;
 }
 
 export interface Breadcrumbs {
     "Klant Module": string;
-    Klanten:        string;
+    Rollen:         string;
+    Wijzigen:       string;
 }
 
 export interface Cp {
@@ -142,18 +142,22 @@ export interface Section {
     active:      boolean;
     matcher:     null;
     permalink:   null;
-    description: null | string;
+    description: null;
     highlighted: boolean;
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     string[];
+    buttons:     SectionButtons;
     attributes:  NewDocumentClass;
     permission:  string;
     breadcrumb:  null;
     hidden:      boolean;
     href:        string;
     url:         string;
+}
+
+export interface SectionButtons {
+    new_role: NewRole;
 }
 
 export interface SectionChild {
@@ -203,17 +207,19 @@ export interface DepartmentChild {
 }
 
 export interface Structure {
-    "anomaly.module.dashboard": AnomalyModuleDashboard;
-    "crvs.module.activities":   AnomalyModuleSettings;
-    "anomaly.module.blocks":    AnomalyModuleBlocks;
-    "crvs.module.clients":      Navigation;
-    "crvs.module.departments":  CrvsModuleDepartments;
-    "crvs.module.faq":          CrvsModuleFAQ;
-    "anomaly.module.files":     AnomalyModuleFiles;
-    "pyro.module.menus":        PyroModuleMenus;
-    "anomaly.module.pages":     AnomalyModulePages;
-    "anomaly.module.settings":  AnomalyModuleSettings;
-    "anomaly.module.users":     AnomalyModuleUsers;
+    "anomaly.module.dashboard":     AnomalyModuleDashboard;
+    "crvs.module.activities":       AnomalyModuleSettings;
+    "pyro.module.activity_log":     AnomalyModuleSettings;
+    "anomaly.module.blocks":        AnomalyModuleBlocks;
+    "crvs.module.clients":          Navigation;
+    "crvs.module.departments":      CrvsModuleDepartments;
+    "crvs.module.faq":              CrvsModuleFAQ;
+    "anomaly.module.files":         AnomalyModuleFiles;
+    "pyro.module.menus":            PyroModuleMenus;
+    "anomaly.module.pages":         AnomalyModulePages;
+    "anomaly.module.settings":      AnomalyModuleSettings;
+    "pyro.module.streams_platform": AnomalyModuleSettings;
+    "anomaly.module.users":         AnomalyModuleUsers;
 }
 
 export interface AnomalyModuleBlocks {
@@ -442,7 +448,7 @@ export interface ChangeView {
 }
 
 export interface AnomalyModuleSettings {
-    children:   Section[];
+    children:   AnomalyModuleSettingsChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -455,6 +461,31 @@ export interface AnomalyModuleSettings {
     breadcrumb: string;
     href:       string;
     url:        string;
+}
+
+export interface AnomalyModuleSettingsChild {
+    children:    SectionChild[];
+    key:         string;
+    slug:        string;
+    icon:        null;
+    title:       string;
+    label:       null;
+    class:       null;
+    active:      boolean;
+    matcher:     null;
+    permalink:   null;
+    description: null;
+    highlighted: boolean;
+    context:     Context;
+    parent:      null;
+    subSection:  boolean;
+    buttons:     string[];
+    attributes:  NewDocumentClass;
+    permission:  string;
+    breadcrumb:  null;
+    hidden:      boolean;
+    href:        string;
+    url:         string;
 }
 
 export interface AnomalyModuleUsers {
@@ -714,19 +745,9 @@ export interface Module {
     type:      string;
 }
 
-export interface UI {
-    table: Table;
-}
-
-export interface Table {
-    filters_dropdown:      boolean;
-    show_filters_dropdown: boolean;
-}
-
 export interface User {
     id:               number;
     sort_order:       number;
-    department_id:    null;
     email:            string;
     username:         string;
     display_name:     string;
@@ -741,5 +762,6 @@ export interface User {
     last_activity_at: Date;
     ip_address:       string;
     str_id:           string;
+    department_id:    null;
     gravatar:         string;
 }
