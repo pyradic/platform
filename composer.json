@@ -25,7 +25,8 @@
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Button/ButtonBuilder.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Button/ButtonGuesser.php",
             "vendor/anomaly/streams-platform/src/Traits/FiresCallbacks.php",
-            "vendor/anomaly/streams-platform/src/Database/Seeder/Seeder.php"
+            "vendor/anomaly/streams-platform/src/Database/Seeder/Seeder.php",
+            "vendor/anomaly/streams-platform/src/Support/Hydrator.php"
         ]
     },
     "extra": {

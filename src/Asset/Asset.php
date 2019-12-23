@@ -39,6 +39,33 @@ class Asset extends \Anomaly\Streams\Platform\Asset\Asset
         })->keyBy('key');
     }
 
+    public function inlinesContext($collection, array $additionalFilters = [])
+    {
+        if ( ! isset($this->collections[ $collection ])) {
+            return [];
+        }
+
+        return array_filter(
+            array_map(
+                function ($sourceFilePath, $filters) use ($additionalFilters) {
+
+                    $filters = array_filter(array_unique(array_merge($filters, $additionalFilters, [ 'noversion' ])));
+
+                    $content = file_get_contents(
+                        $compiledFilePath = $this->paths->realPath('public::' . ltrim($this->path($sourceFilePath, $filters, false), '/\\'))
+                    );
+
+                    $relativeSourceFilePath = path_make_relative($sourceFilePath, base_path());
+                    $pathName = path_make_relative($compiledFilePath, public_path());
+                    $url      = url($pathName);
+                    return compact('filters', 'sourceFilePath','relativeSourceFilePath', 'compiledFilePath', 'content', 'pathName', 'url');
+                },
+                array_keys($this->collections[ $collection ]),
+                array_values($this->collections[ $collection ])
+            )
+        );
+    }
+
     public function has($collection)
     {
         return array_key_exists($collection, $this->collections);

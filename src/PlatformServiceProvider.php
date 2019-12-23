@@ -88,7 +88,6 @@ class PlatformServiceProvider extends ServiceProvider
         $this->dispatchNow(new AddPlatformAssetNamespaces());
 //        $overrides->put('pyro.theme.admin::partials/assets', 'platform::assets');
 //        $overrides->put('pyrocms.theme.accelerant::partials/assets', 'platform::assets');
-        $overrides->put('theme::partials/assets', 'platform::assets');
     }
 
     public function register()

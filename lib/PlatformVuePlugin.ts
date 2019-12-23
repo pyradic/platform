@@ -1,12 +1,13 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import lang from 'element-ui/lib/locale/lang/nl';
-import locale from 'element-ui/lib/locale';
-import LogPlugin from '@/plugins/log';
-import HttpPlugin from '@/plugins/http';
-import { VuePlugin } from '@c/VuePlugin';
-import { Config } from '@c/Config';
+import Vue             from 'vue'
+import Vuex            from 'vuex'
+import lang            from 'element-ui/lib/locale/lang/nl';
+import locale          from 'element-ui/lib/locale';
+import LogPlugin       from '@/plugins/log';
+import HttpPlugin      from '@/plugins/http';
+import { VuePlugin }   from '@c/VuePlugin';
+import { Config }      from '@c/Config';
 import { Application } from '@c/Application';
+import { Script }      from '#/script';
 
 const log = require('debug')('install')
 
@@ -30,7 +31,7 @@ export default class PlatformVuePlugin extends VuePlugin {
         })
 
         this.prefixAndRegisterComponents(_Vue, {
-            // 'script': Script
+            'script': Script
         })
 
         Object.defineProperty(_Vue.prototype, '$py', {

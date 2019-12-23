@@ -7,6 +7,6 @@ use Pyro\ActivityLogModule\Activity\Traits\LogsActivity;
 
 class EntryModel extends \Anomaly\Streams\Platform\Entry\EntryModel
 {
-use LogsActivity;
-use CausesActivity;
+    use LogsActivity;
+    use CausesActivity;
 }

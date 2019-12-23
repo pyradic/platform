@@ -5,10 +5,19 @@
 </style>
 
 {{ template.includes.render('cp_scripts')|raw }}
-
-{% for script in asset_inlines("scripts.js") %}
-    <script type="text/javascript">
-    {{ script|raw }}
-    </script>
+{% set assetOutput = 'content' %}
+{% set assetOutput = 'url' %}
+{% for asset in asset_inlines_context('scripts.js') %}
+    <!-- {{ asset.relativeSourceFilePath }} -->
+    {% if assetOutput == 'content' %}
+        <script type="text/javascript">
+        $(function () {
+            {{ asset.content|raw }}
+        });
+        </script>
+    {% elseif assetOutput == 'url' %}
+        <script type="text/javascript" src="{{ asset.url }}"></script>
+    {% endif %}
 {% endfor %}
+
 <script type="text/javascript" id="assets_scripts"></script>
