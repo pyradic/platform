@@ -29,14 +29,20 @@ export * from './utils/eventEmitter'
 export * from './utils/slot'
 export * from './utils/general'
 export * from './utils/kindOf'
+export * from './utils/cash'
 
 export { merge, Plugin, toJS };
 if ( DEV ) {
     window[ 'toJS' ] = toJS
 }
 
+
 export async function generateVueCompletion() {
+    // const mod3 = await import(/* webpackChunkName: "generateVueCodeCompletion" */'@u/generateVueCodeCompletion')
+    // const mod4 = await import(/* webpackChunkName: "utils" */'@u/utils')
+    // const mod2 = await import('@u/scroll')
     const mod = await import('@u/generateVueCodeCompletion')
+    // console.log({ mod,mod2,mod3,mod4 })
     console.log({ mod })
     const completion = mod.generateVueCodeCompletion();
     console.log({ completion })

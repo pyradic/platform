@@ -91,10 +91,10 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
             $this->command->getOutput()->write($messages);
         }
     }
-    protected function line($messages)
+    protected function line($messages,$verbosity=null)
     {
         if($this->command){
-            $this->command->getOutput()->writeln($messages);
+            $this->command->line($messages,null,$verbosity);//getOutput()->writeln($messages);
         }
     }
 

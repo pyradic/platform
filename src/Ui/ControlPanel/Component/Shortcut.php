@@ -12,6 +12,13 @@ class Shortcut extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Short
 
     protected $children = [];
 
+    protected $type = 'default';
+
+    public function __construct()
+    {
+        return;
+    }
+
     public function getChildren()
     {
         return $this->children;
@@ -20,6 +27,17 @@ class Shortcut extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Short
     public function setChildren($children)
     {
         $this->children = $children;
+        return $this;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
         return $this;
     }
 
@@ -35,6 +53,7 @@ class Shortcut extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Short
             'context'     => $this->context,
             'attributes'  => $this->attributes,
             'permission'  => $this->permission,
+            'type'        => $this->type,
             'children'    => $this->children,
         ];
     }

@@ -91,8 +91,13 @@ class LoadParentTheme
                 $this->view->addNamespace($theme->getNamespace(), $parentHints);
                 $this->view->addNamespace('parent', $parentHints);
                 $this->view->addNamespace('theme', $parentHints);
+
+                $this->asset->addPath('parent', $parent->getPath('resources'));
                 $this->asset->addPath('theme', $theme->getPath('resources'));
+
+                $this->image->addPath('parent', $parent->getPath('resources'));
                 $this->image->addPath('theme', $theme->getPath('resources'));
+
                 $this->template->set('parent', $parent);
             }
 

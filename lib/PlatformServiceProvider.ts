@@ -8,10 +8,14 @@ import { styleVars }                 from '@/styling/export';
 import { store }                     from '@/store';
 import { theme }                     from '@/styling/theme';
 
-
 export class PlatformServiceProvider extends ServiceProvider {
     public register() {
         this.vuePlugin(PlatformVuePlugin);
+
+        // @todo fix properly in backend
+        if ( this.app.config.csrf === null ) {
+            this.app.config.csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
 
         this.app.instance('styling.theme', theme);
 

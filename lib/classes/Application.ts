@@ -1,21 +1,21 @@
-import { AsyncContainerModule, Container, interfaces } from 'inversify';
-import getDecorators from 'inversify-inject-decorators';
-import { Dispatcher } from './Dispatcher';
+import { AsyncContainerModule, Container, interfaces }                                from 'inversify';
+import getDecorators                                                                  from 'inversify-inject-decorators';
+import { Dispatcher }                                                                 from './Dispatcher';
 import { BootstrapOptions, IAgent, IConfig, IServiceProvider, IServiceProviderClass } from '../interfaces';
-import { SyncHook, SyncWaterfallHook } from 'tapable';
-import { Config } from './Config';
-import { ServiceProvider } from './ServiceProvider';
-import Vue, { Component, ComponentOptions, VueConstructor } from 'vue';
-import { merge } from 'lodash';
-import { Cookies, Storage } from '@u/storage';
-import debug from 'debug';
-import { AxiosStatic } from 'axios';
-import { PlatformStyleVariables } from '@/styling/export';
-import { Store } from 'vuex';
-import { IState } from '@/store';
-import { toJS } from '@u/toJS';
-import { PlatformData } from '@/interfaces/platform.data.generated';
-import { Platform } from '@/interfaces/platform.data';
+import { SyncHook, SyncWaterfallHook }                                                from 'tapable';
+import { Config }                                                                     from './Config';
+import { ServiceProvider }                                                            from './ServiceProvider';
+import Vue, { Component, ComponentOptions, VueConstructor }                           from 'vue';
+import { merge }                                                                      from 'lodash';
+import { Cookies, Storage }                                                           from '@u/storage';
+import debug                                                                          from 'debug';
+import { AxiosStatic }                                                                from 'axios';
+import { PlatformStyleVariables }                                                     from '@/styling/export';
+import { Store }                                                                      from 'vuex';
+import { IState }                                                                     from '@/store';
+import { toJS }                                                                       from '@u/toJS';
+import { PlatformData }                                                               from '@/interfaces/platform.data.generated';
+import { Platform }                                                                   from '@/interfaces/platform.data';
 
 const log = require('debug')('classes:Application');
 
@@ -41,7 +41,7 @@ const defaultConfig: Partial<IConfig> = {
     prefix    : 'py',
     debug     : false,
     csrf      : null,
-    delimiters: [ '\{\{', '}}' ]
+    delimiters: [ '\{\{', '}}' ],
 };
 
 export function loadConfigDefaults(): Config<IConfig> {
@@ -81,11 +81,11 @@ export class Application extends Container {
             register  : new SyncHook<IServiceProviderClass | IServiceProvider>([ 'provider' ]),
             registered: new SyncHook<IServiceProvider>([ 'provider' ]),
             booting   : new SyncHook<IServiceProvider>([ 'provider' ]),
-            booted    : new SyncHook<IServiceProvider>([ 'provider' ])
+            booted    : new SyncHook<IServiceProvider>([ 'provider' ]),
         },
         install            : new SyncHook<typeof Vue, any>([ 'vue', 'options' ]),
         installComponents  : new SyncWaterfallHook<Record<string, Component | typeof Vue | any>>([ 'components' ]),
-        installed          : new SyncHook<typeof Vue, any>([ 'vue', 'options' ])
+        installed          : new SyncHook<typeof Vue, any>([ 'vue', 'options' ]),
     };
 
     protected static _instance: Application;
@@ -100,44 +100,46 @@ export class Application extends Container {
     protected loadedProviders: Record<string, IServiceProvider> = {};
     protected providers: Array<IServiceProvider>                = [];
     protected booted: boolean                                   = false;
+    protected starting: boolean                                  = false;
     protected started: boolean                                  = false;
     protected shuttingDown                                      = false;
 
     public get config(): Config<IConfig> & IConfig {return this.get('config');}
-    public get routes(): Record<string,{url:string,methods:string[]}> {return this.get('routes');}
+
+    public get routes(): Record<string, { url: string, methods: string[] }> {return this.get('routes');}
 
     protected constructor() {
         super({
             defaultScope       : 'Singleton',
             autoBindInjectable : true,
-            skipBaseClassChecks: false
+            skipBaseClassChecks: false,
         });
         if ( Application._instance !== undefined ) {
             throw new Error('Cannot create another instance of Application');
         }
         Application._instance = this;
-        log('NAMESPACE', NAMESPACE)
+        log('NAMESPACE', NAMESPACE);
         NAMESPACE[ 'app' ] = this;
         this.bind(Application).toConstantValue(this);
         this.alias(Application, 'app', true);
         this.bind('app').toConstantValue(this);
         this.bind('events').to(Dispatcher).inSingletonScope();
-        this.inject = getDecorators(this).lazyInject.bind(this)
+        this.inject = getDecorators(this).lazyInject.bind(this);
     }
 
-    inject: (serviceIdentifier: string | symbol | interfaces.Newable<any> | interfaces.Abstract<any>) => (proto: any, key: string) => void
+    inject: (serviceIdentifier: string | symbol | interfaces.Newable<any> | interfaces.Abstract<any>) => (proto: any, key: string) => void;
 
     public async bootstrap(_options: BootstrapOptions, ...mergeOptions: BootstrapOptions[]) {
         let options: BootstrapOptions = merge({
             providers: [],
             config   : {},
-            data     : {}
+            data     : {},
         }, _options, ...mergeOptions);
         log('bootstrap', { options });
         this.hooks.bootstrap.call(options);
 
         this.instance('data', Config.proxied(options.data));
-        this.addBindingGetter('data')
+        this.addBindingGetter('data');
 
         await this.loadProviders(options.providers);
         this.configure(options.config);
@@ -180,8 +182,8 @@ export class Application extends Container {
         return provider;
     }
 
-    protected configure(config: IConfig) {
-        config = merge(loadConfigDefaults().raw(), config);
+    protected configure(_config: IConfig) {
+        let config = merge(loadConfigDefaults().raw(), _config);
         this.hooks.configure.call(config);
         let instance = Config.proxied<IConfig>(config);
         this.instance('config', instance);
@@ -235,21 +237,22 @@ export class Application extends Container {
 
     public root: Vue;
 
-    public rootJS() {return toJS(this.root)}
+    public rootJS() {return toJS(this.root);}
 
-    public Root: typeof Vue = Vue
+    public Root: typeof Vue = Vue;
 
     public extendRoot: VueConstructor['extend'] = (options) => {
-        this.Root = this.Root.extend(options)
+        this.Root = this.Root.extend(options);
         return this.Root;
-    }
+    };
 
     public createLog(namespace) {
-        return debug(namespace)
+        return debug(namespace);
     }
 
+
     public start = async (mountPoint: string | HTMLElement = null, options: ComponentOptions<Vue> = {}) => {
-        if ( this.started ) {
+        if ( this.starting || this.started ) {
             return;
         }
         if ( !this.startEnabled ) {
@@ -257,18 +260,21 @@ export class Application extends Container {
             return;
         }
         log('start', { mountPoint, options });
-        this.started = true;
+        this.starting = true;
         this.hooks.start.call(Vue);
         this.root = new (this.Root.extend({
-            delimiters: this.config.delimiters
+            delimiters: this.config.delimiters,
             // template: '<div id="app"><slot></slot></div>',
             // render(h,ctx){     return h(this.$slots.default, this.$slots.default)
             // data() {return self.data.raw()            }
         }));
         this.root.$mount(mountPoint);
-        await this.root.$nextTick()
-        this.instance('root', this.root)
+        await this.root.$nextTick();
+        this.instance('root', this.root);
+        this.starting = false;
+        this.started  = true;
         this.hooks.started.call(this.root);
+        log('started', { mountPoint, options });
 
         return this;
     };
@@ -287,7 +293,7 @@ export class Application extends Container {
         key        = key || id;
         const self = this;
         Object.defineProperty(this, key, {
-            get(): any {return self.get(id);}
+            get(): any {return self.get(id);},
         });
     }
 
@@ -319,7 +325,7 @@ export class Application extends Container {
 
     public binding<T>(id: interfaces.ServiceIdentifier<T>, value: any): this {
 
-        return this
+        return this;
     }
 
     public instance<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {
@@ -340,8 +346,6 @@ export class Application extends Container {
 }
 
 
-
-
-let caller    = { get app(): Application {return Application.instance as any as Application; } }
-const { app } = caller
-export { app }
+let caller    = { get app(): Application {return Application.instance as any as Application; } };
+const { app } = caller;
+export { app };

@@ -1,6 +1,6 @@
 import _Vue, { ComponentOptions } from 'vue';
-import { LogConfig } from '@/interfaces';
-import { Application } from './classes/Application';
+import { LogConfig } from '@pyro/platform';
+import { Application } from '@pyro/platform';
 
 
 declare module 'vue/types/vue' {

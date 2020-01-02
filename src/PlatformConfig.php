@@ -12,7 +12,7 @@ class PlatformConfig extends Dot
     {
         $this->items = [
             'debug' => $app->config->get('app.debug'),
-            'csrf'  => $app->make('session')->token(),
+            'csrf'  => $app->session->token(),
         ];
         return $this;
     }

@@ -1,11 +1,7 @@
 import Vue, { PropOptions } from 'vue';
 import { mergeChildPrototypes } from './mergeChildPrototypes';
 import { camelCase, capitalize, kebabCase } from 'lodash';
-import ElementUi from 'element-ui'
 import { Component } from 'vue/types/options';
-
-Vue.use(ElementUi)
-
 const log = require('debug')('utils:generatevuecode');
 
 function getPlugin() {

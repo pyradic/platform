@@ -6,6 +6,7 @@ namespace Pyro\Platform;
 
 use Anomaly\Streams\Platform\Asset\Asset;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
+use Anomaly\Streams\Platform\Event\Booted;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\Ui\Form\Event\FormWasBuilt;
@@ -18,6 +19,7 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\ServiceProvider;
 use Jackiedo\DotenvEditor\DotenvEditor;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
@@ -183,8 +185,7 @@ class PlatformServiceProvider extends ServiceProvider
     {
         $this->app->singleton('platform', function ($app) {
             $platform = new Platform($app, $app[ 'webpack' ], $app[ 'html' ]);
-            $platform
-                ->addWebpackEntry('@pyro/platform');
+            $platform->addWebpackEntry('@pyro/platform');
             return $platform;
         });
         $this->app->alias('platform', Platform::class);
