@@ -5,6 +5,7 @@ namespace Pyro\Platform\Console;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 
 class RouteListCommand extends \Illuminate\Foundation\Console\RouteListCommand
@@ -16,6 +17,22 @@ class RouteListCommand extends \Illuminate\Foundation\Console\RouteListCommand
         $options[] = [ 'hide', null, InputOption::VALUE_OPTIONAL, 'The column(s) to hide (host, method, uri, name, action, middleware)' ];
 
         return $options;
+    }
+
+    public function setInput($params=[], $defs=null)
+    {
+        $this->input = new ArrayInput($params, $defs);
+        return $this;
+    }
+    public function setInputFromArguments($arguments)
+    {
+        $this->input = $this->createInputFromArguments($arguments);
+        return $this;
+    }
+
+    public function routes()
+    {
+        return $this->getRoutes();
     }
 
     protected function displayRoutes(array $routes)

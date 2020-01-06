@@ -31,8 +31,10 @@ class OverrideAddons
 
         $this->dispatchNow(new AddPathOverrides(path_join(__DIR__, '..', 'resources')));
 
-        $active = $this->themes->active();
-        $this->dispatchNow(new AddAddonOverrides($active));
+        $standardTheme = $this->themes->active('standard');
+        $this->dispatchNow(new AddAddonOverrides($standardTheme));
+        $adminTheme = $this->themes->active('admin');
+        $this->dispatchNow(new AddAddonOverrides($adminTheme));
 
         $installed = $this->addons->installed()->enabled();
         foreach($installed as $addon){

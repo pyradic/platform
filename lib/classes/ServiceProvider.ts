@@ -5,7 +5,6 @@ import Vue, { PluginFunction, PluginObject } from 'vue';
 
 export abstract class ServiceProvider implements IServiceProvider {
     constructor(public readonly app: Application) {
-        console.log('ServiceProvider',new.target.name);
     }
 
     vuePlugin<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T){

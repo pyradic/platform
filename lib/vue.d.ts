@@ -1,6 +1,7 @@
 import _Vue, { ComponentOptions } from 'vue';
 import { LogConfig } from '@pyro/platform';
 import { Application } from '@pyro/platform';
+import { BemMethods } from './plugins/bem';
 
 
 declare module 'vue/types/vue' {
@@ -8,6 +9,8 @@ declare module 'vue/types/vue' {
     // on the `VueConstructor` interface
 
 
+
+    interface Vue extends  BemMethods {}
     interface Vue {
         $py: Application
 

@@ -6,10 +6,11 @@ namespace Pyro\Platform;
 
 use Anomaly\Streams\Platform\Asset\Asset;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
-use Anomaly\Streams\Platform\Event\Booted;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
 use Anomaly\Streams\Platform\Ui\Form\Event\FormWasBuilt;
+use Anomaly\Streams\Platform\Ui\Table\Component\View\ViewRegistry;
+use Anomaly\Streams\Platform\View\Event\RegisteringTwigPlugins;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewOverrides;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
@@ -19,11 +20,11 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
-use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\ServiceProvider;
 use Jackiedo\DotenvEditor\DotenvEditor;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Command\AddPlatformAssetNamespaces;
+use Pyro\Platform\Command\OverrideIconRegistryIcons;
 use Pyro\Platform\Console\AddonListCommand;
 use Pyro\Platform\Console\DatabaseTruncateCommand;
 use Pyro\Platform\Console\EnvSet;
@@ -45,6 +46,10 @@ use Pyro\Platform\View\FileViewFinder;
 class PlatformServiceProvider extends ServiceProvider
 {
     use DispatchesJobs;
+
+    protected $plugins = [
+        PlatformPlugin::class,
+    ];
 
     protected $listen = [
         TemplateDataIsLoading::class => [
@@ -76,6 +81,8 @@ class PlatformServiceProvider extends ServiceProvider
 
         \Pyro\Platform\Bus\BusServiceProvider::class,
         \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
+        \Inertia\ServiceProvider::class,
+        \Livewire\LivewireServiceProvider::class
     ];
 
     protected $devProviders = [
@@ -83,11 +90,12 @@ class PlatformServiceProvider extends ServiceProvider
         \Laravel\Dusk\DuskServiceProvider::class,
     ];
 
-    public function boot(ViewOverrides $overrides, Request $request)
+    public function boot(ViewOverrides $overrides, Request $request, ViewRegistry $viewRegistry)
     {
         $this->bootConfig();
         $this->bootConsole();
-        $this->dispatchNow(new AddPlatformAssetNamespaces());
+        dispatch_now(new AddPlatformAssetNamespaces());
+        dispatch_now(new OverrideIconRegistryIcons());
 //        $overrides->put('pyro.theme.admin::partials/assets', 'platform::assets');
 //        $overrides->put('pyrocms.theme.accelerant::partials/assets', 'platform::assets');
     }
@@ -110,6 +118,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerUi();
         $this->registerUser();
         $this->registerView();
+        $this->registerPlugins();
 
         $this->app->make(Kernel::class)->pushMiddleware(Http\Middleware\RenderPlatformDataToFile::class);
     }
@@ -120,6 +129,9 @@ class PlatformServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.frontend.php', 'platform.frontend');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.diagnose.php', 'platform.diagnose');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.permission_sets.php', 'platform.permission_sets');
+        $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.icons.php', 'platform.icons');
+        $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.icons.sets.fa.php', 'platform.icons.sets.fa');
+        $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.icons.sets.mdi.php', 'platform.icons.sets.mdi');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/ziggy.php', 'ziggy');
     }
 
@@ -129,6 +141,9 @@ class PlatformServiceProvider extends ServiceProvider
             dirname(__DIR__) . '/resources/config/platform.frontend.php'        => config_path('platform.frontend.php'),
             dirname(__DIR__) . '/resources/config/platform.diagnose.php'        => config_path('platform.diagnose.php'),
             dirname(__DIR__) . '/resources/config/platform.permission_sets.php' => config_path('platform.permission_sets.php'),
+            dirname(__DIR__) . '/resources/config/platform.icons.php'           => config_path('platform.icons.php'),
+            dirname(__DIR__) . '/resources/config/platform.icons.sets.fa.php'   => config_path('platform.icons.sets.mdi.php'),
+            dirname(__DIR__) . '/resources/config/platform.icons.sets.mdi.php'  => config_path('platform.icons.sets.mdi.php'),
         ], [ 'config' ]);
     }
 
@@ -299,6 +314,19 @@ class PlatformServiceProvider extends ServiceProvider
         });
 
         $this->app->view->setFinder($this->app[ 'view.finder' ]);
+    }
+
+    protected function registerPlugins()
+    {
+        $this->app->events->listen(RegisteringTwigPlugins::class, function (RegisteringTwigPlugins $event) {
+            $twig = $event->getTwig();
+
+            foreach ($this->plugins as $plugin) {
+                if ( ! $twig->hasExtension($plugin)) {
+                    $twig->addExtension($this->app->make($plugin));
+                }
+            }
+        });
     }
 
 }

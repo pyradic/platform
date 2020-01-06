@@ -78,36 +78,4 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
 //        }
         return parent::find($name);
     }
-
-    // @todo remove
-    public function find2($name)
-    {
-        if (Str::startsWith($name, 'theme::')) {
-            $theme = resolve(ThemeCollection::class)->current();
-            if ($theme) {
-                $overrides = $this->overrides
-                    ->map->where('type', 'theme')
-                    ->flatten(1)
-                    ->where('namespace', $theme->getNamespace());
-                $paths     = $overrides->keyBy('sourceAddon.namespace')->mapWithKeys(function ($value, $key) {
-                    return [ $key => $value[ 'path' ] ];
-                });
-                if ($paths->isNotEmpty()) {
-                    [ $_namespace, $view ] = $this->parseNamespaceSegments($name);
-                    foreach ($paths as $namespace => $path) {
-                        try {
-
-                            $this->findInPaths($view, [ $path ]);
-                            $override = $overrides->keyBy('sourceAddon.namespace')->get($namespace);
-                            return $this->find($namespace . '::addons/' . str_replace('.', '/', $override[ 'namespace' ]) . '/' . $view);
-                        }
-                        catch (\InvalidArgumentException $e) {
-
-                        }
-                    }
-                }
-            }
-        }
-        return parent::find($name);
-    }
 }

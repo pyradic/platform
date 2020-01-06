@@ -21,10 +21,4 @@ export class TsxComponent<P = {}> extends Vue {
     __log: LogConfig
     __setupLog: (setup: LogConfig) => void
 
-    b(): string
-    b(element: string): string
-    b(modifiers: object): string
-    b(element: string, modifiers: object): string
-    b(element: string | false, mixin: string): string
-    b(...args): any {return ''}
 }

@@ -44,7 +44,8 @@ class AddAddonOverrides
         }
 
         // streams::
-        if ($fs->exists($streamsOverridePath = $this->addon->getPath('resources/streams'))) {
+        $streamsOverridePath = $this->addon->getPath('resources/streams');
+        if ($fs->exists($streamsOverridePath)) {
             if ($fs->exists($viewPath = $streamsOverridePath . '/views')) {
                 $namespace = 'streams';
                 $hints = $finder->getHints()[$namespace];
@@ -54,8 +55,6 @@ class AddAddonOverrides
                 // view name with 'original/' like: original/pyrocms.theme.accelerant::partials.metadata
                 $finder->addNamespace('original/' . $namespace, $hints);
                 $finder->prependNamespace($namespace, $viewPath);
-
-                $finder->prependNamespace('streams', $viewPath);
             }
             if ($fs->exists($configPath = $streamsOverridePath . '/config')) {
                 $configurator->addNamespaceOverrides('streams', $configPath);

@@ -100,7 +100,7 @@ export class Application extends Container {
     protected loadedProviders: Record<string, IServiceProvider> = {};
     protected providers: Array<IServiceProvider>                = [];
     protected booted: boolean                                   = false;
-    protected starting: boolean                                  = false;
+    protected starting: boolean                                 = false;
     protected started: boolean                                  = false;
     protected shuttingDown                                      = false;
 
@@ -263,6 +263,7 @@ export class Application extends Container {
         this.starting = true;
         this.hooks.start.call(Vue);
         this.root = new (this.Root.extend({
+            name: 'Root',
             delimiters: this.config.delimiters,
             // template: '<div id="app"><slot></slot></div>',
             // render(h,ctx){     return h(this.$slots.default, this.$slots.default)

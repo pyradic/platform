@@ -1,9 +1,11 @@
-import Vue from 'vue';
+import Vue             from 'vue';
 import { Application } from '@c/Application';
 import { AxiosStatic } from 'axios';
-import { LogConfig } from '@/interfaces';
+import { LogConfig }   from '@/interfaces';
+import { BemMethods }  from '@pyro/admin-theme';
 
 
+export interface Component extends Vue, BemMethods {}
 export class Component extends Vue {
     $py: Application
 
@@ -17,10 +19,5 @@ export class Component extends Vue {
     // $events: Dispatcher
     __log: LogConfig
     __setupLog: (setup: LogConfig) => void
-    b():string
-    b(element:string):string
-    b(modifiers:object):string
-    b(element:string,modifiers:object):string
-    b(element:string|false,mixin:string):string
-    b(...args):any {return ''}
+
 }

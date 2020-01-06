@@ -14,12 +14,12 @@ export function kindOf(value: any): KindsOf {
 }
 
 
-export const isNumber   = (value: any) => kindOf(value) === 'number';
-export const isString   = (value: any) => kindOf(value) === 'string';
-export const isBoolean  = (value: any) => kindOf(value) === 'boolean';
-export const isFunction = (value: any) => kindOf(value) === 'function';
-export const isRegExp   = (value: any) => kindOf(value) === 'regexp';
-export const isArray    = (value: any) => kindOf(value) === 'array';
-export const isDate     = (value: any) => kindOf(value) === 'date';
-export const isError    = (value: any) => kindOf(value) === 'error';
-export const isObject    = (value: any) => kindOf(value) === 'object';
+export const isNumber   = (value: any):value is number => kindOf(value) === 'number';
+export const isString   = (value: any):value is string => kindOf(value) === 'string';
+export const isBoolean  = (value: any):value is boolean => kindOf(value) === 'boolean';
+export const isFunction = (value: any):value is Function => kindOf(value) === 'function';
+export const isRegExp   = (value: any):value is RegExp => kindOf(value) === 'regexp';
+export const isArray    = (value: any):value is Array<any> => kindOf(value) === 'array';
+export const isDate     = (value: any):value is Date => kindOf(value) === 'date';
+export const isError    = (value: any):value is Error => kindOf(value) === 'error';
+export const isObject    = (value: any):value is object => kindOf(value) === 'object';
