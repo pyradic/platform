@@ -5,6 +5,7 @@ namespace Pyro\Platform\View;
 use Anomaly\Streams\Platform\Addon\Addon;
 use Anomaly\Streams\Platform\Addon\AddonCollection;
 use Anomaly\Streams\Platform\Addon\Theme\ThemeCollection;
+use BadFunctionCallException;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 
@@ -18,13 +19,14 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
 
     public function __construct(Filesystem $files, array $paths, array $extensions = null)
     {
-        $this->setAddons(new AddonCollection());
+//        $this->setAddons(new AddonCollection());
         parent::__construct($files, $paths, $extensions);
     }
 
     // @todo remove
     public function setAddons(AddonCollection $addons)
     {
+        throw new BadFunctionCallException('remove this');
         $this->addons    = $addons;
         $this->overrides = collect();
         $this->addons->each(function (Addon $addon) {
@@ -44,6 +46,7 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
     // @todo remove
     protected function override($namespace, $path, $sourceAddon = null)
     {
+        throw new BadFunctionCallException('remove this');
         $targetAddon = $this->addons->get($namespace);
         $type        = $targetAddon->getType();
 
@@ -60,6 +63,7 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
     // @todo remove
     public function addPathOverride($namespace, $hints)
     {
+        throw new BadFunctionCallException('remove this');
         if ( ! array_key_exists($namespace, $this->pathOverrides)) {
             $this->pathOverrides[ $namespace ] = [];
         }
@@ -69,7 +73,8 @@ class FileViewFinder extends \Illuminate\View\FileViewFinder
     public function find($name)
     {
         if (Str::startsWith($name, 'parent::')) { // @todo remove
-            list($parent, $namespace, $view) = explode('::',$name);
+            throw new BadFunctionCallException('remove this');
+            [$parent, $namespace, $view] = explode('::',$name);
             return $this->findInPaths($view, $this->pathOverrides[$namespace][0]);
         }
 //        if (Str::startsWith($name, 'theme::')) {

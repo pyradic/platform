@@ -1,7 +1,9 @@
-import _Vue, { ComponentOptions } from 'vue';
-import { LogConfig } from '@pyro/platform';
-import { Application } from '@pyro/platform';
-import { BemMethods } from './plugins/bem';
+import _Vue, { ComponentOptions }                    from 'vue';
+import { LogConfig }                                 from '@/index';
+import { Application }                               from '@/index';
+import { BemMethods }                                from './plugins/bem';
+import { ElLoadingComponent, LoadingServiceOptions } from 'element-ui/types/loading';
+import { Loading }                                   from 'element-ui';
 
 
 declare module 'vue/types/vue' {
@@ -24,6 +26,9 @@ declare module 'vue/types/vue' {
         __log: LogConfig
 
         __setupLog(setup: LogConfig)
+
+        $loading(options: LoadingServiceOptions):ElLoadingComponent
+        $loader<T=any>(callback: (loading: ElLoadingComponent) => Promise<T>, options: LoadingServiceOptions):Promise<T>
     }
 
     interface VueConstructor<V extends _Vue = _Vue> {
@@ -35,7 +40,7 @@ declare module 'vue/types/vue' {
             defineReactive(obj, key?, val?, customSetter?, shallow?)
             extend(to, _from)
             mergeOptions(parent, child, vm)
-            warn(msg, vm)
+            warn(msg, vm?)
         }
         // $store?: Store
     }

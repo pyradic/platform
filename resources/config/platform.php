@@ -3,5 +3,9 @@
 
 
 return [
+    'livewire' => [
+        'paths' => [
 
+        ]
+    ]
 ];

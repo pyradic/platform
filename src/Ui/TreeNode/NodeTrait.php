@@ -71,6 +71,11 @@ trait NodeTrait
         return $this->value;
     }
 
+    public function hasValue()
+    {
+        return $this->value !== null;
+    }
+
     public function hasChild(NodeInterface $child): bool
     {
         foreach ($this->children as $item) {

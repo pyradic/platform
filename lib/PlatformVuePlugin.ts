@@ -8,12 +8,15 @@ import { VuePlugin }   from '@c/VuePlugin';
 import { Config }      from '@c/Config';
 import { Application } from '@c/Application';
 import { Script }      from '#/script';
+import Axios           from 'axios';
+import { warn }        from '@u/general';
 
 const log = require('debug')('install')
 
 export { PlatformVuePlugin }
 export default class PlatformVuePlugin extends VuePlugin {
     static __installed = false
+
 
     static install(_Vue: typeof Vue, opts: any = {}) {
         if ( this.__installed ) { return }
@@ -26,9 +29,7 @@ export default class PlatformVuePlugin extends VuePlugin {
         locale.use(lang);
 
         _Vue.use(LogPlugin)
-        _Vue.use(HttpPlugin, {
-            csrf: this.app.config.csrf
-        })
+        _Vue.use(HttpPlugin)
 
         this.prefixAndRegisterComponents(_Vue, {
             'script': Script

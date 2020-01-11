@@ -135,7 +135,7 @@ function transformPropsDataJsx(props: Record<string, PropOptions<any>>) {
     // props.asdf.type.name.string()
 }
 
-export function generateVueCodeCompletion() {
+function generate() {
     // let _plugin    = getPlugin()
     let components = mergeChildPrototypes(Vue.options.components)
     // let plugins    = getPlugins().filter(plugin => plugin.NAME !== _plugin.NAME)
@@ -191,4 +191,11 @@ export function generateVueCodeCompletion() {
     let jsxResult = jsxLines.join("\n")
     let getJsxResult = () => jsxResult.replace('↵', '\n');
     return { components, lines, result, getResult, jsxResult, getJsxResult };
+}
+
+
+export async function generateVueCodeCompletion(){
+    const ElementUI = await import('element-ui')
+    Vue.use(ElementUI, {locale:'nl'});
+    return generate();
 }

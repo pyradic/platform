@@ -1,6 +1,4 @@
-///<reference path="vue.d.ts"/>
-///<reference path="global.d.ts"/>
-///<reference path="modules.d.ts"/>
+///<reference path="types/index.d.ts"/>
 
 import 'reflect-metadata';
 import { merge } from 'lodash';

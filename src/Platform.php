@@ -67,6 +67,11 @@ class Platform implements ArrayAccess
         return $this;
     }
 
+    public function addLivewireClass(string $fqns)
+    {
+        $this->app->config->push('platform.livewire.classes', $fqns);
+    }
+
     public function preventBootstrap($value = true)
     {
         $this->preventBootstrap = $value;

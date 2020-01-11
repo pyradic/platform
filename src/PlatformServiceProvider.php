@@ -22,6 +22,7 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Jackiedo\DotenvEditor\DotenvEditor;
+use Pyro\Platform\Addon\AddonProvider;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Command\AddPlatformAssetNamespaces;
 use Pyro\Platform\Command\OverrideIconRegistryIcons;
@@ -39,16 +40,16 @@ use Pyro\Platform\Listener\OverrideAddons;
 use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
 use Pyro\Platform\Listener\SharePlatform;
+use Pyro\Platform\Livewire\LivewirePlugin;
 use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
-use Pyro\Platform\View\FileViewFinder;
 
 class PlatformServiceProvider extends ServiceProvider
 {
     use DispatchesJobs;
 
     protected $plugins = [
-        PlatformPlugin::class,
+        LivewirePlugin::class,
     ];
 
     protected $listen = [
@@ -75,14 +76,15 @@ class PlatformServiceProvider extends ServiceProvider
     protected $providers = [
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
+        \Inertia\ServiceProvider::class,
 //        \Tightenco\Ziggy\ZiggyServiceProvider::class,
+
         \Pyro\CustomInstall\CustomInstallServiceProvider::class,
         \Pyro\Webpack\WebpackServiceProvider::class,
 
+        \Pyro\Platform\Livewire\LivewireServiceProvider::class,
         \Pyro\Platform\Bus\BusServiceProvider::class,
         \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
-        \Inertia\ServiceProvider::class,
-        \Livewire\LivewireServiceProvider::class
     ];
 
     protected $devProviders = [
@@ -92,6 +94,8 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function boot(ViewOverrides $overrides, Request $request, ViewRegistry $viewRegistry)
     {
+        $this->app->singleton(\Anomaly\Streams\Platform\Addon\AddonProvider::class,AddonProvider::class);
+
         $this->bootConfig();
         $this->bootConsole();
         dispatch_now(new AddPlatformAssetNamespaces());
@@ -126,6 +130,7 @@ class PlatformServiceProvider extends ServiceProvider
     protected function mergeConfig()
     {
         ///pyro.platform.
+        $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.php', 'platform');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.frontend.php', 'platform.frontend');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.diagnose.php', 'platform.diagnose');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.permission_sets.php', 'platform.permission_sets');
@@ -138,6 +143,7 @@ class PlatformServiceProvider extends ServiceProvider
     protected function bootConfig()
     {
         $this->publishes([
+            dirname(__DIR__) . '/resources/config/platform.php'                 => config_path('platform.php'),
             dirname(__DIR__) . '/resources/config/platform.frontend.php'        => config_path('platform.frontend.php'),
             dirname(__DIR__) . '/resources/config/platform.diagnose.php'        => config_path('platform.diagnose.php'),
             dirname(__DIR__) . '/resources/config/platform.permission_sets.php' => config_path('platform.permission_sets.php'),
@@ -220,7 +226,7 @@ class PlatformServiceProvider extends ServiceProvider
          * Not enabled on production. Requires app.debug to be true
          */
         if ($this->app->environment('local') && $this->app->config[ 'app.debug' ]) {
-            $this->app->make(Kernel::class)->prependMiddleware(DebugLoginMiddleware::class);
+            $this->app->make(Kernel::class)->pushMiddleware(DebugLoginMiddleware::class);
         }
     }
 
@@ -269,51 +275,52 @@ class PlatformServiceProvider extends ServiceProvider
 
     protected function registerView()
     {
-
-        $this->app->bind(
-            'twig.loader.viewfinder',
-            function ($app) {
-                return $app->make(
-                    View\Loader::class,
-                    [
-                        'files'     => $app[ 'files' ],
-                        'finder'    => $app[ 'view' ]->getFinder(),
-                        'extension' => $app[ 'twig.extension' ],
-                    ]
-                );
-            }
-        );
-
-        $this->app->booting(function (Application $app) {
-            /*
-             * Add cp_scripts
-             */
-//            $includes = $app[ ViewIncludes::class ];
-//            if ($app[ 'config' ][ 'platform.cp_scripts.enabled' ]) {
-//                $includes->include('cp_scripts', 'platform::cp_scripts');
-//            }
-        });
-
         /*
-         *  replace view finder
+         * A slight alteration in the call order to make `theme::something` work in view overrides. As the original loader 'normalizes' it a tad to soon.
          */
-        $oldViewFinder = $this->app[ 'view.finder' ];
-        $this->app->bind('view.finder', function ($app) use ($oldViewFinder) {
-            /** @var FileViewFinder $oldViewFinder */
-            $paths      = array_merge(
-                $app[ 'config' ][ 'view.paths' ],
-                $oldViewFinder->getPaths()
+        $this->app->bind('twig.loader.viewfinder', function (Application $app) {
+            return $app->make(View\Loader::class, [
+                    'files'     => $app[ 'files' ],
+                    'finder'    => $app[ 'view' ]->getFinder(),
+                    'extension' => $app[ 'twig.extension' ],
+                ]
             );
-            $viewFinder = new FileViewFinder($app[ 'files' ], $paths, $oldViewFinder->getExtensions());
-
-            foreach ($oldViewFinder->getHints() as $namespace => $hints) {
-                $viewFinder->addNamespace($namespace, $hints);
-            }
+        }        );
+        $this->app->extend('view.finder', function (\Illuminate\View\FileViewFinder $viewFinder) {
             $viewFinder->addNamespace('platform', dirname(__DIR__) . '/resources/views');
             return $viewFinder;
         });
 
-        $this->app->view->setFinder($this->app[ 'view.finder' ]);
+//        $this->app->booting(function (Application $app) {
+        /*
+         * Add cp_scripts
+         */
+//            $includes = $app[ ViewIncludes::class ];
+//            if ($app[ 'config' ][ 'platform.cp_scripts.enabled' ]) {
+//                $includes->include('cp_scripts', 'platform::cp_scripts');
+//            }
+//        });
+
+        /*
+         *  replace view finder
+         */
+//        $oldViewFinder = $this->app[ 'view.finder' ];
+//        $this->app->bind('view.finder', function ($app) use ($oldViewFinder) {
+//            /** @var FileViewFinder $oldViewFinder */
+//            $paths      = array_merge(
+//                $app[ 'config' ][ 'view.paths' ],
+//                $oldViewFinder->getPaths()
+//            );
+//            $viewFinder = new FileViewFinder($app[ 'files' ], $paths, $oldViewFinder->getExtensions());
+//
+//            foreach ($oldViewFinder->getHints() as $namespace => $hints) {
+//                $viewFinder->addNamespace($namespace, $hints);
+//            }
+//            $viewFinder->addNamespace('platform', dirname(__DIR__) . '/resources/views');
+//            return $viewFinder;
+//        });
+//
+//        $this->app->view->setFinder($this->app[ 'view.finder' ]);
     }
 
     protected function registerPlugins()

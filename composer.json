@@ -28,9 +28,20 @@
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Button/ButtonBuilder.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Button/ButtonGuesser.php",
             "vendor/anomaly/streams-platform/src/Ui/Icon/IconRegistry.php",
+            "vendor/anomaly/streams-platform/src/Ui/Button/Button.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/Component/Action/Action.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/Component/Action/ActionBuilder.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/Component/Column/Column.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/Component/Filter/Filter.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/Component/Header/Header.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/Component/Row/Row.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/Component/View/View.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/Table.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/TableBuilder.php",
             "vendor/anomaly/streams-platform/src/Traits/FiresCallbacks.php",
             "vendor/anomaly/streams-platform/src/Database/Seeder/Seeder.php",
-            "vendor/anomaly/streams-platform/src/Support/Hydrator.php"
+            "vendor/anomaly/streams-platform/src/Support/Hydrator.php",
+            "vendor/anomaly/streams-platform/src/Addon/AddonServiceProvider.php"
         ]
     },
     "extra": {

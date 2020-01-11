@@ -4,7 +4,12 @@
 {% endfor %}
 </style>
 
+
+{{ app.livewire.assets()|raw }}
+
 {{ template.includes.render('cp_scripts')|raw }}
+
+
 {% set assetOutput = 'content' %}
 {% set assetOutput = 'url' %}
 {% for asset in asset_inlines_context('scripts.js') %}

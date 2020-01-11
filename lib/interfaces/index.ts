@@ -1,19 +1,14 @@
-import { Application } from '../classes/Application';
+import { Application }        from '../classes/Application';
+import { AxiosRequestConfig } from 'axios';
 
-export * from './colors'
-export * from './icons'
-export * from './index'
-export * from './platform.config.generated'
-export * from './platform.data.generated'
-export * from './platform.data'
-export * from './streams.generated'
-export * from './streams'
-
-
-
-
-
-
+export * from './colors';
+export * from './icons';
+export * from './index';
+export * from './platform.config.generated';
+export * from './platform.data.generated';
+export * from './platform.data';
+export * from './streams.generated';
+export * from './streams';
 
 
 export interface LogConfig {
@@ -30,7 +25,7 @@ export interface BootstrapOptions {
     config?: IConfig
     providers?: Array<IServiceProviderClass>
     data?: any
-    routes?: Array<{uri:string, methods:string[], domain?:string}>
+    routes?: Array<{ uri: string, methods: string[], domain?: string }>
 
 }
 
@@ -65,6 +60,7 @@ export interface IConfig {
     debug?: boolean
     csrf?: string
     delimiters?: [ string, string ]
+    http?: AxiosRequestConfig
 }
 
 export interface Macroable {
@@ -89,7 +85,7 @@ export interface Comparable<T> {
 
 /* class decorator */
 export function staticImplements<T>() {
-    return (constructor: T) => {}
+    return (constructor: T) => {};
 }
 
 export type Styles = Partial<Record<keyof CSSStyleDeclaration, any>>

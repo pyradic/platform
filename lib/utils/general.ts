@@ -12,7 +12,7 @@ import { camelCase, isNumber } from 'lodash';
 import { isObject }            from './kindOf';
 
 export function warn(message: string, ...params: any[]) {
-    console.warn('[codex][core] ' + message, ...params);
+    console.warn('[pyro][platform] ' + message, ...params);
 }
 
 export function uniqueId() {

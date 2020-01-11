@@ -1,5 +1,5 @@
-import * as platform from './index'
-import { Application, Plugin } from './index'
+import * as platform           from '../index'
+import { Application, Plugin } from '../index'
 
 declare global {
 

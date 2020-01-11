@@ -9,7 +9,7 @@ import Vue, { Component, ComponentOptions, VueConstructor }                     
 import { merge }                                                                      from 'lodash';
 import { Cookies, Storage }                                                           from '@u/storage';
 import debug                                                                          from 'debug';
-import { AxiosStatic }                                                                from 'axios';
+import { AxiosStatic,AxiosRequestConfig }                                                                from 'axios';
 import { PlatformStyleVariables }                                                     from '@/styling/export';
 import { Store }                                                                      from 'vuex';
 import { IState }                                                                     from '@/store';
@@ -42,6 +42,7 @@ const defaultConfig: Partial<IConfig> = {
     debug     : false,
     csrf      : null,
     delimiters: [ '\{\{', '}}' ],
+    http: {}
 };
 
 export function loadConfigDefaults(): Config<IConfig> {
@@ -106,7 +107,7 @@ export class Application extends Container {
 
     public get config(): Config<IConfig> & IConfig {return this.get('config');}
 
-    public get routes(): Record<string, { url: string, methods: string[] }> {return this.get('routes');}
+    public get routes(): Record<string, { uri: string, methods: string[], domain:string|null }> {return this.get('routes');}
 
     protected constructor() {
         super({

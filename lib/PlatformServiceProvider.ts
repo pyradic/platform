@@ -45,14 +45,20 @@ export class PlatformServiceProvider extends ServiceProvider {
 
         this.app.instance<AxiosRequestConfig>('http.config', {} as AxiosRequestConfig);
         this.app.dynamic('http', app => {
-            Axios.defaults.headers.common[ 'X-Requested-With' ] = 'XMLHttpRequest';
-            let token                                           = document.head.querySelector('meta[name="csrf-token"]');
-            if ( token ) {
-                Axios.defaults.headers.common[ 'X-CSRF-TOKEN' ] = token[ 'content' ];
-            } else {
-                Axios.defaults.headers.common[ 'X-CSRF-TOKEN' ] = this.app.config.csrf;
-            }
-            return Axios.create(app.get('http.config'));
+
+            const http = Axios.create({
+                credentials: "same-origin",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/html, application/xhtml+xml',
+                    'X-Requested-With':'XMLHttpRequest',
+                    'X-CSRF-TOKEN': app.config.csrf || document.head.querySelector('meta[name="csrf-token"]')['content'],
+                    'X-Livewire': true,
+                },
+                ...(app.config.http || {})
+            })
+
+            return http;
         });
         this.app.addBindingGetter('http');
 
