@@ -5,6 +5,7 @@ namespace Pyro\Platform\Component;
 use Anomaly\Streams\Platform\Traits\FiresCallbacks;
 use Anomaly\Streams\Platform\Traits\Hookable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Laradic\Support\Traits\ArrayableProperties;
 use Laradic\Support\Traits\ArrayAccessibleProperties;
 use Pyro\Platform\Ui\TreeNode\NodeTrait;
@@ -38,12 +39,11 @@ class Component implements ComponentInterface
     public function __construct(array $data = [])
     {
         $this->setCollectionClass(ComponentCollection::class);
-        $this->reset();
+        $this->reset($data);
     }
 
     public static function create($data = [], ComponentInterface $parent = null)
     {
-        $data      = array_replace_recursive([ 'props' => [], 'attrs' => [], 'class' => [], 'children' => [] ], $data);
         $component = new static($data);
         $component->setParent($parent);
         return $component;
@@ -73,20 +73,38 @@ class Component implements ComponentInterface
         return $this->props;
     }
 
-    public function render()
+    public function render($pretty = false)
     {
-        $res = '';
-        $res .= "<{$this->tag} ";
+        $tag   = Str::kebab($this->tag);
+        $ident = str_repeat(' ', $this->getDepth() * 4);
+        $res   = '';
+        if ($pretty) {
+            $res = $ident;
+        }
+        $res .= "<{$tag}";
 
         if ($this->props->isNotEmpty()) {
-            $res .= $this->props->map->render()->implode(' ');
-            $res .= " ";
+            $res .= " " . $this->props->map->render()->implode(' ');
         }
         $res .= ">";
-        if ($this->hasChildren()) {
-            $res .= $this->getChildren()->map->render()->implode(' ');
+
+        if ($this->hasValue()) {
+            $res .= (string)$this->getValue();
+        } elseif ($this->hasChildren()) {
+            if ($pretty) {
+                $res .= PHP_EOL;
+            }
+            $res .= $this->getChildren()->map->render($pretty)->implode('');
+            if ($pretty) {
+                $res .= $ident;
+            }
         }
-        $res .= "</{$this->tag}>";
+        $res .= "</{$tag}>";
+        if ($pretty) {
+            $res .= PHP_EOL;
+        }
+        if ($this->hasChildren()) {
+        }
         return $res;
     }
 

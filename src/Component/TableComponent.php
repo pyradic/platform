@@ -2,7 +2,10 @@
 
 namespace Pyro\Platform\Component;
 
-class TableComponent
+class TableComponent extends Component
 {
+    /** @var string */
+    protected $tag = 'table';
+
 
 }
