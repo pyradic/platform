@@ -17,6 +17,8 @@ class DiagnoseServiceProvider extends ServiceProvider
     {
         $addons = $_addons->withConfig('diagnose');
 
+        $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', 'self-diagnosis');
+
         return;
     }
 

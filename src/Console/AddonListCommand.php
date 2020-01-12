@@ -13,30 +13,19 @@ class AddonListCommand extends Command
 {
     protected $signature = 'addon:list {--i|installed} {--u|uninstalled} {--E|enabled} {--D|disabled} {--m|modules} {--e|extensions} {--f|fields}  {--t|themes}';
 
-    /**
-     * handle method
-     *
-     * @param \Anomaly\Streams\Platform\Addon\AddonCollection|\Anomaly\Streams\Platform\Addon\Addon[]                             $addons
-     *
-     * @param \Anomaly\Streams\Platform\Addon\Module\ModuleCollection|\Anomaly\Streams\Platform\Addon\Module\Module[]             $modules
-     * @param \Anomaly\Streams\Platform\Addon\Extension\ExtensionCollection|\Anomaly\Streams\Platform\Addon\Extension\Extension[] $extensions
-     * @param \Anomaly\Streams\Platform\Addon\FieldType\FieldTypeCollection|\Anomaly\Streams\Platform\Addon\FieldType\FieldType[] $fieldTypes
-     *
-     * @return void
-     */
-    public function handle(AddonCollection $addons, ModuleCollection $modules, ExtensionCollection $extensions, FieldTypeCollection $fields, ThemeCollection $themes)
+    public function handle(AddonCollection $addons)
     {
         if ($this->option('modules')) {
-            $this->listModules($modules);
+            $this->listModules($addons->modules);
         }
         if ($this->option('extensions')) {
-            $this->listExtensions($extensions);
+            $this->listExtensions($addons->extensions);
         }
         if ($this->option('fields')) {
-            $this->listFields($fields);
+            $this->listFields($addons->fieldTypes);
         }
         if ($this->option('themes')) {
-            $this->listThemes($themes);
+            $this->listThemes($addons->themes);
         }
 
         if (
@@ -45,10 +34,10 @@ class AddonListCommand extends Command
             ! $this->option('fields') &&
             ! $this->option('themes')
         ) {
-            $this->listModules($modules);
-            $this->listExtensions($extensions);
-            $this->listFields($fields);
-            $this->listThemes($themes);
+            $this->listModules($addons->modules);
+            $this->listExtensions($addons->extensions);
+            $this->listFields($addons->fieldTypes);
+            $this->listThemes($addons->themes);
         }
     }
 

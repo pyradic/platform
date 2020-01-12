@@ -12,7 +12,7 @@ class DiagnoseCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'self-diagnosis {environment?}';
+    protected $signature = 'diagnose {environment?}';
 
     /**
      * The console command description.
