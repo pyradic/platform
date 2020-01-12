@@ -4,9 +4,7 @@ namespace Pyro\Platform\Ui;
 
 use Anomaly\Streams\Platform\Ui\Table\Component\Row\Row;
 use Anomaly\Streams\Platform\Ui\Table\Table;
-use Anomaly\Streams\Platform\Ui\Table\TableBuilder;
-use Crvs\ClientsModule\Ui\Input;
-use Crvs\ClientsModule\Ui\Support\Decoder;
+use Pyro\Platform\Support\Decoder;
 
 class Normalizer
 {

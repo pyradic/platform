@@ -41,6 +41,7 @@ use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
 use Pyro\Platform\Listener\SharePlatform;
 use Pyro\Platform\Livewire\LivewirePlugin;
+use Pyro\Platform\Support\ExpressionLanguageParser;
 use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
 
@@ -183,6 +184,13 @@ class PlatformServiceProvider extends ServiceProvider
             return new PermissionsCommand();
         });
         $this->commands([ 'command.platform.seed', 'command.addon.list', 'command.database.truncate', 'command.platform.permissions' ]);
+    }
+
+    protected function registerExpressionLanguageFunctions()
+    {
+        ExpressionLanguageParser::registerFunctions([
+
+        ]);
     }
 
     protected function registerListeners($events)
