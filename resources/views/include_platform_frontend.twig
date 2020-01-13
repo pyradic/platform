@@ -21,6 +21,9 @@
 {% if platform.shouldntPreventBootstrap %}
     <script>
         (function () {
+            if(typeof this.pyro === 'undefined'){
+                alert('Can\'t find namespace pyro. Are assets installed and published?')
+            }
             var app = this.pyro.pyro__platform.Application.instance;
             var log = app.createLog('boot_platform_frontend');
 

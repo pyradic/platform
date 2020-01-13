@@ -59,8 +59,8 @@ class Prop implements ArrayAccess, Arrayable, JsonSerializable
         if ($this->name) {
             $res .= $this->name;
         }
-        if ($this->modifiers->isNotEmpty()) {
-            $res .= '.' . $this->modifiers->implode('.');
+        if (count($this->modifiers) > 1) {
+            $res .= '.' . implode('.', $this->modifiers);
         }
 
         if ($this->value) {

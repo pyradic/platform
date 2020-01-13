@@ -339,6 +339,7 @@ export type CorrespondenceVia = string;
 export type Specials = string;
 export type SignupDate = string;
 export type Memo = string;
+export type A = string;
 
 export interface ClientsClients {
   id: Id;
@@ -371,6 +372,7 @@ export interface ClientsClients {
   specials?: Specials;
   signup_date?: SignupDate;
   memo?: Memo;
+  a?: A;
   [k: string]: any;
 }
 

@@ -4,6 +4,7 @@ namespace Pyro\Platform\Component;
 
 use Anomaly\Streams\Platform\Traits\FiresCallbacks;
 use Anomaly\Streams\Platform\Traits\Hookable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laradic\Support\Traits\ArrayableProperties;
@@ -60,10 +61,11 @@ class Component implements ComponentInterface
 
         $this->class = $data[ 'class' ] ?? $this->class;
 
-        foreach ($data[ 'props' ] as $name => $value) {
+
+        foreach (Arr::wrap($data['props']) as $name => $value) {
             $this->props->set($name, $value);
         }
-        foreach ($data[ 'attrs' ] as $name => $value) {
+        foreach (Arr::wrap($data['attrs']) as $name => $value) {
             $this->attrs->put($name, $value);
         }
     }
