@@ -4,12 +4,12 @@ export interface PlatformData {
     module:      Module;
     breadcrumbs: Breadcrumbs;
     user:        User;
+    profile:     PlatformDataProfile;
 }
 
 export interface Breadcrumbs {
     "Klant Module": string;
     Klanten:        string;
-    Wijzigen:       string;
 }
 
 export interface Cp {
@@ -52,7 +52,7 @@ export interface NavigationChild {
     permalink:   null;
     description: null | string;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     parent:      null;
     subSection:  boolean;
     buttons:     string[] | PurpleButtons;
@@ -102,7 +102,7 @@ export interface PurpleChild {
     class:      null;
     size:       Size;
     permission: string;
-    type:       ManageType;
+    type:       SlugEnum;
     text:       string;
     url:        null;
     tag:        Tag;
@@ -126,10 +126,14 @@ export enum Tag {
     A = "a",
 }
 
-export enum ManageType {
+export enum SlugEnum {
     Default = "default",
     Info = "info",
     Success = "success",
+}
+
+export enum Context {
+    Danger = "danger",
 }
 
 export interface Section {
@@ -145,7 +149,7 @@ export interface Section {
     permalink:   null;
     description: null | string;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     parent:      null;
     subSection:  boolean;
     buttons:     string[];
@@ -172,18 +176,18 @@ export interface SectionChild {
     class:      null;
     size:       Size;
     permission: string;
-    type:       ManageType;
+    type:       SlugEnum;
     text:       string;
     url:        null;
     tag:        Tag;
 }
 
 export interface Shortcuts {
-    department:  Department;
-    preferences: Department;
+    department:  PreferencesClass;
+    preferences: PreferencesClass;
 }
 
-export interface Department {
+export interface PreferencesClass {
     children:    DepartmentChild[];
     type:        string;
     slug:        string;
@@ -192,7 +196,7 @@ export interface Department {
     label:       string;
     class:       null | string;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     attributes:  PurpleAttributes;
     permission:  string;
     href:        string;
@@ -246,7 +250,7 @@ export interface AnomalyModuleDashboardChild {
     permalink:   null;
     description: null;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     parent:      null;
     subSection:  boolean;
     buttons:     ChildButtonsClass;
@@ -265,7 +269,7 @@ export interface ChildButtonsClass {
 }
 
 export interface Manage {
-    type:       ManageType;
+    type:       SlugEnum;
     icon:       Icon;
     enabled:    string;
     permission: string;
@@ -312,7 +316,7 @@ export interface AnomalyModuleFilesChild {
     permalink:   null;
     description: null;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     parent:      null | string;
     subSection:  boolean;
     buttons:     string[] | FluffyButtons;
@@ -335,7 +339,7 @@ export interface Upload {
     "data-toggle": DataToggle;
     icon:          Icon;
     "data-target": DataTarget;
-    type:          ManageType;
+    type:          SlugEnum;
     href:          string;
 }
 
@@ -368,7 +372,7 @@ export interface AnomalyModuleGridsChild {
     permalink:   null;
     description: null;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     parent:      null | string;
     subSection:  boolean;
     buttons:     string[] | TentacledButtons;
@@ -430,7 +434,7 @@ export interface AnomalyModuleUsersChild {
     permalink:   null;
     description: null;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     parent:      null;
     subSection:  boolean;
     buttons:     string[] | StickyButtons;
@@ -475,7 +479,7 @@ export interface CrvsModuleDepartmentsChild {
     permalink:   null;
     description: null;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     parent:      null;
     subSection:  boolean;
     buttons:     any[] | IndigoButtons;
@@ -526,7 +530,7 @@ export interface ExamplesModuleEx3Child {
     permalink:   null;
     description: null;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     parent:      null;
     subSection:  boolean;
     buttons:     any[] | IndecentButtons;
@@ -557,7 +561,7 @@ export interface FluffyChild {
     class:      null;
     size:       Size;
     permission: string;
-    type:       ManageType;
+    type:       SlugEnum;
     text:       string;
     url:        null;
     tag:        Tag;
@@ -597,7 +601,7 @@ export interface PyroModuleMenusChild {
     permalink:   null | string;
     description: null;
     highlighted: boolean;
-    context:     string;
+    context:     Context;
     parent:      null;
     subSection:  boolean;
     buttons:     string[] | StickyButtons;
@@ -655,6 +659,70 @@ export interface Module {
     name:      string;
     namespace: string;
     type:      string;
+}
+
+export interface PlatformDataProfile {
+    entry:       Entry;
+    roles:       RoleClass[];
+    departments: RoleClass[];
+    department:  RoleClass;
+    profiles:    ProfileElement[];
+}
+
+export interface RoleClass {
+    id:          number;
+    name:        string;
+    slug:        string;
+    description: string;
+    enabled?:    boolean;
+    color?:      string;
+}
+
+export interface Entry {
+    id:         number;
+    firstname:  string;
+    lastname:   string;
+    gender:     string;
+    created_at: Date;
+}
+
+export interface ProfileElement {
+    actions: Action[];
+    role:    string;
+    widgets: Widget[];
+    fields:  Field[];
+}
+
+export interface Action {
+    active:     boolean;
+    slug:       string;
+    permission: null;
+    text:       string;
+    disabled:   boolean;
+    enabled:    boolean;
+    entry:      null;
+    attributes: PurpleAttributes;
+    class:      null;
+}
+
+export interface Field {
+    slug:       SlugEnum;
+    title:      string;
+    attributes: any[];
+    class:      null;
+    key:        string;
+    value:      null | string;
+}
+
+export interface Widget {
+    content:    string;
+    slug:       string;
+    permission: null;
+    title:      string;
+    disabled:   boolean;
+    enabled:    boolean;
+    attributes: any[];
+    class:      null;
 }
 
 export interface User {

@@ -56,15 +56,15 @@ class Component implements ComponentInterface
 
         $this->tag   = $data[ 'tag' ] ?? $this->tag;
         $this->attrs = new Collection();
-        $this->props = new PropCollection();
+//        $this->props = new PropCollection();
         $this->class = new Collection();
 
         $this->class = $data[ 'class' ] ?? $this->class;
 
 
-        foreach (Arr::wrap($data['props']) as $name => $value) {
-            $this->props->set($name, $value);
-        }
+//        foreach (Arr::wrap($data['props']) as $name => $value) {
+//            $this->props->set($name, $value);
+//        }
         foreach (Arr::wrap($data['attrs']) as $name => $value) {
             $this->attrs->put($name, $value);
         }
@@ -85,8 +85,10 @@ class Component implements ComponentInterface
         }
         $res .= "<{$tag}";
 
-        if ($this->props->isNotEmpty()) {
-            $res .= " " . $this->props->map->render()->implode(' ');
+        if ($this->attrs->isNotEmpty()) {
+            foreach($this->attrs as $key => $value){
+                $res .= ' ' . $key . '="' . $value . '"';
+            }
         }
         $res .= ">";
 
