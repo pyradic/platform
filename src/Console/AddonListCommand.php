@@ -2,16 +2,22 @@
 
 namespace Pyro\Platform\Console;
 
+use Anomaly\Streams\Platform\Addon\Addon;
 use Anomaly\Streams\Platform\Addon\AddonCollection;
 use Anomaly\Streams\Platform\Addon\Extension\ExtensionCollection;
 use Anomaly\Streams\Platform\Addon\FieldType\FieldTypeCollection;
 use Anomaly\Streams\Platform\Addon\Module\ModuleCollection;
 use Anomaly\Streams\Platform\Addon\Theme\ThemeCollection;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class AddonListCommand extends Command
 {
-    protected $signature = 'addon:list {--i|installed} {--u|uninstalled} {--E|enabled} {--D|disabled} {--m|modules} {--e|extensions} {--f|fields}  {--t|themes}';
+    protected $signature = 'addon:list
+                                      {search?}
+                                      {--i|installed} {--u|uninstalled}
+                                      {--E|enabled} {--D|disabled}
+                                      {--m|modules} {--e|extensions} {--f|fields}  {--t|themes}';
 
     public function handle(AddonCollection $addons)
     {
@@ -44,7 +50,9 @@ class AddonListCommand extends Command
     protected function listThemes(ThemeCollection $themes)
     {
         $rows = [];
-        foreach ($themes as $theme) {
+        $themes = $this->filterSearch($themes);
+
+        foreach ($themes->all() as $theme) {
             $rows[] = [
                 $theme->getNamespace(),
             ];
@@ -55,7 +63,9 @@ class AddonListCommand extends Command
     protected function listFields(FieldTypeCollection $fields)
     {
         $rows = [];
-        foreach ($fields as $field) {
+        $fields = $this->filterSearch($fields);
+
+        foreach ($fields->all() as $field) {
             $rows[] = [
                 $field->getNamespace(),
             ];
@@ -70,6 +80,8 @@ class AddonListCommand extends Command
                 $extensions = $extensions->{$state}();
             }
         }
+
+            $extensions = $this->filterSearch($extensions);
 
         $rows = [];
         foreach ($extensions as $extension) {
@@ -89,6 +101,8 @@ class AddonListCommand extends Command
             }
         }
 
+        $modules = $this->filterSearch($modules);
+
         $rows = [];
         foreach ($modules as $module) {
             $rows[] = [
@@ -97,5 +111,20 @@ class AddonListCommand extends Command
             ];
         }
         $this->table([ 'namespace', 'enabled' ], $rows);
+    }
+
+    /**
+     * @param \Anomaly\Streams\Platform\Addon\AddonCollection $addons
+     *
+     * @return \Anomaly\Streams\Platform\Addon\Addon[]|\Anomaly\Streams\Platform\Addon\AddonCollection
+     */
+    protected function filterSearch(AddonCollection $addons)
+    {
+        if($search = $this->argument('search')) {
+            return $addons->filter(function (Addon $addon) use ($search) {
+                return Str::is("*{$search}*", $addon->getNamespace());
+            });
+        }
+        return $addons;
     }
 }

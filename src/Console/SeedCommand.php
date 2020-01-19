@@ -17,9 +17,12 @@ class SeedCommand extends Command
     public function handle(UserRepositoryInterface $repository)
     {
         $regs = collect(Seeder::$registered);
-        $user = $repository->findByEmail(env('ADMIN_EMAIL'));
-        auth()->loginUsingId($user->getId());
-
+        try {
+            $user = $repository->findByEmail(env('ADMIN_EMAIL'));
+            auth()->loginUsingId($user->getId());
+        } catch (\Throwable $e){
+            $this->warn($e->getMessage());
+        }
         if($this->option('list')){
             $rows = collect($regs)->map(function($reg){
                 return [$reg['name'], $reg['description'], $reg['class']];

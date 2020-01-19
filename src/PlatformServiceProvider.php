@@ -29,6 +29,7 @@ use Pyro\Platform\Command\OverrideIconRegistryIcons;
 use Pyro\Platform\Console\AddonListCommand;
 use Pyro\Platform\Console\DatabaseTruncateCommand;
 use Pyro\Platform\Console\EnvSet;
+use Pyro\Platform\Console\MacroCommand;
 use Pyro\Platform\Console\PermissionsCommand;
 use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
@@ -85,7 +86,7 @@ class PlatformServiceProvider extends ServiceProvider
 
         \Pyro\Platform\Livewire\LivewireServiceProvider::class,
         \Pyro\Platform\Bus\BusServiceProvider::class,
-        \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
+//        \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
     ];
 
     protected $devProviders = [
@@ -95,7 +96,7 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function boot(ViewOverrides $overrides, Request $request, ViewRegistry $viewRegistry)
     {
-        $this->app->singleton(\Anomaly\Streams\Platform\Addon\AddonProvider::class,AddonProvider::class);
+        $this->app->singleton(\Anomaly\Streams\Platform\Addon\AddonProvider::class, AddonProvider::class);
 
         $this->bootConfig();
         $this->bootConsole();
@@ -133,7 +134,7 @@ class PlatformServiceProvider extends ServiceProvider
         ///pyro.platform.
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.php', 'platform');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.frontend.php', 'platform.frontend');
-        $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.diagnose.php', 'platform.diagnose');
+        $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.macros.php', 'platform.macros');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.permission_sets.php', 'platform.permission_sets');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.icons.php', 'platform.icons');
         $this->mergeConfigFrom(dirname(__DIR__) . '/resources/config/platform.icons.sets.fa.php', 'platform.icons.sets.fa');
@@ -146,7 +147,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->publishes([
             dirname(__DIR__) . '/resources/config/platform.php'                 => config_path('platform.php'),
             dirname(__DIR__) . '/resources/config/platform.frontend.php'        => config_path('platform.frontend.php'),
-            dirname(__DIR__) . '/resources/config/platform.diagnose.php'        => config_path('platform.diagnose.php'),
+            dirname(__DIR__) . '/resources/config/platform.macros.php'          => config_path('platform.macros.php'),
             dirname(__DIR__) . '/resources/config/platform.permission_sets.php' => config_path('platform.permission_sets.php'),
             dirname(__DIR__) . '/resources/config/platform.icons.php'           => config_path('platform.icons.php'),
             dirname(__DIR__) . '/resources/config/platform.icons.sets.fa.php'   => config_path('platform.icons.sets.mdi.php'),
@@ -180,10 +181,13 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton('command.database.truncate', function ($app) {
             return new DatabaseTruncateCommand();
         });
+        $this->app->singleton('command.platform.macro', function ($app) {
+            return new MacroCommand();
+        });
         $this->app->singleton('command.platform.permissions', function ($app) {
             return new PermissionsCommand();
         });
-        $this->commands([ 'command.platform.seed', 'command.addon.list', 'command.database.truncate', 'command.platform.permissions' ]);
+        $this->commands([ 'command.platform.seed', 'command.addon.list', 'command.database.truncate', 'command.platform.macro', 'command.platform.permissions' ]);
     }
 
     protected function registerExpressionLanguageFunctions()
@@ -293,7 +297,7 @@ class PlatformServiceProvider extends ServiceProvider
                     'extension' => $app[ 'twig.extension' ],
                 ]
             );
-        }        );
+        });
         $this->app->extend('view.finder', function (\Illuminate\View\FileViewFinder $viewFinder) {
             $viewFinder->addNamespace('platform', dirname(__DIR__) . '/resources/views');
             return $viewFinder;
