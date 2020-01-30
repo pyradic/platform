@@ -35,7 +35,7 @@ class LivewireServiceProvider extends \Livewire\LivewireServiceProvider
                 if (Str::startsWith($alias, [ 'module::', 'addon::' ])) {
                     $alias = str_replace([ 'module::', 'addon::' ], [ $addon->getNamespace() . '::', $addon->getNamespace() . '::' ], $alias);
                 }
-                $lw->component($alias, $class);
+                $this->app->livewire->component($alias, $class);
             }
         });
     }

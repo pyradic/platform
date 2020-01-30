@@ -1,5 +1,4 @@
 export interface PlatformData {
-    departments: DepartmentElement[];
     cp:          Cp;
     menus:       Menus;
     module:      Module;
@@ -8,69 +7,19 @@ export interface PlatformData {
 }
 
 export interface Breadcrumbs {
-    Overzicht: string;
+    "Dashboard Module": string;
+    Dashboards:         string;
 }
 
 export interface Cp {
     structure:  Structure;
-    navigation: null;
-    section:    null;
+    navigation: Navigation;
+    section:    Section;
     shortcuts:  Shortcuts;
 }
 
-export interface Shortcuts {
-    department:  PreferencesClass;
-    preferences: PreferencesClass;
-}
-
-export interface PreferencesClass {
-    children:    DepartmentChild[];
-    type:        string;
-    slug:        string;
-    icon:        string;
-    title:       string;
-    label:       string;
-    class:       null | string;
-    highlighted: boolean;
-    context:     Context;
-    attributes:  PurpleAttributes;
-    permission:  string;
-    href:        string;
-}
-
-export interface PurpleAttributes {
-    href: string;
-}
-
-export interface DepartmentChild {
-    label: string;
-    slug:  string;
-    href:  string;
-}
-
-export enum Context {
-    Danger = "danger",
-}
-
-export interface Structure {
-    "anomaly.module.dashboard":  AnomalyModuleDashboard;
-    "crvs.module.activities":    AnomalyModuleSettings;
-    "pyro.module.activity_log":  AnomalyModuleSettings;
-    "crvs.module.clients":       CrvsModuleClients;
-    "crvs.module.contacts":      AnomalyModuleSettings;
-    "crvs.module.departments":   CrvsModuleDepartments;
-    "crvs.module.faq":           CrvsModuleFAQ;
-    "anomaly.module.files":      AnomalyModuleFiles;
-    "anomaly.module.grids":      AnomalyModuleGrids;
-    "crvs.module.help_requests": AnomalyModuleSettings;
-    "pyro.module.menus":         PyroModuleMenus;
-    "crvs.module.registrations": AnomalyModuleDashboard;
-    "anomaly.module.settings":   AnomalyModuleSettings;
-    "anomaly.module.users":      AnomalyModuleUsers;
-}
-
-export interface AnomalyModuleDashboard {
-    children:   AnomalyModuleDashboardChild[];
+export interface Navigation {
+    children:   Section[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -85,8 +34,12 @@ export interface AnomalyModuleDashboard {
     url:        string;
 }
 
-export interface AnomalyModuleDashboardChild {
-    children:    PurpleChild[];
+export interface PurpleAttributes {
+    href: string;
+}
+
+export interface Section {
+    children:    SectionChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -101,7 +54,7 @@ export interface AnomalyModuleDashboardChild {
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     ChildButtonsClass;
+    buttons:     SectionButtons;
     attributes:  PurpleAttributes;
     permission:  string;
     breadcrumb:  null;
@@ -110,7 +63,7 @@ export interface AnomalyModuleDashboardChild {
     url:         string;
 }
 
-export interface ChildButtonsClass {
+export interface SectionButtons {
     new_dashboard?: NewDashboard;
     manage?:        Manage;
     new_widget:     NewWidget;
@@ -118,9 +71,15 @@ export interface ChildButtonsClass {
 
 export interface Manage {
     type:       ManageType;
-    icon:       string;
+    icon:       Icon;
     enabled:    string;
     permission: string;
+}
+
+export enum Icon {
+    FaFaPlus = "fa fa-plus",
+    Upload = "upload",
+    Wrench = "wrench",
 }
 
 export enum ManageType {
@@ -149,18 +108,18 @@ export enum DataToggle {
     Modal = "modal",
 }
 
-export interface PurpleChild {
+export interface SectionChild {
     key:        string;
     title:      string;
     dropdown:   any[];
     dropup:     boolean;
     position:   Position;
     parent:     null;
-    attributes: AssignFieldsClass;
+    attributes: AddFieldClass;
     disabled:   boolean;
     enabled:    boolean;
     entry:      null;
-    icon:       null | string;
+    icon:       Icon | null;
     class:      null;
     size:       Size;
     permission: string;
@@ -170,7 +129,7 @@ export interface PurpleChild {
     tag:        Tag;
 }
 
-export interface AssignFieldsClass {
+export interface AddFieldClass {
     href:           string;
     "data-toggle"?: DataToggle;
     "data-target"?: DataTarget;
@@ -188,8 +147,55 @@ export enum Tag {
     A = "a",
 }
 
-export interface AnomalyModuleFiles {
-    children:   AnomalyModuleFilesChild[];
+export enum Context {
+    Danger = "danger",
+}
+
+export interface Shortcuts {
+    department:  Department;
+    preferences: Department;
+}
+
+export interface Department {
+    children:    DepartmentChild[];
+    type:        string;
+    slug:        string;
+    icon:        string;
+    title:       string;
+    label:       string;
+    class:       null | string;
+    highlighted: boolean;
+    context:     Context;
+    attributes:  PurpleAttributes;
+    permission:  string;
+    href:        string;
+}
+
+export interface DepartmentChild {
+    label: string;
+    slug:  string;
+    href:  string;
+}
+
+export interface Structure {
+    "anomaly.module.dashboard":  Navigation;
+    "crvs.module.activities":    AnomalyModuleSettings;
+    "pyro.module.activity_log":  AnomalyModuleSettings;
+    "crvs.module.clients":       CrvsModuleClients;
+    "crvs.module.contacts":      AnomalyModuleSettings;
+    "crvs.module.departments":   CrvsModuleDepartments;
+    "crvs.module.faq":           CrvsModuleFAQ;
+    "crvs.module.files":         CrvsModuleFiles;
+    "anomaly.module.grids":      AnomalyModuleGrids;
+    "crvs.module.help_requests": AnomalyModuleSettings;
+    "pyro.module.menus":         PyroModuleMenus;
+    "crvs.module.registrations": Navigation;
+    "anomaly.module.settings":   AnomalyModuleSettings;
+    "anomaly.module.users":      AnomalyModuleUsers;
+}
+
+export interface AnomalyModuleGrids {
+    children:   AnomalyModuleGridsChild[];
     key:        string;
     slug:       string;
     icon:       string;
@@ -204,8 +210,8 @@ export interface AnomalyModuleFiles {
     url:        string;
 }
 
-export interface AnomalyModuleFilesChild {
-    children:    PurpleChild[];
+export interface AnomalyModuleGridsChild {
+    children:    SectionChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -230,62 +236,6 @@ export interface AnomalyModuleFilesChild {
 }
 
 export interface PurpleButtons {
-    upload?:        Upload;
-    new_disk?:      AssignFieldsClass;
-    new_field?:     AssignFieldsClass;
-    assign_fields?: AssignFieldsClass;
-}
-
-export interface Upload {
-    "data-toggle": DataToggle;
-    icon:          string;
-    "data-target": DataTarget;
-    type:          ManageType;
-    href:          string;
-}
-
-export interface AnomalyModuleGrids {
-    children:   AnomalyModuleGridsChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface AnomalyModuleGridsChild {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null | string;
-    subSection:  boolean;
-    buttons:     string[] | FluffyButtons;
-    attributes:  PurpleAttributes;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface FluffyButtons {
     new_field?:     NewWidget;
     assign_fields?: NewWidget;
 }
@@ -307,7 +257,7 @@ export interface AnomalyModuleSettings {
 }
 
 export interface AnomalyModuleSettingsChild {
-    children:    FluffyChild[];
+    children:    PurpleChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -331,7 +281,7 @@ export interface AnomalyModuleSettingsChild {
     url:         string;
 }
 
-export interface FluffyChild {
+export interface PurpleChild {
     key:        string;
     title:      string;
     dropdown:   any[];
@@ -369,7 +319,7 @@ export interface AnomalyModuleUsers {
 }
 
 export interface AnomalyModuleUsersChild {
-    children:    PurpleChild[];
+    children:    SectionChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -384,7 +334,7 @@ export interface AnomalyModuleUsersChild {
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     string[] | TentacledButtons;
+    buttons:     string[] | FluffyButtons;
     attributes:  PurpleAttributes;
     permission:  string;
     breadcrumb:  null;
@@ -393,8 +343,8 @@ export interface AnomalyModuleUsersChild {
     url:         string;
 }
 
-export interface TentacledButtons {
-    add_field: AssignFieldsClass;
+export interface FluffyButtons {
+    add_field: AddFieldClass;
 }
 
 export interface CrvsModuleClients {
@@ -414,7 +364,7 @@ export interface CrvsModuleClients {
 }
 
 export interface CrvsModuleClientsChild {
-    children:    PurpleChild[];
+    children:    SectionChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -429,7 +379,7 @@ export interface CrvsModuleClientsChild {
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     string[] | StickyButtons;
+    buttons:     string[] | TentacledButtons;
     attributes:  PurpleAttributes;
     permission:  string;
     breadcrumb:  null;
@@ -438,7 +388,7 @@ export interface CrvsModuleClientsChild {
     url:         string;
 }
 
-export interface StickyButtons {
+export interface TentacledButtons {
     new_role?:  NewRole;
     new_field?: NewWidget;
 }
@@ -464,7 +414,7 @@ export interface CrvsModuleDepartments {
 }
 
 export interface CrvsModuleDepartmentsChild {
-    children:    FluffyChild[];
+    children:    PurpleChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -479,7 +429,7 @@ export interface CrvsModuleDepartmentsChild {
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     any[] | IndigoButtons;
+    buttons:     any[] | StickyButtons;
     attributes:  PurpleAttributes;
     permission:  string;
     breadcrumb:  null;
@@ -488,7 +438,7 @@ export interface CrvsModuleDepartmentsChild {
     url:         string;
 }
 
-export interface IndigoButtons {
+export interface StickyButtons {
     new_department?:  New;
     new_association?: New;
 }
@@ -515,7 +465,79 @@ export interface CrvsModuleFAQ {
 }
 
 export interface CrvsModuleFAQChild {
-    children:    TentacledChild[];
+    children:    FluffyChild[];
+    key:         string;
+    slug:        string;
+    icon:        null;
+    title:       string;
+    label:       null;
+    class:       null;
+    active:      boolean;
+    matcher:     null;
+    permalink:   null;
+    description: null;
+    highlighted: boolean;
+    context:     Context;
+    parent:      null;
+    subSection:  boolean;
+    buttons:     string[] | IndigoButtons;
+    attributes:  PurpleAttributes;
+    permission:  string;
+    breadcrumb:  null;
+    hidden:      boolean;
+    href:        string;
+    url:         string;
+}
+
+export interface IndigoButtons {
+    "0":     string;
+    default: string[];
+}
+
+export interface FluffyChild {
+    key:        string;
+    title:      string;
+    dropdown:   any[];
+    dropup:     boolean;
+    position:   Position;
+    parent:     null;
+    attributes: FluffyAttributes;
+    disabled:   boolean;
+    enabled:    boolean;
+    entry:      null;
+    icon:       null;
+    class:      null;
+    size:       Size;
+    permission: string;
+    type:       ManageType;
+    text:       string;
+    url:        null;
+    tag:        Tag;
+}
+
+export interface FluffyAttributes {
+    href: string;
+    "0"?: string;
+}
+
+export interface CrvsModuleFiles {
+    children:   CrvsModuleFilesChild[];
+    key:        string;
+    slug:       string;
+    icon:       string;
+    title:      string;
+    class:      null;
+    active:     boolean;
+    favorite:   boolean;
+    attributes: PurpleAttributes;
+    permission: null;
+    breadcrumb: string;
+    href:       string;
+    url:        string;
+}
+
+export interface CrvsModuleFilesChild {
+    children:    SectionChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -540,34 +562,17 @@ export interface CrvsModuleFAQChild {
 }
 
 export interface IndecentButtons {
-    "0":     string;
-    default: string[];
+    upload?:    Upload;
+    new_disk?:  AddFieldClass;
+    new_field?: AddFieldClass;
 }
 
-export interface TentacledChild {
-    key:        string;
-    title:      string;
-    dropdown:   any[];
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: ChildAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       null;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       ManageType;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-}
-
-export interface ChildAttributes {
-    href: string;
-    "0"?: string;
+export interface Upload {
+    "data-toggle": DataToggle;
+    icon:          Icon;
+    "data-target": DataTarget;
+    type:          ManageType;
+    href:          string;
 }
 
 export interface PyroModuleMenus {
@@ -587,7 +592,7 @@ export interface PyroModuleMenus {
 }
 
 export interface PyroModuleMenusChild {
-    children:    PurpleChild[];
+    children:    SectionChild[];
     key:         string;
     slug:        string;
     icon:        null;
@@ -602,21 +607,13 @@ export interface PyroModuleMenusChild {
     context:     Context;
     parent:      null;
     subSection:  boolean;
-    buttons:     string[] | TentacledButtons;
-    attributes:  AssignFieldsClass;
+    buttons:     string[] | FluffyButtons;
+    attributes:  NewWidget;
     permission:  string;
     breadcrumb:  null;
     hidden:      boolean;
     href:        string;
     url:         string;
-}
-
-export interface DepartmentElement {
-    id:          number;
-    name:        string;
-    slug:        string;
-    description: string;
-    enabled:     boolean;
 }
 
 export interface Menus {
@@ -670,7 +667,7 @@ export interface Module {
 export interface User {
     id:               number;
     sort_order:       number;
-    department_id:    null;
+    department_id:    number;
     email:            string;
     username:         string;
     display_name:     string;

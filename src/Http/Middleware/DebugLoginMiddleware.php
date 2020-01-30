@@ -16,19 +16,24 @@ class DebugLoginMiddleware
         } elseif (isset($_SERVER[ 'PYCRVS_DEBUG' ])) {
             $this->login($_SERVER[ 'PYCRVS_DEBUG' ]);
         }
+
         return $next($request);
     }
 
     protected function login($login)
     {
-        if(is_numeric($login)){
+
+        if (is_numeric($login)) {
             return auth()->onceUsingId($login);
         }
-        if(is_string($login)){
-            if(Str::contains($login,'@')) {
-                return resolve(UserRepositoryInterface::class)->findByEmail($login);
+
+        if (is_string($login)) {
+            if (Str::contains($login, '@')) {
+                return resolve(UserRepositoryInterface::class)
+                    ->findByEmail($login);
             }
-            return resolve(UserRepositoryInterface::class)->findByUsername($login);
+            return resolve(UserRepositoryInterface::class)
+                ->findByUsername($login);
         }
         return false;
     }

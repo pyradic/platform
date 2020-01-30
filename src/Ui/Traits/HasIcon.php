@@ -19,7 +19,7 @@ trait HasIcon
      *
      * @var string
      */
-    protected $icon = null;
+    protected $icon ;
 
     /**
      * Get the icon.
@@ -34,7 +34,7 @@ trait HasIcon
     /**
      * Set the icon.
      *
-     * @param array $icon
+     * @param string $icon = \Pyro\IdeHelper\Examples\IconExamples::all()[$any]
      * @return $this
      */
     public function setIcon($icon)

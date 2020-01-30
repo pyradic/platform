@@ -28,7 +28,7 @@ class AddonListCommand extends Command
             $this->listExtensions($addons->extensions);
         }
         if ($this->option('fields')) {
-            $this->listFields($addons->fieldTypes);
+            $this->listFields($addons->field_type);
         }
         if ($this->option('themes')) {
             $this->listThemes($addons->themes);
@@ -42,13 +42,14 @@ class AddonListCommand extends Command
         ) {
             $this->listModules($addons->modules);
             $this->listExtensions($addons->extensions);
-            $this->listFields($addons->fieldTypes);
+            $this->listFields($addons->field_type);
             $this->listThemes($addons->themes);
         }
     }
 
     protected function listThemes(ThemeCollection $themes)
     {
+        $this->getOutput()->title('Themes');
         $rows = [];
         $themes = $this->filterSearch($themes);
 
@@ -62,6 +63,7 @@ class AddonListCommand extends Command
 
     protected function listFields(FieldTypeCollection $fields)
     {
+        $this->getOutput()->title('Fields');
         $rows = [];
         $fields = $this->filterSearch($fields);
 
@@ -75,6 +77,7 @@ class AddonListCommand extends Command
 
     protected function listExtensions(ExtensionCollection $extensions)
     {
+        $this->getOutput()->title('Extensions');
         foreach ([ 'installed', 'uninstalled', 'enabled', 'disabled' ] as $state) {
             if ($this->option($state)) {
                 $extensions = $extensions->{$state}();
@@ -95,6 +98,7 @@ class AddonListCommand extends Command
 
     protected function listModules(ModuleCollection $modules)
     {
+        $this->getOutput()->title('Modules');
         foreach ([ 'installed', 'uninstalled', 'enabled', 'disabled' ] as $state) {
             if ($this->option($state)) {
                 $modules = $modules->{$state}();

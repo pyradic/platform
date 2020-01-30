@@ -17,7 +17,7 @@ trait HasClassAttribute
      *
      * @var string
      */
-    protected $class = null;
+    protected $class ;
 
     /**
      * Get the class.

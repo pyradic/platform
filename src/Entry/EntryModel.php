@@ -36,6 +36,26 @@ class EntryModel extends \Anomaly\Streams\Platform\Entry\EntryModel
         parent::__construct($attributes);
     }
 
+    /**
+     * Return the creator relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function created_by()
+    {
+        return $this->createdBy();
+    }
+
+    /**
+     * Return the updater relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function updated_by()
+    {
+        return $this->updatedBy();
+    }
+
     protected function newMorphTo(Builder $query, Model $parent, $foreignKey, $ownerKey, $type, $relation)
     {
         return new MorphTo($query, $parent, $foreignKey, $ownerKey, $type, $relation);

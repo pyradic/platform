@@ -3,7 +3,7 @@
     "require": {
         "pyro/webpack": "~1.0",
         "inertiajs/inertia-laravel": "0.2.*",
-        "livewire/livewire": "0.5.*",
+        "livewire/livewire": "0.7.*",
         "laradic/support": "~2.0",
         "laradic/generators": "~2.0",
         "laradic/dependency-sorter": "~1.0",

@@ -1,3 +1,8 @@
+{# @var \Illuminate\Contracts\Foundation\Application app #}
+{# @var \Pyro\Platform\Platform platform #}
+
+{{ app.livewire.styles()|raw }}
+
 <style type="text/css" id="assets_styles">
 {% for style in asset_inlines("styles.css") %}
 {{ style|raw }}
@@ -5,7 +10,7 @@
 </style>
 
 
-{{ app.livewire.assets()|raw }}
+{{ app.livewire.scripts|raw }}
 
 {{ template.includes.render('cp_scripts')|raw }}
 

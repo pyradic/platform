@@ -4,8 +4,11 @@ import { LogConfig } from '@/interfaces';
 import { AxiosStatic } from 'axios';
 import { Application } from './Application';
 
-import * as tsx from 'vue-tsx-support'
+import * as tsx       from 'vue-tsx-support'
+import { BemMethods } from '@pyro/admin-theme';
+export interface TsxComponent extends BemMethods{
 
+}
 export class TsxComponent<P = {}> extends Vue {
 
     $py: Application

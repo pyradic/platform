@@ -1,4 +1,5 @@
 ///<reference path="types/index.d.ts"/>
+///<reference path="modules.d.ts"/>
 
 import 'reflect-metadata';
 import { merge } from 'lodash';
@@ -28,6 +29,7 @@ export * from './utils/slot'
 export * from './utils/general'
 export * from './utils/kindOf'
 export * from './utils/cash'
+export * from './utils/cash.ensureClass'
 
 export { merge, Plugin, toJS };
 if ( DEV ) {

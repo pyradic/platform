@@ -15,6 +15,7 @@ use Anomaly\Streams\Platform\Ui\Table\Contract\TableRepositoryInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
+use Pyro\Platform\Hooks;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -133,7 +134,7 @@ class TableBuilder
     {
         $this->fire('ready', ['builder' => $this]);
 
-        $this->dispatchNow(new BuildTable($this));
+        Hooks::dispatch([ BuildTable::class, static::class ],[ $this ]);
 
         $this->fire('built', ['builder' => $this]);
 
@@ -164,9 +165,9 @@ class TableBuilder
      */
     public function load()
     {
-        $this->dispatchNow(new LoadTable($this));
-        $this->dispatchNow(new AddAssets($this));
-        $this->dispatchNow(new MakeTable($this));
+        Hooks::dispatch([ LoadTable::class, static::class ],[ $this ]);
+        Hooks::dispatch([ AddAssets::class, static::class ],[ $this ]);
+        Hooks::dispatch([ MakeTable::class, static::class ],[ $this ]);
 
         return $this;
     }
@@ -180,7 +181,7 @@ class TableBuilder
     public function post()
     {
         if (app('request')->isMethod('post')) {
-            $this->dispatchNow(new PostTable($this));
+            Hooks::dispatch([ PostTable::class, static::class ],[ $this ]);
         }
 
         return $this;
@@ -196,7 +197,7 @@ class TableBuilder
         $this->make();
 
         if ($this->table->getResponse() === null) {
-            $this->dispatchNow(new SetTableResponse($this));
+            Hooks::dispatch([ SetTableResponse::class, static::class ],[ $this ]);
         }
 
         return $this->table->getResponse();

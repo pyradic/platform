@@ -13,6 +13,7 @@ use Anomaly\Streams\Platform\Ui\Table\Component\View\ViewRegistry;
 use Anomaly\Streams\Platform\View\Event\RegisteringTwigPlugins;
 use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewOverrides;
+use Anomaly\UsersModule\User\Contract\UserRepositoryInterface;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
@@ -22,6 +23,7 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Jackiedo\DotenvEditor\DotenvEditor;
+use Jenssegers\Agent\Agent;
 use Pyro\Platform\Addon\AddonProvider;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Command\AddPlatformAssetNamespaces;
@@ -266,8 +268,16 @@ class PlatformServiceProvider extends ServiceProvider
         if ($this->app->environment('local') && $this->app->config[ 'app.debug' ]) {
             $this->app->extend('login', function (LoginFormBuilder $login) {
                 $login->on('built', function (LoginFormBuilder $builder) {
-                    $builder->getFormField('email')->setValue(env('ADMIN_EMAIL'));
-                    $builder->getFormField('password')->setValue(env("ADMIN_PASSWORD"));
+                    $email    = env('ADMIN_EMAIL');
+                    $password = env("ADMIN_PASSWORD");
+                    if (resolve(Agent::class)->is('Firefox')) {
+                        if (resolve(UserRepositoryInterface::class)->findByEmail('admin2@test.com')) {
+                            $email    = 'admin2@test.com';
+                            $password = 'test';
+                        }
+                    }
+                    $builder->getFormField('email')->setValue($email);
+                    $builder->getFormField('password')->setValue($password);
                 });
                 return $login;
             });

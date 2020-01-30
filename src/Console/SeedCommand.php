@@ -33,8 +33,8 @@ class SeedCommand extends Command
         $names = $this->argument('names');
         if(!$names) {
             $names = $this->choice('seeds', $regs->keys()->toArray(), null, null, true);
-            $names = Arr::wrap($names);
         }
+        $names = Arr::wrap($names);
         foreach ($names as $name) {
             $reg = $regs[ $name ];
             $this->call('db:seed', [ '--class' => $reg[ 'class' ] ]);

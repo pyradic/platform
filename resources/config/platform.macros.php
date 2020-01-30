@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'associate'         => [
+    'associate'               => [
         'desc'     => 'Associate departments to streams',
         'commands' => [
             [ 'departments:association', [ 'action' => 'add', 'args' => [ 'clients::clients', 'mylink', 'multi' ] ] ],
@@ -9,7 +9,7 @@ return [
             [ 'departments:association', [ 'action' => 'list' ] ],
         ],
     ],
-    'dissociate'        => [
+    'dissociate'              => [
         'desc'     => 'Dissociate departments from streams',
         'commands' => [
             [ 'departments:association', [ 'action' => 'remove', 'args' => [ 'clients::clients', 'mylink', 'multi' ] ] ],
@@ -17,7 +17,7 @@ return [
             [ 'departments:association', [ 'action' => 'list' ] ],
         ],
     ],
-    'clients:uninstall' => [
+    'clients:uninstall'       => [
         'desc'     => 'Remove clients',
         'commands' => [
             [ 'addon:uninstall', [ 'addon' => 'clients_default_role_type' ] ],
@@ -29,8 +29,8 @@ return [
             [ 'addon:uninstall', [ 'addon' => 'clients' ] ],
         ],
     ],
-    'clients:install'   => [
-        'desc'     => 'Remove clients',
+    'clients:install'         => [
+        'desc'     => 'Install clients',
         'commands' => [
             [ 'addon:install', [ 'addon' => 'clients_default_role_type' ] ],
             [ 'addon:install', [ 'addon' => 'clients_requester_role_type' ] ],
@@ -44,11 +44,19 @@ return [
             [ 'seed', [ 'names' => 'clients' ] ],
         ],
     ],
-    'clients:reinstall' => [
-        'desc'     => '',
+    'clients:reinstall'       => [
+        'desc'     => 'Reinstall clients',
         'commands' => [
             [ 'macro', [ 'macro' => 'clients:uninstall' ] ],
             [ 'macro', [ 'macro' => 'clients:install' ] ],
+        ],
+    ],
+    'help_requests:reinstall' => [
+        'desc' => 'Reinstall Help Requests',
+        'commands' => [
+            [ 'addon:reinstall', [ 'addon' => 'help_requests' ] ],
+            [ 'departments:association', [ 'action' => 'add', 'args' => [ 'help_requests::requests', 'mylink', 'single' ] ] ],
+            [ 'seed', [ 'names' => 'help_requests' ] ],
         ],
     ],
 ];
