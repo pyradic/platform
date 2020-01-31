@@ -43,19 +43,20 @@ class Shortcut extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Short
 
     public function toArray()
     {
-        return [
-            'slug'        => $this->slug,
-            'icon'        => $this->icon,
-            'title'       => trans($this->title),
-            'label'       => trans($this->label),
-            'class'       => $this->class,
-            'highlighted' => $this->highlighted,
-            'context'     => $this->context,
-            'attributes'  => $this->attributes,
-            'permission'  => $this->permission,
-            'type'        => $this->type,
-            'children'    => $this->children,
-        ];
+        return [];
+//        return [
+//            'slug'        => $this->slug,
+//            'icon'        => $this->icon,
+//            'title'       => trans($this->title),
+//            'label'       => trans($this->label),
+//            'class'       => $this->class,
+//            'highlighted' => $this->highlighted,
+//            'context'     => $this->context,
+//            'attributes'  => $this->attributes,
+//            'permission'  => $this->permission,
+//            'type'        => $this->type,
+//            'children'    => $this->children,
+//        ];
     }
 
 }

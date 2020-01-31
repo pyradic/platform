@@ -43,55 +43,55 @@ class BuildTable
         /*
          * Resolve and set the table model and stream.
          */
-        Hooks::dispatch([ SetTableModel::class, static::class ],[ $this->builder ]);
-        Hooks::dispatch([ SetTableStream::class, static::class ],[ $this->builder ]);
-        Hooks::dispatch([ SetDefaultParameters::class, static::class ],[ $this->builder ]);
-        Hooks::dispatch([ SetRepository::class, static::class ],[ $this->builder ]);
+        Hooks::dispatch([ SetTableModel::class, get_class($this->builder) ],[ $this->builder ]);
+        Hooks::dispatch([ SetTableStream::class, get_class($this->builder) ],[ $this->builder ]);
+        Hooks::dispatch([ SetDefaultParameters::class, get_class($this->builder) ],[ $this->builder ]);
+        Hooks::dispatch([ SetRepository::class, get_class($this->builder) ],[ $this->builder ]);
 
         /*
          * Build table views and mark active.
          */
-        Hooks::dispatch([ BuildViews::class, static::class ],[ $this->builder ]);
-        Hooks::dispatch([ SetActiveView::class, static::class ],[ $this->builder ]);
+        Hooks::dispatch([ BuildViews::class, get_class($this->builder) ],[ $this->builder ]);
+        Hooks::dispatch([ SetActiveView::class, get_class($this->builder) ],[ $this->builder ]);
 
         /**
          * Set the table options going forward.
          */
-        Hooks::dispatch([ SetTableOptions::class, static::class ],[ $this->builder ]);
-        Hooks::dispatch([ SetDefaultOptions::class, static::class ],[ $this->builder ]);
-        Hooks::dispatch([ SaveTableState::class, static::class ],[ $this->builder ]);
+        Hooks::dispatch([ SetTableOptions::class, get_class($this->builder) ],[ $this->builder ]);
+        Hooks::dispatch([ SetDefaultOptions::class, get_class($this->builder) ],[ $this->builder ]);
+        Hooks::dispatch([ SaveTableState::class, get_class($this->builder) ],[ $this->builder ]);
 
         /*
          * Before we go any further, authorize the request.
          */
-        Hooks::dispatch([ AuthorizeTable::class, static::class ],[ $this->builder ]);
+        Hooks::dispatch([ AuthorizeTable::class, get_class($this->builder) ],[ $this->builder ]);
 
         /*
          * Build table filters and flag active.
          */
-        Hooks::dispatch([ BuildFilters::class, static::class ],[ $this->builder ]);
-        Hooks::dispatch([ SetActiveFilters::class, static::class ],[ $this->builder ]);
+        Hooks::dispatch([ BuildFilters::class, get_class($this->builder) ],[ $this->builder ]);
+        Hooks::dispatch([ SetActiveFilters::class, get_class($this->builder) ],[ $this->builder ]);
 
         /*
          * Build table actions and flag active.
          */
-        Hooks::dispatch([ BuildActions::class, static::class ],[ $this->builder ]);
-        Hooks::dispatch([ SetActiveAction::class, static::class ],[ $this->builder ]);
+        Hooks::dispatch([ BuildActions::class, get_class($this->builder) ],[ $this->builder ]);
+        Hooks::dispatch([ SetActiveAction::class, get_class($this->builder) ],[ $this->builder ]);
 
         /*
          * Build table headers.
          */
-        Hooks::dispatch([ BuildHeaders::class, static::class ],[ $this->builder ]);
-        Hooks::dispatch([ EagerLoadRelations::class, static::class ],[ $this->builder ]);
+        Hooks::dispatch([ BuildHeaders::class, get_class($this->builder) ],[ $this->builder ]);
+        Hooks::dispatch([ EagerLoadRelations::class, get_class($this->builder) ],[ $this->builder ]);
 
         /*
          * Get table entries.
          */
-        Hooks::dispatch([ GetTableEntries::class, static::class ],[ $this->builder ]);
+        Hooks::dispatch([ GetTableEntries::class, get_class($this->builder) ],[ $this->builder ]);
 
         /*
          * Lastly table rows.
          */
-        Hooks::dispatch([ BuildRows::class, static::class ],[ $this->builder ]);
+        Hooks::dispatch([ BuildRows::class, get_class($this->builder) ],[ $this->builder ]);
     }
 }
