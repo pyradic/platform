@@ -5,12 +5,12 @@ import { app } from '@c/Application';
 
 const log = require('debug')('utils:registerComponents');
 
-export function prefixAndRegisterComponents(_Vue: VueConstructor, _components: Record<string, any>, extraPrefix:string=null) {
+export function prefixAndRegisterComponents(_Vue: VueConstructor, _components: Record<string, any>, extraPrefix:string=null, prefix:string=app.config.prefix) {
     let components = app.hooks.installComponents.call({ ..._components })
     Object.keys(components).forEach(key => {
         let componentName = key;
-        if ( app.config.prefix ) {
-            componentName = `${app.config.prefix}-`;
+        if ( prefix ) {
+            componentName = `${prefix}-`;
             if(extraPrefix){
                 componentName += `${extraPrefix}-`
             }

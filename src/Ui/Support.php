@@ -12,20 +12,20 @@ use Anomaly\Streams\Platform\Support\Value;
 use Illuminate\Support\Collection;
 use Pyro\Platform\Support\ExpressionLanguageParser;
 
-class Input
+class Support
 {
     public static function expression($target, array $arguments = [])
     {
-        return ExpressionLanguageParser::getInstance()->parse($target,$arguments);
+        return ExpressionLanguageParser::getInstance()->parse($target, $arguments);
     }
 
     public static function resolver($target, array $arguments = [], array $options = [])
     {
-        $resolver = resolve(Resolver::class);
+        $resolver = static::resolve(Resolver::class);
         $target   = $resolver->resolve($target, $arguments, $options);
         if (is_array($target)) {
             foreach ($target as &$item) {
-                $item = $resolver->resolve($item, $arguments, $options);
+                $item = $resolver->resolve((array)$item, $arguments, $options);
 //                if (is_array($item)) {
 //                    foreach ($item as $key => $value) {
 //                        $item[ $key ] = static::resolver($value, $arguments, $options);
@@ -36,49 +36,54 @@ class Input
         return $target;
     }
 
-    public static function render($target, $entry, $term = 'entry', $payload = [])
+    public static function render(&$target, $entry, $term = 'entry', $payload = [])
     {
         if (is_array($target)) {
             foreach ($target as &$item) {
                 $item = static::render($item, $entry, $term, $payload);
             }
         } elseif (is_string($target) && str_contains($target, [ '{{', '{%' ])) {
-            $target = (string)resolve(Template::class)->render($target, [ $term => $entry ]);
+            $target = (string)static::resolve(Template::class)->render($target, [ $term => $entry ]);
         }
         return $target;
     }
 
+    protected static $resolved = [];
+
+    protected static function resolve($name)
+    {
+        if ( ! array_key_exists($name, static::$resolved)) {
+            static::$resolved[ $name ] = resolve($name);
+        }
+        return static::$resolved[ $name ];
+    }
+
     public static function evaluate($target, array $arguments = [])
     {
-        return resolve(Evaluator::class)->evaluate($target, $arguments);
+        return  static::resolve(Evaluator::class)->evaluate($target, $arguments);
     }
 
-    public static function valuate($parameters, $entry, $term = 'entry', $payload = [])
+    public static function valuate(&$parameters, $entry, $term = 'entry', $payload = [])
     {
-        return resolve(Value::class)->make($parameters, $entry, $term = 'entry', $payload = []);
+        return $parameters = static::resolve(Value::class)->make($parameters, $entry, $term = 'entry', $payload = []);
     }
 
-    public static function valuate2($parameters, $entry, $term = 'entry', $payload = [])
+    public static function parse(&$target, array $data = [])
     {
-        return resolve(Value2::class)->make($parameters, $entry, $term = 'entry', $payload = []);
-    }
-
-    public static function parse($target, array $data = [])
-    {
-        return resolve(Parser::class)->parse($target, $data);
+        return $target = static::resolve(Parser::class)->parse($target, $data);
     }
 
     public static function hydrate($object, array $parameters)
     {
-        return resolve(Hydrator::class)->hydrate($object, $parameters);
+        return static::resolve(Hydrator::class)->hydrate($object, $parameters);
     }
 
     public static function authorize($permission, $user = null)
     {
-        return resolve(Authorizer::class)->authorize($permission, $user);
+        return static::resolve(Authorizer::class)->authorize($permission, $user);
     }
 
-    public static function translate($target)
+    public static function translate(&$target)
     {
 
         if (is_string($target) && strpos($target, '::')) {
@@ -87,7 +92,7 @@ class Input
                 return $target;
             }
 
-            return trans($target);
+            return $target = trans($target);
         }
 
         if (is_array($target)) {

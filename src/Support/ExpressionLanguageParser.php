@@ -236,6 +236,7 @@ class ExpressionLanguageParser
 
     public static function createDefault()
     {
-        return new ExpressionLanguageParser(new ExpressionLanguage());
+        $cache = new \Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool(resolve('cache.store'));
+        return new ExpressionLanguageParser(new ExpressionLanguage($cache));
     }
 }
