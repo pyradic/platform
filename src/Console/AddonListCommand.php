@@ -55,6 +55,7 @@ class AddonListCommand extends Command
 
         foreach ($themes->all() as $theme) {
             $rows[] = [
+                trans($theme->getNamespace('addon.name')),
                 $theme->getNamespace(),
             ];
         }
@@ -69,6 +70,7 @@ class AddonListCommand extends Command
 
         foreach ($fields->all() as $field) {
             $rows[] = [
+                trans($field->getNamespace('addon.name')),
                 $field->getNamespace(),
             ];
         }
@@ -89,6 +91,7 @@ class AddonListCommand extends Command
         $rows = [];
         foreach ($extensions as $extension) {
             $rows[] = [
+                trans($extension->getNamespace('addon.name')),
                 $extension->isInstalled() ? "<fg=green>{$extension->getNamespace()}</>" : "<fg=red>{$extension->getNamespace()}</>",
                 ($extension->isEnabled() ? '<fg=green>yes</>' : '<fg=yellow>-</>'),
             ];
@@ -110,6 +113,7 @@ class AddonListCommand extends Command
         $rows = [];
         foreach ($modules as $module) {
             $rows[] = [
+                trans($module->getNamespace('addon.name')),
                 $module->isInstalled() ? "<fg=green>{$module->getNamespace()}</>" : "<fg=red>{$module->getNamespace()}</>",
                 ($module->isEnabled() ? '<fg=green>yes</>' : '<fg=yellow>-</>'),
             ];
