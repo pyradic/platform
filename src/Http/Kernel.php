@@ -2,6 +2,7 @@
 
 namespace Pyro\Platform\Http;
 
+use Clockwork\Clockwork;
 use Laradic\Support\MultiBench;
 
 class Kernel extends \Anomaly\Streams\Platform\Http\Kernel
@@ -30,6 +31,8 @@ class Kernel extends \Anomaly\Streams\Platform\Http\Kernel
     protected function dispatchToRouter()
     {
         return function ($request) {
+            resolve(Clockwork::class);
+
             $this->app->instance('request', $request);
             MultiBench::on('lifecycle')->mark('dispatchToRouter');
             $response = $this->router->dispatch($request);

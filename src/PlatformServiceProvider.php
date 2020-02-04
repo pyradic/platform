@@ -239,7 +239,11 @@ class PlatformServiceProvider extends ServiceProvider
          * Development Feature - Login as user using a request variable (header, url parameter, etc)
          * Not enabled on production. Requires app.debug to be true
          */
-        if ($this->app->environment('local') && $this->app->config[ 'app.debug' ]) {
+        $use = $this->app->config[ 'platform.debug_login' ] === true;
+        if ($use === null) {
+            $use = $this->app->environment('local') && $this->app->config[ 'app.debug' ];
+        }
+        if ($use === true) {
             $this->app->make(Kernel::class)->pushMiddleware(DebugLoginMiddleware::class);
         }
     }

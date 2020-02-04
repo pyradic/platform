@@ -33,7 +33,9 @@ class AddAddonOverrides
             }
             $targetAddon = $addons->get($namespace);
             if ($fs->exists($viewPath = $overridePath . '/views')) {
-                $finder->prependNamespace($targetAddon->getNamespace(), $viewPath);
+                $hints = $finder->getHints()[$namespace];
+                $finder->addNamespace('original/' . $namespace, $hints);
+                $finder->prependNamespace($namespace, $viewPath);
             }
             if ($fs->exists($configPath = $overridePath . '/config')) {
                 $configurator->addNamespaceOverrides($targetAddon->getNamespace(), $configPath);
