@@ -16,7 +16,7 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 
     protected static $helpers = [];
 
-    protected static $name = '';
+    protected static $name;
 
     protected static $description = '';
 
@@ -35,6 +35,9 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         static::$description       = $description;
 
         $class                     = static::class;
+        if($name === null){
+            $name=$class;
+        }
         self::$registered[ $name ] = compact('name', 'class', 'description');
     }
 

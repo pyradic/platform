@@ -4,6 +4,7 @@
 
 namespace Pyro\Platform;
 
+use Anomaly\Streams\Platform\Addon\Event\AddonWasRegistered;
 use Anomaly\Streams\Platform\Asset\Asset;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
@@ -40,6 +41,7 @@ use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
 use Pyro\Platform\Listener\AddControlPanelStructure;
 use Pyro\Platform\Listener\AddJavascriptData;
 use Pyro\Platform\Listener\OverrideAddons;
+use Pyro\Platform\Listener\RegisterAddonSeeders;
 use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
 use Pyro\Platform\Listener\SharePlatform;
@@ -75,6 +77,9 @@ class PlatformServiceProvider extends ServiceProvider
             SetSafeDelimiters::class
 //            AddControlPanelStructure::class
         ],
+        AddonWasRegistered::class => [
+            RegisterAddonSeeders::class
+        ]
     ];
 
     protected $providers = [
