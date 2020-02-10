@@ -19,13 +19,17 @@
     },
     "autoload": {
         "files": [
-            "src/helpers.php"
+            "src/helpers.php",
+            "src/Ui/Hyperscript/H.php"
         ],
         "psr-4": {
             "Pyro\\Platform\\": "src",
-            "Anomaly\\": "overrides/Anomaly"
+            "Anomaly\\": "overrides/Anomaly",
+            "Clockwork\\": "overrides/Clockwork"
         },
         "exclude-from-classmap": [
+            "vendor/itsgoingd/clockwork/Clockwork/Storage/FileStorage.php",
+
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/ControlPanel.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/ControlPanelBuilder.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Command/BuildControlPanel.php",

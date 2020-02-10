@@ -46,6 +46,7 @@ use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
 use Pyro\Platform\Listener\SharePlatform;
 use Pyro\Platform\Livewire\LivewirePlugin;
+use Pyro\Platform\Support\Dev;
 use Pyro\Platform\Support\ExpressionLanguageParser;
 use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
@@ -77,9 +78,9 @@ class PlatformServiceProvider extends ServiceProvider
             SetSafeDelimiters::class
 //            AddControlPanelStructure::class
         ],
-        AddonWasRegistered::class => [
-            RegisterAddonSeeders::class
-        ]
+        AddonWasRegistered::class    => [
+            RegisterAddonSeeders::class,
+        ],
     ];
 
     protected $providers = [
@@ -118,6 +119,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->mergeConfig();
         $this->registerListeners($this->listen);
         $this->registerProviders($this->providers);
+        $this->app->singleton('dev',Dev::class);
         if ($this->app->environment('local')) {
             $this->registerProviders($this->devProviders);
         }
