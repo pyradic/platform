@@ -22,14 +22,13 @@ class LivewireServiceProvider extends \Livewire\LivewireServiceProvider
     public function registerProvider()
     {
         $this->app->register(\Livewire\LivewireServiceProvider::class);
-        $this->app->singleton(LivewireManager::class);
+        $this->app->singleton(LivewireManager::class,LivewireManager::class);
         $this->app->alias(LivewireManager::class, 'livewire');
     }
 
     public function addAddonProviderComponentRegistration()
     {
         AddonProvider::when('registered', function (AddonServiceProvider $provider, Addon $addon) {
-            $lw = $this->app->livewire;
             foreach ($provider->getComponents() as $alias => $class) {
 //                if(!class_exists($class)) continue;
                 if (Str::startsWith($alias, [ 'module::', 'addon::' ])) {

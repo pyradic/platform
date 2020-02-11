@@ -56,7 +56,7 @@ class PlatformServiceProvider extends ServiceProvider
     use DispatchesJobs;
 
     protected $plugins = [
-        LivewirePlugin::class,
+//        LivewirePlugin::class,
     ];
 
     protected $listen = [
@@ -92,14 +92,12 @@ class PlatformServiceProvider extends ServiceProvider
         \Pyro\CustomInstall\CustomInstallServiceProvider::class,
         \Pyro\Webpack\WebpackServiceProvider::class,
 
-        \Pyro\Platform\Livewire\LivewireServiceProvider::class,
+//        \Pyro\Platform\Livewire\LivewireServiceProvider::class,
         \Pyro\Platform\Bus\BusServiceProvider::class,
 //        \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
     ];
 
     protected $devProviders = [
-        \Pyro\IdeHelper\IdeHelperServiceProvider::class,
-        \Laravel\Dusk\DuskServiceProvider::class,
     ];
 
     public function boot(ViewOverrides $overrides, Request $request, ViewRegistry $viewRegistry)

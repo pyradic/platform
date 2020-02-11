@@ -838,4 +838,10 @@ class TableBuilder
     {
         return array_get($_REQUEST, $this->getOption('prefix') . $key, $default);
     }
+
+//
+//    public function onQuerying(RequestTableBuilder $builder, EntryQueryBuilder $query)
+//    {
+//        return;
+//    }
 }
