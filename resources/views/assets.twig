@@ -1,16 +1,31 @@
 {# @var \Illuminate\Contracts\Foundation\Application app #}
 {# @var \Pyro\Platform\Platform platform #}
 
-{{ app.livewire.styles()|raw }}
-
+{#{{ app.livewire.styles()|raw }}#}
+{#
 <style type="text/css" id="assets_styles">
 {% for style in asset_inlines("styles.css") %}
 {{ style|raw }}
 {% endfor %}
 </style>
+#}
+{% for asset in asset_inlines_context('styles.css') %}
+    <!-- {{ asset.relativeSourceFilePath }} -->
+    {% if assetOutput == 'content' %}
+        <style type="text/css">
+        {{ asset.content|raw }}
+        </style>
+    {% elseif assetOutput == 'url' %}
+        <link type="text/css" href="{{ asset.url }}"/>
+    {% else %}
+        <style type="text/css">
+        {{ asset.content|raw }}
+        </style>
+    {% endif %}
+{% endfor %}
 
 
-{{ app.livewire.scripts|raw }}
+{#{{ app.livewire.scripts|raw }}#}
 
 {{ template.includes.render('cp_scripts')|raw }}
 
