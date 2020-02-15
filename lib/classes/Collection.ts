@@ -66,6 +66,7 @@ export class Collection<T> extends Array<T> implements Array<T> {
     findBy(key: keyof T, value: any): T | undefined { return this.find(item => item[ key ] === value); }
 
     where(key: keyof T, value: any): this { return this.filter(item => item[ key ] === value); }
+    whereNot(key: keyof T, value: any): this { return this.filter(item => item[ key ] !== value); }
 
     whereIn(key: keyof T, values: any[]): this {return this.filter(item => values.includes(item[ key ]) === true); }
 

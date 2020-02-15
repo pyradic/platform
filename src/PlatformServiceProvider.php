@@ -118,6 +118,7 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerListeners($this->listen);
         $this->registerProviders($this->providers);
         $this->app->singleton('dev',Dev::class);
+        $this->app->singleton('dev',Dev::class);
         if ($this->app->environment('local')) {
             $this->registerProviders($this->devProviders);
         }
