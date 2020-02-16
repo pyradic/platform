@@ -47,9 +47,13 @@ class AddControlPanelStructure
                 return $shortcut;
             });
 
+            $buttons = $cp->getButtons();
+
+
             platform()->set('cp.navigation', $navigation);
             platform()->set('cp.section', $section);
             platform()->set('cp.shortcuts', $shortcuts);
+            platform()->set('cp.buttons', $buttons);
 
         }
     }

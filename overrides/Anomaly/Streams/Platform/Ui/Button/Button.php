@@ -2,6 +2,9 @@
 
 use Anomaly\Streams\Platform\Ui\Button\Contract\ButtonInterface;
 use Illuminate\Support\Traits\Macroable;
+use Laradic\Support\Traits\ArrayableProperties;
+use Laradic\Support\Traits\ArrayAccessibleProperties;
+use Pyro\AdminTheme\Components\Concerns\ProvidesArrayAccess;
 
 /**
  * Class Button
@@ -13,6 +16,8 @@ use Illuminate\Support\Traits\Macroable;
 class Button implements ButtonInterface
 {
     use Macroable;
+    use ArrayableProperties;
+    use ArrayAccessibleProperties;
 
     /**
      * The action tag.

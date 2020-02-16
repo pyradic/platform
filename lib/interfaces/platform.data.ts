@@ -4,7 +4,7 @@ export namespace Platform {
     export interface Data {
         cp: Cp;
         module: Module;
-        breadcrumbs: any;
+        breadcrumbs: Record<string,string>;
         user: User;
         menus: any;
 
@@ -15,8 +15,26 @@ export namespace Platform {
         structure: Record<string, StructureNavigtion>;
         navigation: Navigation;
         section: Section;
-
+        buttons:Button[]
         [ key: string ]: any
+    }
+
+    export interface Button {
+        attributes:any
+        class:string
+        disabled:boolean
+        dropdown:any[]
+        dropup:boolean
+        enabled:boolean
+        icon:string
+        permission:string
+        position:string
+        size:string
+        tag:string
+        text:string
+        title:"Manage Dashboards"
+        type:"info"
+        url:string
     }
 
     export interface StructureNavigtion {
