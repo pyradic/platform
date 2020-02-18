@@ -10,7 +10,7 @@ use Pyro\Platform\Database\Seeder;
 
 class SeedCommand extends Command
 {
-    protected $signature = 'seed {names?*} {--list}';
+    protected $signature = 'seed {names?*} {--list} {--force}';
 
     protected $description = 'Database seeders';
 
@@ -37,7 +37,7 @@ class SeedCommand extends Command
         $names = Arr::wrap($names);
         foreach ($names as $name) {
             $reg = $regs[ $name ];
-            $this->call('db:seed', [ '--class' => $reg[ 'class' ] ]);
+            $this->call('db:seed', [ '--class' => $reg[ 'class' ], '--force' => $this->option('force') ]);
         }
 
         $this->info('Done');
