@@ -56,9 +56,9 @@ class Asset extends \Anomaly\Streams\Platform\Asset\Asset
                     );
 
                     $relativeSourceFilePath = path_make_relative($sourceFilePath, base_path());
-                    $pathName = path_make_relative($compiledFilePath, public_path());
-                    $url      = url($pathName);
-                    return compact('filters', 'sourceFilePath','relativeSourceFilePath', 'compiledFilePath', 'content', 'pathName', 'url');
+                    $pathName               = path_make_relative($compiledFilePath, public_path());
+                    $url                    = url($pathName);
+                    return compact('filters', 'sourceFilePath', 'relativeSourceFilePath', 'compiledFilePath', 'content', 'pathName', 'url');
                 },
                 array_keys($this->collections[ $collection ]),
                 array_values($this->collections[ $collection ])
@@ -86,7 +86,13 @@ class Asset extends \Anomaly\Streams\Platform\Asset\Asset
 
     public function getCollections()
     {
-        return collect($this->collections);
+        return \Laradic\Support\Helpers\dot($this->collections);
+    }
+
+    public function setCollections($collections)
+    {
+        $this->collections = $collections;
+        return $this;
     }
 
     public function getPaths()
