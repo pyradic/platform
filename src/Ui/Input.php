@@ -14,6 +14,7 @@ use Pyro\Platform\Support\ExpressionLanguageParser;
 
 class Input
 {
+
     public static function expression($target, array $arguments = [])
     {
         return ExpressionLanguageParser::getInstance()->parse($target,$arguments);
@@ -25,12 +26,14 @@ class Input
         $target   = $resolver->resolve($target, $arguments, $options);
         if (is_array($target)) {
             foreach ($target as &$item) {
-                $item = $resolver->resolve($item, $arguments, $options);
-//                if (is_array($item)) {
-//                    foreach ($item as $key => $value) {
-//                        $item[ $key ] = static::resolver($value, $arguments, $options);
-//                    }
-//                }
+
+                $method = array_get($options, 'method', 'handle');
+                if ((is_string($item) && str_contains($item, '@')) || $item instanceof \Closure) {
+                    $item = app()->call($item, $arguments);
+                } elseif (is_string($item) && class_exists($item) && method_exists($item, $method)) {
+                    $item = app()->call($item . '@' . $method, $arguments);
+                }
+
             }
         }
         return $target;
