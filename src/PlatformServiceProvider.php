@@ -20,6 +20,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Translation\Translator;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
@@ -94,6 +95,7 @@ class PlatformServiceProvider extends ServiceProvider
 
 //        \Pyro\Platform\Livewire\LivewireServiceProvider::class,
         \Pyro\Platform\Bus\BusServiceProvider::class,
+        \BeyondCode\ServerTiming\ServerTimingServiceProvider::class,
 //        \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
     ];
 
@@ -114,6 +116,7 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function register()
     {
+        AliasLoader::getInstance()->alias('ServerTiming', \BeyondCode\ServerTiming\Facades\ServerTiming::class);
         $this->mergeConfig();
         $this->registerListeners($this->listen);
         $this->registerProviders($this->providers);

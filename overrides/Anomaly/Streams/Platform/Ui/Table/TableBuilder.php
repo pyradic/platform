@@ -148,13 +148,15 @@ class TableBuilder
      */
     public function make()
     {
+
+        \ServerTiming::start('TableBuilder make');
         $this->build();
         $this->post();
 
         if (!app('request')->isMethod('post')) {
             $this->load();
         }
-
+        \ServerTiming::stop('TableBuilder make');
         return $this;
     }
 

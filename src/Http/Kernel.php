@@ -2,42 +2,17 @@
 
 namespace Pyro\Platform\Http;
 
-use Clockwork\Clockwork;
-use Laradic\Support\MultiBench;
+use BeyondCode\ServerTiming\Middleware\ServerTimingMiddleware;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Routing\Router;
 
 class Kernel extends \Anomaly\Streams\Platform\Http\Kernel
 {
-
-    /**
-     * Send the given request through the middleware / router.
-     *
-     * @param \Illuminate\Http\Request $request
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function sendRequestThroughRouter($request)
+    public function __construct(Application $app, Router $router)
     {
-        MultiBench::on('lifecycle')->mark('sendRequestThroughRouter');
-        $response = parent::sendRequestThroughRouter($request);
-        MultiBench::on('lifecycle')->mark('sendRequestThroughRouter:end');
-        return $response;
-    }
-
-    /**
-     * Get the route dispatcher callback.
-     *
-     * @return \Closure
-     */
-    protected function dispatchToRouter()
-    {
-        return function ($request) {
-            resolve(Clockwork::class);
-
-            $this->app->instance('request', $request);
-            MultiBench::on('lifecycle')->mark('dispatchToRouter');
-            $response = $this->router->dispatch($request);
-            MultiBench::on('lifecycle')->mark('dispatchToRouter:end');
-            return $response;
-        };
+        parent::__construct($app, $router);
+        $this->middleware = array_merge([
+            ServerTimingMiddleware::class,
+        ], $this->middleware);
     }
 }

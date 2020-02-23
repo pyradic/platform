@@ -238,6 +238,7 @@ class FormBuilder
      */
     public function make($entry = null)
     {
+        \ServerTiming::start('FormBuilder make');
         $this->build($entry);
         $this->post();
 
@@ -247,6 +248,7 @@ class FormBuilder
             Hooks::dispatch([ LoadForm::class, static::class ],[ $this ]);
             Hooks::dispatch([ MakeForm::class, static::class ],[ $this ]);
         }
+        \ServerTiming::stop('FormBuilder make');
 
         return $this;
     }
