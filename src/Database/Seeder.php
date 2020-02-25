@@ -28,22 +28,22 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 
     public static function registerSeed($name = null, $description = null)
     {
-        $name                      = $name ?? static::$name;
-        static::$name              = $name;
+        $name         = $name ?? static::$name;
+        static::$name = $name;
 
-        $description               = $description ?? static::$description;
-        static::$description       = $description;
+        $description         = $description ?? static::$description;
+        static::$description = $description;
 
-        $class                     = static::class;
-        if($name === null){
-            $name=$class;
+        $class = static::class;
+        if ($name === null) {
+            $name = $class;
         }
         self::$registered[ $name ] = compact('name', 'class', 'description');
     }
 
     protected function option($key)
     {
-        if($this->command) {
+        if ($this->command) {
             return $this->command->option($key);
         }
         return null;
@@ -51,7 +51,7 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 
     protected function argument($key)
     {
-        if($this->command) {
+        if ($this->command) {
             return $this->command->argument($key);
         }
         return null;
@@ -82,7 +82,7 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 
     protected function error($message)
     {
-        if($this->command){
+        if ($this->command) {
             return $this->command->error($message);
         }
         throw new \RuntimeException($message);
@@ -90,15 +90,32 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 
     protected function write($messages)
     {
-        if($this->command){
+        if ($this->command) {
             $this->command->getOutput()->write($messages);
         }
     }
-    protected function line($messages,$verbosity=null)
+
+    protected function line($messages, $verbosity = null)
     {
-        if($this->command){
-            $this->command->line($messages,null,$verbosity);//getOutput()->writeln($messages);
+        if ($this->command) {
+            $this->command->line($messages, null, $verbosity);//getOutput()->writeln($messages);
         }
+    }
+
+    protected function confirm($message, $default = false)
+    {
+        if ($this->command) {
+            return $this->command->confirm($message, $default);
+        }
+        return $default;
+    }
+
+    protected function input($message, $default = null)
+    {
+        if ($this->command) {
+            return $this->command->ask($message, $default);
+        }
+        return $default;
     }
 
     protected function helper($class)
@@ -140,9 +157,7 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
             $this->fire('called', [ $this, $instance, $class, $silent ]);
         }
 
-
         return $this;
     }
-
 
 }

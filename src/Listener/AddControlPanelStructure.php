@@ -37,7 +37,9 @@ class AddControlPanelStructure
                 if ($active = $cp->getActiveSection()) {
                     /** @var \Illuminate\Support\Collection $section */
                     $section = $navigation->get('children')->firstWhere('slug', $active->getSlug());
-                    $section->put('active', true);
+                    if($section) {
+                        $section->put('active', true);
+                    }
                 }
             }
 
