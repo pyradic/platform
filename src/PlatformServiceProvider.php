@@ -4,7 +4,10 @@
 
 namespace Pyro\Platform;
 
+use Anomaly\Streams\Platform\Addon\AddonCollection;
 use Anomaly\Streams\Platform\Addon\Event\AddonWasRegistered;
+use Anomaly\Streams\Platform\Addon\Extension\Extension;
+use Anomaly\Streams\Platform\Addon\Module\Module;
 use Anomaly\Streams\Platform\Asset\Asset;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
@@ -32,6 +35,8 @@ use Pyro\Platform\Addon\AddonProvider;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Command\AddPlatformAssetNamespaces;
 use Pyro\Platform\Command\OverrideIconRegistryIcons;
+use Pyro\Platform\Console\AddonDisableCommand;
+use Pyro\Platform\Console\AddonEnableCommand;
 use Pyro\Platform\Console\AddonListCommand;
 use Pyro\Platform\Console\DatabaseTruncateCommand;
 use Pyro\Platform\Console\EnvSet;
@@ -119,6 +124,12 @@ class PlatformServiceProvider extends ServiceProvider
     public function register()
     {
         AliasLoader::getInstance()->alias('ServerTiming', \BeyondCode\ServerTiming\Facades\ServerTiming::class);
+        AddonCollection::macro('disabled', function () {
+            return $this->installable()->filter(function ($addon) {
+                /* @var Module|Extension $addon */
+                return ! $addon->isEnabled();
+            });
+        });
         $this->mergeConfig();
         $this->registerListeners($this->listen);
         $this->registerProviders($this->providers);
@@ -187,6 +198,12 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton('command.addon.list', function ($app) {
             return new AddonListCommand();
         });
+        $this->app->singleton('command.addon.disable', function ($app) {
+            return new AddonDisableCommand();
+        });
+        $this->app->singleton('command.addon.enable', function ($app) {
+            return new AddonEnableCommand();
+        });
         $this->app->singleton('command.platform.seed', function ($app) {
             return new SeedCommand();
         });
@@ -202,7 +219,15 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton('command.platform.permissions', function ($app) {
             return new PermissionsCommand();
         });
-        $this->commands([ 'command.platform.seed', 'command.addon.list', 'command.database.truncate', 'command.platform.macro', 'command.platform.permissions' ]);
+        $this->commands([
+            'command.platform.seed',
+            'command.addon.list',
+            'command.addon.disable',
+            'command.addon.enable',
+            'command.database.truncate',
+            'command.platform.macro',
+            'command.platform.permissions',
+        ]);
     }
 
     protected function registerExpressionLanguageFunctions()
