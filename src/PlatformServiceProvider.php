@@ -19,7 +19,9 @@ use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
 use Illuminate\Contracts\Translation\Translator;
+use Illuminate\Contracts\View\Factory as ViewFactoryContract;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
@@ -46,7 +48,7 @@ use Pyro\Platform\Listener\RegisterAddonSeeders;
 use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
 use Pyro\Platform\Listener\SharePlatform;
-use Pyro\Platform\Livewire\LivewirePlugin;
+use Pyro\Platform\Routing\ResponseFactory;
 use Pyro\Platform\Support\Dev;
 use Pyro\Platform\Support\ExpressionLanguageParser;
 use Pyro\Platform\Ui\UiServiceProvider;
@@ -120,8 +122,8 @@ class PlatformServiceProvider extends ServiceProvider
         $this->mergeConfig();
         $this->registerListeners($this->listen);
         $this->registerProviders($this->providers);
-        $this->app->singleton('dev',Dev::class);
-        $this->app->singleton('dev',Dev::class);
+        $this->app->singleton('dev', Dev::class);
+        $this->app->singleton('dev', Dev::class);
         if ($this->app->environment('local')) {
             $this->registerProviders($this->devProviders);
         }
@@ -134,8 +136,10 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerTranslator();
         $this->registerUi();
         $this->registerUser();
+        $this->registerResponseFactory();
         $this->registerView();
         $this->registerPlugins();
+        $this->registerStreamsSingletons();
 
         $this->app->make(Kernel::class)->pushMiddleware(Http\Middleware\RenderPlatformDataToFile::class);
     }
@@ -297,6 +301,13 @@ class PlatformServiceProvider extends ServiceProvider
         }
     }
 
+    protected function registerResponseFactory()
+    {
+        $this->app->singleton(ResponseFactoryContract::class, function ($app) {
+            return new ResponseFactory($app[ ViewFactoryContract::class ], $app[ 'redirect' ]);
+        });
+    }
+
     protected function registerUser()
     {
         $this->app->singleton('permission_set_collection', function ($app) {
@@ -369,6 +380,25 @@ class PlatformServiceProvider extends ServiceProvider
                 }
             }
         });
+    }
+
+    protected function registerStreamsSingletons()
+    {
+        $this->app->singleton(\Anomaly\Streams\Platform\Support\Template::class, \Anomaly\Streams\Platform\Support\Template::class);
+        $this->app->singleton(\Anomaly\Streams\Platform\Support\Value::class, \Anomaly\Streams\Platform\Support\Value::class);
+        $this->app->singleton(\Anomaly\Streams\Platform\Support\Decorator::class, \Anomaly\Streams\Platform\Support\Decorator::class);
+
+        $alias = AliasLoader::getInstance();
+        $alias->alias('Authorizer', \Pyro\Platform\Support\Facade\Authorizer::class);
+        $alias->alias('Configurator', \Pyro\Platform\Support\Facade\Configurator::class);
+        $alias->alias('Decorator', \Pyro\Platform\Support\Facade\Decorator::class);
+        $alias->alias('Evaluator', \Pyro\Platform\Support\Facade\Evaluator::class);
+        $alias->alias('Hydrator', \Pyro\Platform\Support\Facade\Hydrator::class);
+        $alias->alias('Parser', \Pyro\Platform\Support\Facade\Parser::class);
+        $alias->alias('Resolver', \Pyro\Platform\Support\Facade\Resolver::class);
+        $alias->alias('Template', \Pyro\Platform\Support\Facade\Template::class);
+        $alias->alias('Translator', \Pyro\Platform\Support\Facade\Translator::class);
+        $alias->alias('Value', \Pyro\Platform\Support\Facade\Value::class);
     }
 
 }

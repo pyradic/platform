@@ -2,13 +2,15 @@
 
 namespace Pyro\Platform\Ui;
 
-use Anomaly\Streams\Platform\Support\Authorizer;
-use Anomaly\Streams\Platform\Support\Evaluator;
-use Anomaly\Streams\Platform\Support\Hydrator;
-use Anomaly\Streams\Platform\Support\Parser;
-use Anomaly\Streams\Platform\Support\Resolver;
-use Anomaly\Streams\Platform\Support\Template;
-use Anomaly\Streams\Platform\Support\Value;
+
+use Pyro\Platform\Support\Facade\Authorizer;
+use Pyro\Platform\Support\Facade\Evaluator;
+use Pyro\Platform\Support\Facade\Hydrator;
+use Pyro\Platform\Support\Facade\Parser;
+use Pyro\Platform\Support\Facade\Resolver;
+
+use Pyro\Platform\Support\Facade\Template;
+use Pyro\Platform\Support\Facade\Value;
 use Illuminate\Support\Collection;
 use Pyro\Platform\Support\ExpressionLanguageParser;
 
@@ -22,8 +24,7 @@ class Input
 
     public static function resolver($target, array $arguments = [], array $options = [])
     {
-        $resolver = resolve(Resolver::class);
-        $target   = $resolver->resolve($target, $arguments, $options);
+        $target   = Resolver::resolve($target, $arguments, $options);
         if (is_array($target)) {
             foreach ($target as &$item) {
 
@@ -46,19 +47,19 @@ class Input
                 $item = static::render($item, $entry, $term, $payload);
             }
         } elseif (is_string($target) && str_contains($target, [ '{{', '{%' ])) {
-            $target = (string)resolve(Template::class)->render($target, [ $term => $entry ]);
+            $target = (string) Template::render($target, [ $term => $entry ]);
         }
         return $target;
     }
 
     public static function evaluate($target, array $arguments = [])
     {
-        return resolve(Evaluator::class)->evaluate($target, $arguments);
+        return Evaluator::evaluate($target, $arguments);
     }
 
     public static function valuate($parameters, $entry, $term = 'entry', $payload = [])
     {
-        return resolve(Value::class)->make($parameters, $entry, $term = 'entry', $payload = []);
+        return Value::make($parameters, $entry, $term = 'entry', $payload = []);
     }
 
     public static function valuate2($parameters, $entry, $term = 'entry', $payload = [])
@@ -68,17 +69,17 @@ class Input
 
     public static function parse($target, array $data = [])
     {
-        return resolve(Parser::class)->parse($target, $data);
+        return Parser::parse($target, $data);
     }
 
     public static function hydrate($object, array $parameters)
     {
-        return resolve(Hydrator::class)->hydrate($object, $parameters);
+        return Hydrator::hydrate($object, $parameters);
     }
 
     public static function authorize($permission, $user = null)
     {
-        return resolve(Authorizer::class)->authorize($permission, $user);
+        return Authorizer::authorize($permission, $user);
     }
 
     public static function translate($target)

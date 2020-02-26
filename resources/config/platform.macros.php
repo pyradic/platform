@@ -39,9 +39,6 @@ return [
             [ 'addon:install', [ 'addon' => 'clients_caretaker_role_type' ] ],
             [ 'addon:install', [ 'addon' => 'clients_courses_role_type' ] ],
             [ 'addon:install', [ 'addon' => 'clients' ] ],
-//            [ 'departments:set-user' ],
-//            [ 'departments:association', [ 'action' => 'add', 'args' => [ 'clients::clients', 'mylink', 'multi' ] ] ],
-//            [ 'departments:association', [ 'action' => 'add', 'args' => [ 'clients::groups', 'mylink', 'single' ] ] ],
             [ 'seed', [ 'names' => 'clients' ] ],
         ],
     ],
@@ -56,10 +53,15 @@ return [
         'desc'     => 'Reinstall Help Requests',
         'commands' => [
             [ 'addon:reinstall', [ 'addon' => 'help_requests' ] ],
-//            [ 'departments:set-user' ],
-//            [ 'departments:association', [ 'action' => 'add', 'args' => [ 'help_requests::requests', 'mylink', 'single' ] ] ],
             [ 'seed', [ 'names' => 'help_requests' ] ],
         ],
     ],
+    'requester:reinstall' => [
+        'desc' => 'Reinstall Clients Requester Role Type',
+        'commands' => [
+            ['addon:reinstall', ['addon' => 'clients_requester_role_type']],
+            ['seed', ['names'=> 'requester_role_type'],'-vvv' => true]
+        ]
+    ]
 ];
 
