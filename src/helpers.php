@@ -38,17 +38,3 @@ if ( ! function_exists('get_protected_class_property')) {
 }
 
 
-
-if ( ! function_exists('h')) {
-    /**
-     * @param string|\Pyro\Platform\Ui\Hyperscript\Element                                                    $tag
-     * @param \Pyro\Platform\Ui\Hyperscript\Element|\Pyro\Platform\Ui\Hyperscript\Element[]|string|array|null $attributesOrChildren
-     * @param \Pyro\Platform\Ui\Hyperscript\Element|\Pyro\Platform\Ui\Hyperscript\Element[]                   $children
-     *
-     * @return \Pyro\Platform\Ui\Hyperscript\Element
-     */
-    function h($tag, $attributesOrChildren = null, $children = null)
-    {
-        return \Pyro\Platform\Ui\Hyperscript\Hyperscript::createElement($tag, $attributesOrChildren, $children);
-    }
-}

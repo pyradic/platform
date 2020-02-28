@@ -121,7 +121,7 @@ class Row implements RowInterface
     /**
  * Get the row buttons.
  *
- * @return  \Anomaly\Streams\Platform\Ui\Button\ButtonCollection|\Anomaly\Streams\Platform\Ui\Button\Button[]
+ * @return \Anomaly\Streams\Platform\Ui\Button\ButtonCollection|\Anomaly\Streams\Platform\Ui\Button\Button[] 
  */
     public function getButtons()
     {
@@ -144,7 +144,7 @@ class Row implements RowInterface
     /**
  * Get the row columns.
  *
- * @return  \Anomaly\Streams\Platform\Ui\Table\Component\Column\ColumnCollection|\Anomaly\Streams\Platform\Ui\Table\Component\Column\Column[]
+ * @return \Anomaly\Streams\Platform\Ui\Table\Component\Column\ColumnCollection|\Anomaly\Streams\Platform\Ui\Table\Component\Column\Column[] 
  */
     public function getColumns()
     {

@@ -1,6 +1,8 @@
 <?php namespace Anomaly\Streams\Platform\Ui\Button;
 
 use Anomaly\Streams\Platform\Ui\Button\Contract\ButtonInterface;
+use ArrayAccess;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Traits\Macroable;
 use Laradic\Support\Traits\ArrayableProperties;
 use Laradic\Support\Traits\ArrayAccessibleProperties;
@@ -13,7 +15,7 @@ use Pyro\AdminTheme\Components\Concerns\ProvidesArrayAccess;
  * @author  PyroCMS, Inc. <support@pyrocms.com>
  * @author  Ryan Thompson <ryan@pyrocms.com>
  */
-class Button implements ButtonInterface
+class Button implements ButtonInterface, ArrayAccess, Arrayable
 {
     use Macroable;
     use ArrayableProperties;
@@ -507,5 +509,14 @@ class Button implements ButtonInterface
         $this->tag = $tag;
 
         return $this;
+    }
+
+    public function offsetGet($offset)
+    {
+        return isset($this->{$offset}) ? $this->{$offset} : $this->attributes[$offset];
+    }
+    public function offsetExists($offset)
+    {
+        return isset($this->{$offset}) && $this->{$offset} !== null;
     }
 }

@@ -181,7 +181,7 @@ class Column implements ColumnInterface
     /**
  * Get the entry.
  *
- * @return  \Anomaly\Streams\Platform\Entry\Contract\EntryInterface|mixed
+ * @return \Anomaly\Streams\Platform\Entry\Contract\EntryInterface|mixed 
  */
     public function getEntry()
     {

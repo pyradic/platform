@@ -104,7 +104,7 @@ class FormBuilder
     /**
  * The fields config.
  *
- * @var  array = \Pyro\IdeHelper\Examples\FieldTypeExamples::values()
+ * @var array = \Pyro\IdeHelper\Examples\FieldTypeExamples::values()
  */
     protected $fields = [];
 
@@ -125,28 +125,28 @@ class FormBuilder
     /**
  * The actions config.
  *
- * @var  array = \Pyro\IdeHelper\Examples\FormBuilderExamples::actions()
+ * @var array = \Pyro\IdeHelper\Examples\FormBuilderExamples::actions()
  */
     protected $actions = [];
 
     /**
  * The buttons config.
  *
- * @var  array = \Pyro\IdeHelper\Examples\Examples::buttons()
+ * @var array = \Pyro\IdeHelper\Examples\Examples::buttons()
  */
     protected $buttons = [];
 
     /**
  * The form options.
  *
- * @var  array = \Pyro\IdeHelper\Examples\FormBuilderExamples::options()
+ * @var array = \Pyro\IdeHelper\Examples\FormBuilderExamples::options()
  */
     protected $options = [];
 
     /**
  * The form sections.
  *
- * @var  array = \Pyro\IdeHelper\Examples\FormBuilderExamples::sections()
+ * @var array = \Pyro\IdeHelper\Examples\FormBuilderExamples::sections()
  */
     protected $sections = [];
 
@@ -747,7 +747,7 @@ class FormBuilder
     /**
  * Set the actions config.
  *
- * @param  array $actions = \Pyro\IdeHelper\Examples\FormBuilderExamples::actions()
+ * @param array $actions  = \Pyro\IdeHelper\Examples\FormBuilderExamples::actions()
  */
     public function setActions($actions)
     {
@@ -777,7 +777,7 @@ class FormBuilder
     /**
  * Get the actions config.
  *
- * @return  array = \Pyro\IdeHelper\Examples\FormBuilderExamples::actions()
+ * @return array  = \Pyro\IdeHelper\Examples\FormBuilderExamples::actions()
  */
     public function getActions()
     {
@@ -787,7 +787,7 @@ class FormBuilder
     /**
  * Set the buttons config.
  *
- * @param  array $buttons = \Pyro\IdeHelper\Examples\FormBuilderExamples::buttons()
+ * @param array $buttons  = \Pyro\IdeHelper\Examples\FormBuilderExamples::buttons()
  */
     public function setButtons($buttons)
     {
@@ -799,7 +799,7 @@ class FormBuilder
     /**
  * Get the buttons config.
  *
- * @return  array = \Pyro\IdeHelper\Examples\FormBuilderExamples::buttons()
+ * @return array  = \Pyro\IdeHelper\Examples\FormBuilderExamples::buttons()
  */
     public function getButtons()
     {
@@ -811,7 +811,7 @@ class FormBuilder
  *
  * @param $button
  * @return $this
- * @param array $definition = \Pyro\IdeHelper\Examples\Examples::button()
+ * @param array $definition  = \Pyro\IdeHelper\Examples\Examples::button()
  */
     public function addButton($button, array $definition = [])
     {
@@ -827,7 +827,7 @@ class FormBuilder
     /**
  * The the options.
  *
- * @return  array = \Pyro\IdeHelper\Examples\FormBuilderExamples::options()
+ * @return array  = \Pyro\IdeHelper\Examples\FormBuilderExamples::options()
  */
     public function getOptions()
     {
@@ -837,7 +837,7 @@ class FormBuilder
     /**
  * Set the options.
  *
- * @param  array $options = \Pyro\IdeHelper\Examples\FormBuilderExamples::options()
+ * @param array $options  = \Pyro\IdeHelper\Examples\FormBuilderExamples::options()
  */
     public function setOptions($options)
     {
@@ -862,7 +862,7 @@ class FormBuilder
     /**
  * Get the sections.
  *
- * @return  array = \Pyro\IdeHelper\Examples\FormBuilderExamples::sections()
+ * @return array  = \Pyro\IdeHelper\Examples\FormBuilderExamples::sections()
  */
     public function getSections()
     {
@@ -872,7 +872,7 @@ class FormBuilder
     /**
  * Set the sections.
  *
- * @param  array $sections = \Pyro\IdeHelper\Examples\FormBuilderExamples::sections()
+ * @param array $sections  = \Pyro\IdeHelper\Examples\FormBuilderExamples::sections()
  */
     public function setSections($sections)
     {
@@ -979,7 +979,7 @@ class FormBuilder
     /**
  * Get an option value.
  *
- * @param  string $key = \Pyro\IdeHelper\Examples\FormBuilderExamples::option()[$any]
+ * @param string $key  = \Pyro\IdeHelper\Examples\FormBuilderExamples::option()[$any]
  */
     public function getOption($key, $default = null)
     {
@@ -989,7 +989,7 @@ class FormBuilder
     /**
  * Set an option value.
  *
- * @param  string $key = \Pyro\IdeHelper\Examples\FormBuilderExamples::option()[$any]
+ * @param string $key  = \Pyro\IdeHelper\Examples\FormBuilderExamples::option()[$any]
  */
     public function setOption($key, $value)
     {
@@ -1001,7 +1001,7 @@ class FormBuilder
     /**
  * Return if the form has an option.
  *
- * @param  string $key = \Pyro\IdeHelper\Examples\FormBuilderExamples::option()[$any]
+ * @param string $key  = \Pyro\IdeHelper\Examples\FormBuilderExamples::option()[$any]
  */
     public function hasOption($key)
     {

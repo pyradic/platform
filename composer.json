@@ -20,8 +20,7 @@
     },
     "autoload": {
         "files": [
-            "src/helpers.php",
-            "src/Ui/Hyperscript/H.php"
+            "src/helpers.php"
         ],
         "psr-4": {
             "Pyro\\Platform\\": "src",
@@ -35,6 +34,9 @@
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/ControlPanelBuilder.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Command/BuildControlPanel.php",
 
+            "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Navigation/NavigationLink.php",
+            "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Section/Section.php",
+            "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Shortcut/Shortcut.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Button/ButtonBuilder.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Button/ButtonBuilder.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Component/Button/ButtonGuesser.php",
@@ -42,7 +44,7 @@
             "vendor/anomaly/streams-platform/src/Ui/Button/Button.php",
 
             "vendor/anomaly/streams-platform/src/Ui/Table/Table.php",
-            "vendor/anomaly/streams-platform/src/Ui/Table/TableBuilder.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/TableBuilder2.php",
             "vendor/anomaly/streams-platform/src/Ui/Table/Command/BuildTable.php",
             "vendor/anomaly/streams-platform/src/Ui/Table/Component/Action/Action.php",
             "vendor/anomaly/streams-platform/src/Ui/Table/Component/Action/ActionBuilder.php",

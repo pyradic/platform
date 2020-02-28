@@ -2,11 +2,7 @@
 
 namespace Pyro\Platform\Ui\ControlPanel\Component;
 
-use ArrayAccess;
-use Illuminate\Contracts\Support\Arrayable;
-use Laradic\Support\Traits\ArrayAccessibleProperties;
-
-class Button extends \Anomaly\Streams\Platform\Ui\Button\Button implements Arrayable, ArrayAccess
+class Button extends \Anomaly\Streams\Platform\Ui\Button\Button
 {
 
     use ComponentTrait;

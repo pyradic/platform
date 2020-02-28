@@ -31,6 +31,7 @@ use Pyro\Platform\Ui\ControlPanel\Component\Section;
 use Pyro\Platform\Ui\ControlPanel\ControlPanel;
 use Pyro\Platform\Ui\ControlPanel\ControlPanelBuilder;
 use Pyro\Platform\Ui\ControlPanel\ControlPanelStructure;
+use ServerTiming;
 
 class BuildControlPanelStructure
 {
@@ -62,21 +63,21 @@ class BuildControlPanelStructure
     {
         $cp = resolve(\Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanel::class);
         if(static::$structure === null || $this->cache === false) {
-            debugbar()->startMeasure('control_panel_structure');
+            \ServerTiming::start('control_panel_structure');
             $key     = "cp.structure.user.{$guard->id()}";
             $navKey  = $key . '.nav';
             $lastKey = $key . '.last';
             $last    = $cp->getNavigation()->map->getSlug()->implode(',');
             if ($this->cache && $cache->has($lastKey) && $cache->has($navKey) && $cache->get($lastKey) === $last) {
-                debugbar()->startMeasure('control_panel_structure.cache');
+                ServerTiming::start('control_panel_structure.cache');
                 $structure = $cache->get($navKey);
-                debugbar()->stopMeasure('control_panel_structure.cache');
+                ServerTiming::stop('control_panel_structure.cache');
             } else {
                 $cache->forever($lastKey, $last);
-                debugbar()->startMeasure('control_panel_structure.build');
+                ServerTiming::start('control_panel_structure.build');
                 $structure = $this->build($modules);
-                debugbar()->stopMeasure('control_panel_structure.build');
-                $cache->forever($navKey, $structure);
+                ServerTiming::stop('control_panel_structure.build');
+                $cache->forever($navKey, $structure->map->except(['asset','image']));
             }
             static::$structure = $structure;
             if ($activeLink = $cp->getNavigation()->active()) {
@@ -89,7 +90,7 @@ class BuildControlPanelStructure
                     }
                 }
             }
-            debugbar()->stopMeasure('control_panel_structure');
+            ServerTiming::stop('control_panel_structure');
 
         }
         // the real cp
@@ -123,11 +124,11 @@ class BuildControlPanelStructure
             $link->put('url',
                 $link->get('url',$link->dataGet('attributes.href', ''))
             );
-            $link[ 'children' ] = $link[ 'children' ]->toBase()->map->toArray()->map('collect')->map(function (Collection $section) {
+            $link[ 'children' ] = collect($link[ 'children' ])->map('collect')->map(function (Collection $section) {
                 $section->put('url',
                     $section->get('url',$section->dataGet('attributes.href', ''))
                 );
-                $section[ 'children' ] = $section[ 'children' ]->map->toArray()->map('collect')->map(function(Collection $button){
+                $section[ 'children' ] = collect($section[ 'children' ])->map('collect')->map(function(Collection $button){
                     $button['title'] = $button['text'];
                     $button->put('url',
                         $button->get('url',$button->dataGet('attributes.href', ''))

@@ -2,11 +2,7 @@
 
 namespace Pyro\Platform\Ui\ControlPanel\Component;
 
-use ArrayAccess;
-use Illuminate\Contracts\Support\Arrayable;
-use Laradic\Support\Traits\ArrayAccessibleProperties;
-
-class Section extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\Section implements Arrayable, ArrayAccess
+class Section extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\Section
 {
 
     use ComponentTrait;

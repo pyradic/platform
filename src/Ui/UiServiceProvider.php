@@ -24,9 +24,9 @@ class UiServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->app->when(\Anomaly\Streams\Platform\Ui\Table\Component\Action\ActionBuilder::class)
-            ->needs(\Anomaly\Streams\Platform\Ui\Table\Component\Action\ActionInput::class)
-            ->give(\Pyro\Platform\Ui\ActionInput::class);
+//        $this->app->when(\Anomaly\Streams\Platform\Ui\Table\Component\Action\ActionBuilder::class)
+//            ->needs(\Anomaly\Streams\Platform\Ui\Table\Component\Action\ActionInput::class)
+//            ->give(\Pyro\Platform\Ui\ActionInput::class);
 
 //        $this->app->events->listen(GatherNavigation::class, function (GatherNavigation $event) {
 //            $event->getBuilder()->setNavigation(

@@ -2,11 +2,7 @@
 
 namespace Pyro\Platform\Ui\ControlPanel\Component;
 
-use ArrayAccess;
-use Illuminate\Contracts\Support\Arrayable;
-use Laradic\Support\Traits\ArrayAccessibleProperties;
-
-class NavigationLink extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\NavigationLink implements Arrayable, ArrayAccess
+class NavigationLink extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\NavigationLink
 {
 
     use ComponentTrait;

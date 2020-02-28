@@ -4,19 +4,9 @@ namespace Pyro\Platform\Ui\ControlPanel\Component;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Laradic\Support\Traits\ArrayAccessibleProperties;
-use Pyro\Platform\Command\GetClassArray;
 
 trait ComponentTrait
 {
-    use ArrayAccessibleProperties;
-
-    public function toArray()
-    {
-        $array = dispatch_now(new GetClassArray($this));
-        return $array;
-    }
-
     public function translate($keys, $recursive = false)
     {
         foreach (Arr::wrap($keys) as $key) {

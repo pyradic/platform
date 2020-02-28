@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @author PyroCMS, Inc. <support@pyrocms.com>
  * @author Ryan Thompson <ryan@pyrocms.com>
  */
-class TableBuilder
+class TableBuilder2
 {
     use Macroable;
     use DispatchesJobs;

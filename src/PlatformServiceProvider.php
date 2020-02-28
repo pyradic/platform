@@ -19,6 +19,7 @@ use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewOverrides;
 use Anomaly\UsersModule\User\Contract\UserRepositoryInterface;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
+use Illuminate\Console\Application as Artisan;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
@@ -123,6 +124,7 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function register()
     {
+
         AliasLoader::getInstance()->alias('ServerTiming', \BeyondCode\ServerTiming\Facades\ServerTiming::class);
         AddonCollection::macro('disabled', function () {
             return $this->installable()->filter(function ($addon) {
@@ -228,6 +230,15 @@ class PlatformServiceProvider extends ServiceProvider
             'command.platform.macro',
             'command.platform.permissions',
         ]);
+        if (class_exists(\Bamarni\Symfony\Console\Autocomplete\DumpCommand::class)) {
+            $this->app->singleton('command.autocomplete.dump', function () {
+                return new \Bamarni\Symfony\Console\Autocomplete\DumpCommand();
+            });
+
+            Artisan::starting(function (\Illuminate\Console\Application $artisan) {
+                $artisan->add($this->app['command.autocomplete.dump']);
+            });
+        }
     }
 
     protected function registerExpressionLanguageFunctions()
