@@ -11,8 +11,11 @@ class UiServiceProvider extends ServiceProvider
     public $providers = [];
 
     public $bindings = [
-        \Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanelBuilder::class => \Pyro\Platform\Ui\ControlPanel\ControlPanelBuilder::class,
-        \Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanel::class        => \Pyro\Platform\Ui\ControlPanel\ControlPanel::class,
+//        \Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanelBuilder::class => \Pyro\Platform\Ui\ControlPanel\ControlPanelBuilder::class,
+        \Anomaly\Streams\Platform\Ui\ControlPanel\ControlPanel::class                        => \Pyro\Platform\Ui\ControlPanel\ControlPanel::class,
+        \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\NavigationLink::class => \Pyro\Platform\Ui\ControlPanel\Component\NavigationLink::class,
+        \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\Section::class           => \Pyro\Platform\Ui\ControlPanel\Component\Section::class,
+        \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Shortcut\Shortcut::class         => \Pyro\Platform\Ui\ControlPanel\Component\Shortcut::class,
     ];
 
     public $singletons = [];

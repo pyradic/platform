@@ -33,7 +33,7 @@ class ControlPanel extends \Anomaly\Streams\Platform\Ui\ControlPanel\ControlPane
     public function toArray()
     {
         return [
-            'button' => $this->buttons->toArray(),
+            'buttons' => $this->buttons->toArray(),
             'sections' => $this->sections->toArray(),
             'shortcuts' => $this->shortcuts->toArray(),
             'navigation' => $this->navigation->toArray(),

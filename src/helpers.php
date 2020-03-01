@@ -6,7 +6,7 @@ if ( ! function_exists('platform')) {
      */
     function platform()
     {
-        return app('platform');
+        return App::make('platform');
     }
 }
 

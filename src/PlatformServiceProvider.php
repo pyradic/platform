@@ -36,10 +36,6 @@ use Pyro\Platform\Addon\AddonProvider;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Command\AddPlatformAssetNamespaces;
 use Pyro\Platform\Command\OverrideIconRegistryIcons;
-use Pyro\Platform\Console\AddonDisableCommand;
-use Pyro\Platform\Console\AddonEnableCommand;
-use Pyro\Platform\Console\AddonListCommand;
-use Pyro\Platform\Console\DatabaseTruncateCommand;
 use Pyro\Platform\Console\EnvSet;
 use Pyro\Platform\Console\MacroCommand;
 use Pyro\Platform\Console\PermissionsCommand;
@@ -47,7 +43,7 @@ use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
 use Pyro\Platform\Event\PlatformWillRender;
 use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
-use Pyro\Platform\Listener\AddControlPanelStructure;
+use Pyro\Platform\Listener\AddControlPanelToJS;
 use Pyro\Platform\Listener\AddJavascriptData;
 use Pyro\Platform\Listener\OverrideAddons;
 use Pyro\Platform\Listener\RegisterAddonSeeders;
@@ -71,7 +67,8 @@ class PlatformServiceProvider extends ServiceProvider
     protected $listen = [
         TemplateDataIsLoading::class => [
             SharePlatform::class,
-            AddControlPanelStructure::class,
+//            AddControlPanelStructure::class,
+            AddControlPanelToJS::class,
         ],
         Ready::class                 => [
             OverrideAddons::class,
@@ -100,6 +97,7 @@ class PlatformServiceProvider extends ServiceProvider
 
         \Pyro\CustomInstall\CustomInstallServiceProvider::class,
         \Pyro\Webpack\WebpackServiceProvider::class,
+        \Pyro\Helpers\HelpersServiceProvider::class,
 
 //        \Pyro\Platform\Livewire\LivewireServiceProvider::class,
         \Pyro\Platform\Bus\BusServiceProvider::class,
@@ -196,24 +194,11 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->extend(\Anomaly\Streams\Platform\Application\Console\EnvSet::class, function (\Anomaly\Streams\Platform\Application\Console\EnvSet $command) {
             return $this->app->make(EnvSet::class);
         });
-
-        $this->app->singleton('command.addon.list', function ($app) {
-            return new AddonListCommand();
-        });
-        $this->app->singleton('command.addon.disable', function ($app) {
-            return new AddonDisableCommand();
-        });
-        $this->app->singleton('command.addon.enable', function ($app) {
-            return new AddonEnableCommand();
-        });
         $this->app->singleton('command.platform.seed', function ($app) {
             return new SeedCommand();
         });
         $this->app->singleton('command.route.list', function ($app) {
             return new RouteListCommand($app[ 'router' ]);
-        });
-        $this->app->singleton('command.database.truncate', function ($app) {
-            return new DatabaseTruncateCommand();
         });
         $this->app->singleton('command.platform.macro', function ($app) {
             return new MacroCommand();
@@ -223,10 +208,6 @@ class PlatformServiceProvider extends ServiceProvider
         });
         $this->commands([
             'command.platform.seed',
-            'command.addon.list',
-            'command.addon.disable',
-            'command.addon.enable',
-            'command.database.truncate',
             'command.platform.macro',
             'command.platform.permissions',
         ]);
@@ -236,7 +217,7 @@ class PlatformServiceProvider extends ServiceProvider
             });
 
             Artisan::starting(function (\Illuminate\Console\Application $artisan) {
-                $artisan->add($this->app['command.autocomplete.dump']);
+                $artisan->add($this->app[ 'command.autocomplete.dump' ]);
             });
         }
     }
