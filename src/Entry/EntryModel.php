@@ -2,6 +2,7 @@
 
 namespace Pyro\Platform\Entry;
 
+use Anomaly\SlugFieldType\SlugFieldType;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -34,6 +35,25 @@ class EntryModel extends \Anomaly\Streams\Platform\Entry\EntryModel
             'dissociated',
         ]);
         parent::__construct($attributes);
+    }
+
+    public function resolveRouteBinding($value)
+    {
+        if(is_numeric($value)) {
+
+            if ($result = $this->where('id', $value)->first()) {
+                return $result;
+            }
+            abort(404, "Could not find id({$value}) on stream [{$this->stream()->getNamespace()}.{$this->stream()->getSlug()}]");
+        }
+        foreach($this->getAssignments() as $assignment){
+            if($assignment->getFieldType() instanceof SlugFieldType){
+                if ($result = $this->where($assignment->getFieldSlug(), $value)->first()) {
+                    return $result;
+                }
+            }
+        }
+        abort(404, "Could not find slug({$value}) on stream [{$this->stream()->getNamespace()}.{$this->stream()->getSlug()}]");
     }
 
     /**

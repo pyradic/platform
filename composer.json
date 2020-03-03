@@ -30,6 +30,7 @@
         "exclude-from-classmap": [
             "vendor/itsgoingd/clockwork/Clockwork/Storage/FileStorage.php",
 
+            "vendor/anomaly/streams-platform/src/Http/Controller/AdminController.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/ControlPanel.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/ControlPanelBuilder.php",
             "vendor/anomaly/streams-platform/src/Ui/ControlPanel/Command/BuildControlPanel.php",

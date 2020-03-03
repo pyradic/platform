@@ -416,6 +416,7 @@ class PlatformServiceProvider extends ServiceProvider
         $alias->alias('Template', \Pyro\Platform\Support\Facade\Template::class);
         $alias->alias('Translator', \Pyro\Platform\Support\Facade\Translator::class);
         $alias->alias('Value', \Pyro\Platform\Support\Facade\Value::class);
+        $alias->alias('MessageBag', \Pyro\Platform\Support\Facade\MessageBag::class);
     }
 
 }
