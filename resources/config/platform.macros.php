@@ -17,29 +17,43 @@ return [
             [ 'departments:association', [ 'action' => 'list' ] ],
         ],
     ],
-    'clients:uninstall'       => [
+    'clients:roles:uninstall'       => [
         'desc'     => 'Remove clients',
         'commands' => [
-            [ 'addon:uninstall', [ 'addon' => 'clients_default_role_type' ] ],
-            [ 'addon:uninstall', [ 'addon' => 'clients_requester_role_type' ] ],
-            [ 'addon:uninstall', [ 'addon' => 'clients_volunteer_role_type' ] ],
-            [ 'addon:uninstall', [ 'addon' => 'clients_care_role_type' ] ],
-            [ 'addon:uninstall', [ 'addon' => 'clients_caretaker_role_type' ] ],
-            [ 'addon:uninstall', [ 'addon' => 'clients_courses_role_type' ] ],
-            [ 'addon:uninstall', [ 'addon' => 'clients' ] ],
+            [ 'addon:uninstall', [ 'addon' => 'default_role_type' ] ],
+            [ 'addon:uninstall', [ 'addon' => 'requester_role_type' ] ],
+            [ 'addon:uninstall', [ 'addon' => 'volunteer_role_type' ] ],
+            [ 'addon:uninstall', [ 'addon' => 'care_role_type' ] ],
+            [ 'addon:uninstall', [ 'addon' => 'caretaker_role_type' ] ],
+            [ 'addon:uninstall', [ 'addon' => 'courses_role_type' ] ],
         ],
     ],
-    'clients:install'         => [
+    'clients:roles:install'         => [
         'desc'     => 'Install clients',
         'commands' => [
-            [ 'addon:install', [ 'addon' => 'clients_default_role_type' ] ],
-            [ 'addon:install', [ 'addon' => 'clients_requester_role_type' ] ],
-            [ 'addon:install', [ 'addon' => 'clients_volunteer_role_type' ] ],
-            [ 'addon:install', [ 'addon' => 'clients_care_role_type' ] ],
-            [ 'addon:install', [ 'addon' => 'clients_caretaker_role_type' ] ],
-            [ 'addon:install', [ 'addon' => 'clients_courses_role_type' ] ],
+            [ 'addon:install', [ 'addon' => 'default_role_type' ] ],
+            [ 'addon:install', [ 'addon' => 'requester_role_type' ] ],
+            [ 'addon:install', [ 'addon' => 'volunteer_role_type' ] ],
+            [ 'addon:install', [ 'addon' => 'care_role_type' ] ],
+            [ 'addon:install', [ 'addon' => 'caretaker_role_type' ] ],
+            [ 'addon:install', [ 'addon' => 'courses_role_type' ] ],
+            [ 'seed', [ 'names' => 'requester_role_type' ], '-vvv' => true ],
+        ],
+    ],
+    'clients:install'       => [
+        'desc'     => 'Install clients',
+        'commands' => [
             [ 'addon:install', [ 'addon' => 'clients' ] ],
-            [ 'seed', [ 'names' => 'clients' ] ],
+            [ 'seed', [ 'names' => 'clients' ], '-vvv' => true ],
+            [ 'macro', [ 'macro' => 'clients:roles:install' ] ],
+        ],
+    ],
+    'clients:uninstall'       => [
+        'desc'     => 'Reinstall clients',
+        'commands' => [
+            [ 'macro', [ 'macro' => 'clients:roles:uninstall' ] ],
+            [ 'addon:uninstall', [ 'addon' => 'clients' ] ],
+            [ 'macro', [ 'macro' => 'clients:install' ] ],
         ],
     ],
     'clients:reinstall'       => [

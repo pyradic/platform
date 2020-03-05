@@ -4,37 +4,52 @@ export namespace Platform {
     export interface Data {
         cp: Cp;
         module: Module;
-        breadcrumbs: Record<string,string>;
+        breadcrumbs: Breadcrumb[]
         user: User;
         menus: any;
 
         [ key: string ]: any
     }
 
+    export interface Breadcrumb {
+        key: string
+        route: {
+            as:string
+            uses: string
+            uri: string
+        }
+        addon?: any
+        parent: string
+        title: string
+        attributes:any
+        class:string
+    }
+
     export interface Cp {
         structure: Record<string, StructureNavigtion>;
         navigation: Navigation;
         section: Section;
-        buttons:Button[]
+        buttons: Button[]
+
         [ key: string ]: any
     }
 
     export interface Button {
-        attributes:any
-        class:string
-        disabled:boolean
-        dropdown:any[]
-        dropup:boolean
-        enabled:boolean
-        icon:string
-        permission:string
-        position:string
-        size:string
-        tag:string
-        text:string
-        title:"Manage Dashboards"
-        type:"info"
-        url:string
+        attributes: any
+        class: string
+        disabled: boolean
+        dropdown: any[]
+        dropup: boolean
+        enabled: boolean
+        icon: string
+        permission: string
+        position: string
+        size: string
+        tag: string
+        text: string
+        title: 'Manage Dashboards'
+        type: 'info'
+        url: string
     }
 
     export interface StructureNavigtion {

@@ -80,7 +80,7 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         $this->fire('constructed');
     }
 
-    protected function error($message)
+    public function error($message)
     {
         if ($this->command) {
             return $this->command->error($message);
@@ -88,21 +88,21 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         throw new \RuntimeException($message);
     }
 
-    protected function write($messages)
+    public function write($messages)
     {
         if ($this->command) {
             $this->command->getOutput()->write($messages);
         }
     }
 
-    protected function line($messages, $verbosity = null)
+    public function line($messages, $verbosity = null)
     {
         if ($this->command) {
             $this->command->line($messages, null, $verbosity);//getOutput()->writeln($messages);
         }
     }
 
-    protected function confirm($message, $default = false)
+    public function confirm($message, $default = false)
     {
         if ($this->command) {
             return $this->command->confirm($message, $default);
@@ -110,7 +110,7 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         return $default;
     }
 
-    protected function input($message, $default = null)
+    public function input($message, $default = null)
     {
         if ($this->command) {
             return $this->command->ask($message, $default);
@@ -118,7 +118,7 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         return $default;
     }
 
-    protected function helper($class)
+    public function helper($class)
     {
         if ( ! array_key_exists($class, static::$helpers)) {
             static::$helpers[ $class ] = resolve($class);
@@ -160,4 +160,8 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
         return $this;
     }
 
+    public function getCommand()
+    {
+        return $this->command;
+    }
 }

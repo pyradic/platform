@@ -4,7 +4,10 @@
 
 namespace Pyro\Platform;
 
+use Anomaly\Streams\Platform\Addon\Addon;
 use Anomaly\Streams\Platform\Addon\AddonCollection;
+use Anomaly\Streams\Platform\Addon\AddonProvider;
+use Anomaly\Streams\Platform\Addon\AddonServiceProvider;
 use Anomaly\Streams\Platform\Addon\Event\AddonWasRegistered;
 use Anomaly\Streams\Platform\Addon\Extension\Extension;
 use Anomaly\Streams\Platform\Addon\Module\Module;
@@ -30,9 +33,9 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Jackiedo\DotenvEditor\DotenvEditor;
 use Jenssegers\Agent\Agent;
-use Pyro\Platform\Addon\AddonProvider;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Command\AddPlatformAssetNamespaces;
 use Pyro\Platform\Command\OverrideIconRegistryIcons;
@@ -51,8 +54,6 @@ use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
 use Pyro\Platform\Listener\SharePlatform;
 use Pyro\Platform\Routing\ResponseFactory;
-use Pyro\Platform\Support\Dev;
-use Pyro\Platform\Support\ExpressionLanguageParser;
 use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
 
@@ -101,6 +102,7 @@ class PlatformServiceProvider extends ServiceProvider
 
 //        \Pyro\Platform\Livewire\LivewireServiceProvider::class,
         \Pyro\Platform\Bus\BusServiceProvider::class,
+        \Pyro\Platform\Routing\RoutingServiceProvider::class,
         \BeyondCode\ServerTiming\ServerTimingServiceProvider::class,
 //        \Pyro\Platform\Diagnose\DiagnoseServiceProvider::class,
     ];
@@ -110,7 +112,7 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function boot(ViewOverrides $overrides, Request $request, ViewRegistry $viewRegistry)
     {
-        $this->app->singleton(\Anomaly\Streams\Platform\Addon\AddonProvider::class, AddonProvider::class);
+//        $this->app->singleton(\Anomaly\Streams\Platform\Addon\AddonProvider::class, AddonProvider::class);
 
         $this->bootConfig();
         $this->bootConsole();
@@ -124,23 +126,37 @@ class PlatformServiceProvider extends ServiceProvider
     {
 
         AliasLoader::getInstance()->alias('ServerTiming', \BeyondCode\ServerTiming\Facades\ServerTiming::class);
-        AddonCollection::macro('disabled', function () {
-            return $this->installable()->filter(function ($addon) {
-                /* @var Module|Extension $addon */
-                return ! $addon->isEnabled();
-            });
-        });
         $this->mergeConfig();
-        $this->registerListeners($this->listen);
-        $this->registerProviders($this->providers);
-        $this->app->singleton('dev', Dev::class);
-        $this->app->singleton('dev', Dev::class);
-        if ($this->app->environment('local')) {
-            $this->registerProviders($this->devProviders);
+
+        // Start listening to listeners
+        $dispatcher = resolve(Dispatcher::class);
+        foreach ($this->listen as $event => $listeners) {
+            foreach (array_unique($listeners) as $listener) {
+                $dispatcher->listen($event, $listener);
+            }
         }
-        Request::macro('isAdmin', function () {
-            return $this->segment(1) === 'admin';
+
+        // Register providers
+        foreach (array_merge(
+                     $this->providers,
+                     $this->app->environment('local') ? $this->devProviders : []
+                 ) as $provider) {
+            $this->app->register($provider);
+        }
+
+        // Add twig extensions
+        $this->app->events->listen(RegisteringTwigPlugins::class, function (RegisteringTwigPlugins $event) {
+            $twig = $event->getTwig();
+
+            foreach ($this->plugins as $plugin) {
+                if ( ! $twig->hasExtension($plugin)) {
+                    $twig->addExtension($this->app->make($plugin));
+                }
+            }
         });
+
+        $this->registerAddonProviderExtras();
+        $this->registerMacros();
         $this->registerPlatform();
         $this->registerAsset();
         $this->registerHttp();
@@ -149,10 +165,8 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerUser();
         $this->registerResponseFactory();
         $this->registerView();
-        $this->registerPlugins();
         $this->registerStreamsSingletons();
 
-        $this->app->make(Kernel::class)->pushMiddleware(Http\Middleware\RenderPlatformDataToFile::class);
     }
 
     protected function mergeConfig()
@@ -222,28 +236,70 @@ class PlatformServiceProvider extends ServiceProvider
         }
     }
 
-    protected function registerExpressionLanguageFunctions()
+    protected function registerMacros()
     {
-        ExpressionLanguageParser::registerFunctions([
+        AddonCollection::macro('disabled', function () {
+            return $this->installable()->filter(function ($addon) {
+                /* @var Module|Extension $addon */
+                return ! $addon->isEnabled();
+            });
+        });
 
-        ]);
+        Request::macro('isAdmin', function () {
+            return $this->segment(1) === 'admin';
+        });
     }
 
-    protected function registerListeners($events)
+    protected function registerAddonProviderExtras()
     {
-        $dispatcher = resolve(Dispatcher::class);
-        foreach ($events as $event => $listeners) {
-            foreach (array_unique($listeners) as $listener) {
-                $dispatcher->listen($event, $listener);
+        AddonServiceProvider::macro('setRoutes', function ($routes) {
+            $this->routes = $routes;
+        });
+        AddonServiceProvider::macro('getRoutesNamespace', function () {
+            return $this->routesNamespace ?? null;
+        });
+        AddonProvider::when('register', function (AddonServiceProvider $provider, Addon $addon, AddonProvider $addonProvider) {
+            $routes = $provider->getRoutes();
+            $ns     = $provider->getRoutesNamespace();
+            foreach ($routes as $uri => &$route) {
+                // convert value to array
+                if (is_string($route)) {
+                    $route = [ 'uses' => $route ];
+                }
+                // prefix 'uses' with namespace if needed
+                if ($ns && array_key_exists('uses', $route)) {
+                    $route[ 'uses' ] = Str::ensureLeft($route[ 'uses' ], $ns);
+                }
+
+                // pefix 'as' with addon namespace if needed
+                if (array_key_exists('as', $route) && data_get($route, 'auto_prefix', true) === true) {
+                    if ( ! Str::contains($route[ 'as' ], '::')) {
+                        $route[ 'as' ] = $addon->getNamespace($route[ 'as' ]);
+                    }
+                    $needles = [ 'addon::', 'module::' ];
+                    if (Str::startsWith($route[ 'as' ], $needles)) {
+                        $route[ 'as' ] = str_replace($needles, $addon->getNamespace() . '::', $route[ 'as' ]);
+                    }
+                    if (Str::startsWith($route[ 'as' ], '::')) {
+                        $route[ 'as' ] = Str::replaceFirst('::', $addon->getNamespace() . '::', $route[ 'as' ]);
+                    }
+                }
+
+                $route[ 'uri' ] = $uri;
+
+                if (isset($route[ 'breadcrumbs' ])) {
+                    foreach ($route[ 'breadcrumbs' ] as $routeBreadcrumb) {
+                        $this->app->route_crumbs->addFromProvider($routeBreadcrumb, $route, $addon);
+                    }
+                }
+
+                // register 'breadcrumb' with RouteCrumbs
+                if (isset($route[ 'breadcrumb' ])) {
+                    $this->app->route_crumbs->addFromProvider($route[ 'breadcrumb' ], $route, $addon);
+                }
             }
-        }
-    }
-
-    protected function registerProviders($providers)
-    {
-        foreach ($providers as $provider) {
-            $this->app->register($provider);
-        }
+            $provider->setRoutes($routes);
+        });
     }
 
     protected function registerPlatform()
@@ -355,18 +411,11 @@ class PlatformServiceProvider extends ServiceProvider
         });
 
 //        $this->app->booting(function (Application $app) {
-        /*
-         * Add cp_scripts
-         */
 //            $includes = $app[ ViewIncludes::class ];
 //            if ($app[ 'config' ][ 'platform.cp_scripts.enabled' ]) {
 //                $includes->include('cp_scripts', 'platform::cp_scripts');
 //            }
 //        });
-
-        /*
-         *  replace view finder
-         */
 //        $oldViewFinder = $this->app[ 'view.finder' ];
 //        $this->app->bind('view.finder', function ($app) use ($oldViewFinder) {
 //            /** @var FileViewFinder $oldViewFinder */
@@ -384,19 +433,6 @@ class PlatformServiceProvider extends ServiceProvider
 //        });
 //
 //        $this->app->view->setFinder($this->app[ 'view.finder' ]);
-    }
-
-    protected function registerPlugins()
-    {
-        $this->app->events->listen(RegisteringTwigPlugins::class, function (RegisteringTwigPlugins $event) {
-            $twig = $event->getTwig();
-
-            foreach ($this->plugins as $plugin) {
-                if ( ! $twig->hasExtension($plugin)) {
-                    $twig->addExtension($this->app->make($plugin));
-                }
-            }
-        });
     }
 
     protected function registerStreamsSingletons()

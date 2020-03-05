@@ -222,17 +222,17 @@ class Platform implements ArrayAccess
 
     public function offsetExists($offset)
     {
-        return $this->data->has($offset);
+        return $this->has($offset);
     }
 
     public function offsetGet($offset)
     {
-        return $this->data->get($offset);
+        return $this->get($offset);
     }
 
     public function offsetSet($offset, $value)
     {
-        return $this->data->set($offset, $value);
+        return $this->set($offset, $value);
     }
 
     public function offsetUnset($offset)
