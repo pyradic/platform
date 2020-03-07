@@ -4,6 +4,7 @@
 
 namespace Pyro\Platform\Ui;
 
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
 class UiServiceProvider extends ServiceProvider
@@ -16,13 +17,22 @@ class UiServiceProvider extends ServiceProvider
         \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\NavigationLink::class => \Pyro\Platform\Ui\ControlPanel\Component\NavigationLink::class,
         \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\Section::class           => \Pyro\Platform\Ui\ControlPanel\Component\Section::class,
         \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Shortcut\Shortcut::class         => \Pyro\Platform\Ui\ControlPanel\Component\Shortcut::class,
+
+        \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\SectionInput::class => \Pyro\Platform\Ui\ControlPanel\Component\SectionInput::class,
     ];
 
     public $singletons = [];
 
-    public function boot()
+    public function boot(Router $router)
     {
-
+        Input::elp()
+            ->registerPhpFunctions([ 'route', 'resolve', 'response','app','request','auth' ])
+            ->share([
+//                'router'  => $router,
+//                'app'     => app(),
+//                'request' => request(),
+//                'auth'    => auth(),
+            ]);
     }
 
     public function register()
@@ -30,7 +40,6 @@ class UiServiceProvider extends ServiceProvider
 //        $this->app->when(\Anomaly\Streams\Platform\Ui\Table\Component\Action\ActionBuilder::class)
 //            ->needs(\Anomaly\Streams\Platform\Ui\Table\Component\Action\ActionInput::class)
 //            ->give(\Pyro\Platform\Ui\ActionInput::class);
-
 //        $this->app->events->listen(GatherNavigation::class, function (GatherNavigation $event) {
 //            $event->getBuilder()->setNavigation(
 //                collect($event->getBuilder()->getNavigation())->map([ Dot::class, 'wrap' ])->each(function (Dot $section) {

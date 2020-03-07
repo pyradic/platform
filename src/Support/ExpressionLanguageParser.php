@@ -158,9 +158,11 @@ class ExpressionLanguageParser
         return $target;
     }
 
-    protected function evaluate($value, $data = [])
+    public static $pattern = '/\{\{(.*?)\}\}/';
+
+    public function evaluate($value, $data = [])
     {
-        $matched = preg_match_all('/\{\{(.*?)\}\}/', $value, $matches);
+        $matched = preg_match_all(static::$pattern, $value, $matches);
         if ( ! $matched) {
             return $value;
         }
@@ -177,7 +179,7 @@ class ExpressionLanguageParser
     protected function prepareData($data)
     {
         $prepared = $this->data->dot();
-        $prepared->mergeRecursive($data);
+        $prepared->merge($data);
         return $prepared->toArray();
     }
 
@@ -237,6 +239,21 @@ class ExpressionLanguageParser
     public static function createDefault()
     {
         $cache = new \Madewithlove\IlluminatePsrCacheBridge\Laravel\CacheItemPool(resolve('cache.store'));
-        return new ExpressionLanguageParser(new ExpressionLanguage($cache));
+        return new static(new ExpressionLanguage($cache));
+    }
+
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    public function share($key, $value = null)
+    {
+        if (is_array($key)) {
+            $this->data->mergeRecursive($key);
+        } else {
+            $this->data->set($key, $value);
+        }
+        return $this;
     }
 }

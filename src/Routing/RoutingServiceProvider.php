@@ -3,6 +3,7 @@
 namespace Pyro\Platform\Routing;
 
 use Anomaly\Streams\Platform\Addon\AddonProvider;
+use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
@@ -18,21 +19,27 @@ class RoutingServiceProvider extends ServiceProvider
         $this->app->alias('route_crumbs',RouteCrumbs::class);
 
         $this->app->bind(\Illuminate\Routing\Contracts\ControllerDispatcher::class, ControllerDispatcher::class);
+
+        $this->app->events->listen(AddonsHaveRegistered::class, function(AddonsHaveRegistered $event){
+            $addons = $event->getAddons();
+            $this->app->route_crumbs->entry(request());
+        });
 //
-//        AddonProvider::when('register',
-//            /**
-//             * @param \Anomaly\Streams\Platform\Addon\AddonServiceProvider $provider
-//             * @param \Anomaly\Streams\Platform\Addon\Addon                $addon
-//             */
-//            function ($provider, $addon) {
-//                foreach ($provider->getRoutes() as $uri => $route) {
-//                    if ( ! isset($route[ 'breadcrumb' ])) {
-//                        continue;
-//                    }
-//                    $route[ 'uri' ] = $uri;
-//                    $this->app->route_crumbs->addFromProvider($route, $addon);
-//                }
-//            });
+        AddonProvider::when('register',
+            /**
+             * @param \Anomaly\Streams\Platform\Addon\AddonServiceProvider $provider
+             * @param \Anomaly\Streams\Platform\Addon\Addon                $addon
+             */
+            function ($provider, $addon) {
+                $routes=$provider->getRoutes();
+                foreach ($routes as $uri => &$route) {
+                    if (is_array($route) &&  ! isset($route[ 'uses' ])) {
+                        $route[ 'uses' ] = null;
+                    }
+                }
+
+                $provider->setRoutes($routes);
+            });
     }
 
 

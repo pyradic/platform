@@ -2,15 +2,20 @@
 
 namespace Pyro\Platform\Routing;
 
+use Anomaly\Streams\Platform\Entry\Contract\EntryInterface;
+use Anomaly\Streams\Platform\Entry\EntryPresenter;
 use Closure;
 use Evaluator;
 use Hydrator;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Parser;
+use Pyro\Platform\Ui\Input;
+use Template;
 use Translator;
-use Value;
 
 class RouteCrumbs
 {
@@ -42,8 +47,8 @@ class RouteCrumbs
             $breadcrumb[ 'parent' ] = $routeBreadcrumb[ 1 ] ?? null;
         }
 
-        foreach ([ 'parent', 'title' ] as $v) {
-            if ($breadcrumb[ $v ]) {
+        foreach ([ 'parent', 'title', 'key' ] as $v) {
+            if (isset($breadcrumb[ $v ])) {
                 $needles = [ 'addon::', 'module::' ];
                 if (Str::startsWith($breadcrumb[ $v ], $needles)) {
                     $breadcrumb[ $v ] = str_replace($needles, $addon->getNamespace() . '::', $breadcrumb[ $v ]);
@@ -55,6 +60,9 @@ class RouteCrumbs
         }
         if ( ! Str::contains($breadcrumb[ 'parent' ], '::')) {
             $breadcrumb[ 'parent' ] = $addon->getNamespace($breadcrumb[ 'parent' ]);
+        }
+        if (isset($breadcrumb[ 'key' ]) && ! Str::contains($breadcrumb[ 'key' ], '::')) {
+            $breadcrumb[ 'key' ] = $addon->getNamespace($breadcrumb[ 'key' ]);
         }
 
         $breadcrumb[ 'attributes' ] = data_get($breadcrumb, 'attributes', []);
@@ -70,50 +78,94 @@ class RouteCrumbs
         return $this;
     }
 
-    public function entry(Request $request = null, $entry = null)
+    public function findBreadcrumb($key)
+    {
+        $breadcrumb = $this->breadcrumbs->where('key', $key)->first();
+        if ($breadcrumb !== null) {
+            $breadcrumb = collect($breadcrumb);
+        }
+        return $breadcrumb;
+    }
+
+    public function entry(Request $request = null) //, $entry = null)
     {
         $route = $request ? $request->route() : \Request::route();
         if ( ! $route) {
             return [];
         }
-        $bc = $this->breadcrumbs->where('key', $route->getName())->first();
+        $bc = $this->findBreadcrumb($route->getName());
         if ( ! $bc) {
             return [];
         }
 
         // collect parents
-        $bcs  = collect();
-        $loop = true;
-        while ($loop) {
-            $bcs[] = $bc;
-            $bc    = $this->breadcrumbs->where('key', $bc[ 'parent' ])->first();
-            $loop  = $bc !== null;
+        $bcs    = collect();
+        $routes = resolve(Router::class)->getRoutes();
+        while ($bc) {
+            $bcs[]             = $bc;
+            $bc[ 'variables' ] = [];
+            if ($bcRoute = $routes->getByName($bc[ 'key' ])) {
+                $bc[ 'route' ]     = $bcRoute;
+                $compiled = $bcRoute->getCompiled();
+                if(!$compiled){
+                    $compiled = ($rc = new \Illuminate\Routing\RouteCompiler($bcRoute))->compile();
+                }
+                $bc[ 'variables' ] = $compiled->getPathVariables();
+
+            }
+            $bc = $this->findBreadcrumb($bc[ 'parent' ]);
         }
 
-        if ($entry === null) {
-            $entryBc = $bcs->firstWhere('entry', '!=', null);
-            $entry   = $route->parameter($entryBc[ 'entry' ]);
+        $entries     = $route->parameters();
+        foreach ($bcs as $bc) {
+//            $entries = array_replace($entries, $route->parameters());
+            foreach ($bc[ 'variables' ] as $variable) {
+                if ( ! array_key_exists($variable, $entries)) {
+                    foreach ($entries as $name => $_entry) {
+                        if (
+                            ($_entry instanceof EntryInterface || $_entry instanceof EntryPresenter)
+                            && $_entry->assignmentIsRelationship($variable)
+                        ) {
+                            $_entry->loadMissing($variable);
+                            $entries[ $variable ] = $_entry->getAttribute($variable);
+                        }
+                    }
+                }
+            }
         }
-        if ($entry === null) {
-            $entry = head($route->parameters());
+        foreach($entries as &$entry){
+            if($entry instanceof EntryPresenter === false) {
+                $entry = $entry->getPresenter();
+            }
         }
         $breadcrumbs = collect();
-
-        foreach ($bcs as $bc) {
+        foreach ($bcs->toArray() as $bc) {
             if ( ! isset($bc[ 'url' ])) {
-                $bc[ 'url' ] = route($bc[ 'route' ][ 'as' ], $route->parameters());
+                $bc[ 'url' ] = route($bc[ 'route' ]->getName(), $route->parameters());
             }
             $bc = Translator::translate($bc);
-            if ($entry) {
-                $bc            = Evaluator::evaluate($bc, compact('entry'));
-                $bc            = Parser::parse($bc, compact('entry'));
-                $bc[ 'title' ] = Value::make($bc[ 'title' ], $entry);
-                $bc[ 'url' ]   = $bc[ 'url' ] ? Value::make($bc[ 'url' ], $entry) : null;
+            if ( ! empty($entries)) {
+                $bc = Evaluator::evaluate($bc, $entries);
+                $bc = $this->render($bc, $entries);
+//                $bc = Parser::parse($bc, $entries);
             }
-            Hydrator::hydrate($breadcrumb = app()->build($bc[ 'breadcrumb' ]), $bc);
+            $bc = Translator::translate($bc);
+            Hydrator::hydrate($breadcrumb = app()->build($bc[ 'breadcrumb' ]), Collection::unwrap($bc));
             $breadcrumbs->push($breadcrumb);
         }
-        platform()->set('breadcrumbs', array_reverse($breadcrumbs->toArray()));
+        platform()->set('breadcrumbs', array_reverse($breadcrumbs->except('route')->toArray()));
         return $breadcrumbs;
+    }
+
+    protected function render($target, $data)
+    {
+        if (is_array($target)) {
+            foreach ($target as &$item) {
+                $item = $this->render($item, $data);
+            }
+        } elseif (is_string($target) && str_contains($target, [ '{{', '{%' ])) {
+            $target = (string) Template::render($target, $data);
+        }
+        return $target;
     }
 }

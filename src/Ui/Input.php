@@ -16,10 +16,14 @@ use Pyro\Platform\Support\ExpressionLanguageParser;
 
 class Input
 {
+    public static function elp()
+    {
+        return ExpressionLanguageParser::getInstance();
+    }
 
     public static function expression($target, array $arguments = [])
     {
-        return ExpressionLanguageParser::getInstance()->parse($target,$arguments);
+        return static::elp()->parse($target,$arguments);
     }
 
     public static function resolver($target, array $arguments = [], array $options = [])

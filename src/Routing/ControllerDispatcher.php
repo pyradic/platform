@@ -8,7 +8,7 @@ class ControllerDispatcher extends \Illuminate\Routing\ControllerDispatcher
 {
     public function dispatch(Route $route, $controller, $method)
     {
-        $hasBreadcrumb = isset($route->action['breadcrumb']);
+        $hasBreadcrumb = isset($route->action['breadcrumb']) || isset($route->action['breadcrumbs']);
 
         $parameters = $this->resolveClassMethodDependencies(
             $route->parametersWithoutNulls(), $controller, $method

@@ -39,6 +39,9 @@ use Jenssegers\Agent\Agent;
 use Pyro\Platform\Addon\Theme\Command\LoadParentTheme;
 use Pyro\Platform\Command\AddPlatformAssetNamespaces;
 use Pyro\Platform\Command\OverrideIconRegistryIcons;
+use Pyro\Platform\Console\ClearCommand;
+use Pyro\Platform\Console\DatabaseExportCommand;
+use Pyro\Platform\Console\DatabaseImportCommand;
 use Pyro\Platform\Console\EnvSet;
 use Pyro\Platform\Console\MacroCommand;
 use Pyro\Platform\Console\PermissionsCommand;
@@ -166,7 +169,6 @@ class PlatformServiceProvider extends ServiceProvider
         $this->registerResponseFactory();
         $this->registerView();
         $this->registerStreamsSingletons();
-
     }
 
     protected function mergeConfig()
@@ -208,23 +210,46 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->extend(\Anomaly\Streams\Platform\Application\Console\EnvSet::class, function (\Anomaly\Streams\Platform\Application\Console\EnvSet $command) {
             return $this->app->make(EnvSet::class);
         });
-        $this->app->singleton('command.platform.seed', function ($app) {
-            return new SeedCommand();
-        });
+
+        // register custom
+        $commands = [
+            'command.platform.seed'            => SeedCommand::class,
+            'command.platform.macro'           => MacroCommand::class,
+            'command.platform.permissions'     => PermissionsCommand::class,
+            'command.platform.clear'           => ClearCommand::class,
+            'command.platform.database.export' => DatabaseExportCommand::class,
+            'command.platform.database.import' => DatabaseImportCommand::class,
+        ];
+        foreach ($commands as $command => $class) {
+            $this->app->singleton($command, function ($app) use ($class) {
+                return $app->build($class);
+            });
+        }
+        $this->commands(array_keys($commands));
+
+        // override
         $this->app->singleton('command.route.list', function ($app) {
             return new RouteListCommand($app[ 'router' ]);
         });
-        $this->app->singleton('command.platform.macro', function ($app) {
-            return new MacroCommand();
-        });
-        $this->app->singleton('command.platform.permissions', function ($app) {
-            return new PermissionsCommand();
-        });
-        $this->commands([
-            'command.platform.seed',
-            'command.platform.macro',
-            'command.platform.permissions',
-        ]);
+
+//        $this->app->singleton('command.platform.seed', function ($app) {
+//            return new SeedCommand();
+//        });
+//        $this->app->singleton('command.platform.macro', function ($app) {
+//            return new MacroCommand();
+//        });
+//        $this->app->singleton('command.platform.permissions', function ($app) {
+//            return new PermissionsCommand();
+//        });
+//        $this->app->singleton('command.platform.clear', function ($app) {
+//            return new ClearCommand();
+//        });
+//        $this->commands([
+//            'command.platform.seed',
+//            'command.platform.macro',
+//            'command.platform.permissions',
+//            'command.platform.clear',
+//        ]);
         if (class_exists(\Bamarni\Symfony\Console\Autocomplete\DumpCommand::class)) {
             $this->app->singleton('command.autocomplete.dump', function () {
                 return new \Bamarni\Symfony\Console\Autocomplete\DumpCommand();
