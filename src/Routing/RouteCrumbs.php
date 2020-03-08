@@ -8,12 +8,11 @@ use Closure;
 use Evaluator;
 use Hydrator;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Parser;
-use Pyro\Platform\Ui\Input;
 use Template;
 use Translator;
 
@@ -104,19 +103,19 @@ class RouteCrumbs
         while ($bc) {
             $bcs[]             = $bc;
             $bc[ 'variables' ] = [];
-            if ($bcRoute = $routes->getByName($bc[ 'key' ])) {
-                $bc[ 'route' ]     = $bcRoute;
-                $compiled = $bcRoute->getCompiled();
-                if(!$compiled){
+            $bcRoute = $routes->getByName($bc[ 'key' ]) ?? $routes->getByName($bc['route']['as']);
+            if ($bcRoute) {
+                $bc[ 'route' ] = $bcRoute;
+                $compiled      = $bcRoute->getCompiled();
+                if ( ! $compiled) {
                     $compiled = ($rc = new \Illuminate\Routing\RouteCompiler($bcRoute))->compile();
                 }
                 $bc[ 'variables' ] = $compiled->getPathVariables();
-
             }
             $bc = $this->findBreadcrumb($bc[ 'parent' ]);
         }
 
-        $entries     = $route->parameters();
+        $entries = $route->parameters();
         foreach ($bcs as $bc) {
 //            $entries = array_replace($entries, $route->parameters());
             foreach ($bc[ 'variables' ] as $variable) {
@@ -133,16 +132,23 @@ class RouteCrumbs
                 }
             }
         }
-        foreach($entries as &$entry){
-            if($entry instanceof EntryPresenter === false) {
+        foreach ($entries as &$entry) {
+            if ($entry instanceof EntryPresenter === false) {
                 $entry = $entry->getPresenter();
             }
         }
         $breadcrumbs = collect();
-        foreach ($bcs->toArray() as $bc) {
-            if ( ! isset($bc[ 'url' ])) {
-                $bc[ 'url' ] = route($bc[ 'route' ]->getName(), $route->parameters());
+        foreach ($bcs as $bc) {
+            if ( ! isset($bc[ 'url' ]) || $bc[ 'url' ] === null) {
+                if ($bc[ 'route' ] instanceof Route) {
+                    $bc[ 'url' ] = route($bc[ 'route' ]->getName(), $route->parameters());
+                } else {
+//                    if($route=$routes->getByName($bc['route']['as'])){
+//                        $bc[ 'url' ] =
+//                    }
+                }
             }
+            $bc = $bc->toArray();
             $bc = Translator::translate($bc);
             if ( ! empty($entries)) {
                 $bc = Evaluator::evaluate($bc, $entries);
@@ -164,7 +170,7 @@ class RouteCrumbs
                 $item = $this->render($item, $data);
             }
         } elseif (is_string($target) && str_contains($target, [ '{{', '{%' ])) {
-            $target = (string) Template::render($target, $data);
+            $target = (string)Template::render($target, $data);
         }
         return $target;
     }
