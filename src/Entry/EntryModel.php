@@ -37,17 +37,29 @@ class EntryModel extends \Anomaly\Streams\Platform\Entry\EntryModel
         parent::__construct($attributes);
     }
 
+    public function addCascade($cascade)
+    {
+        $this->cascades[] = $cascade;
+        return $this;
+    }
+
+    public function setCascades($cascades)
+    {
+        $this->cascades = $cascades;
+        return $this;
+    }
+
     public function resolveRouteBinding($value)
     {
-        if(is_numeric($value)) {
+        if (is_numeric($value)) {
 
             if ($result = $this->where('id', $value)->first()) {
                 return $result;
             }
             abort(404, "Could not find id({$value}) on stream [{$this->stream()->getNamespace()}.{$this->stream()->getSlug()}]");
         }
-        foreach($this->getAssignments() as $assignment){
-            if($assignment->getFieldType() instanceof SlugFieldType){
+        foreach ($this->getAssignments() as $assignment) {
+            if ($assignment->getFieldType() instanceof SlugFieldType) {
                 if ($result = $this->where($assignment->getFieldSlug(), $value)->first()) {
                     return $result;
                 }
