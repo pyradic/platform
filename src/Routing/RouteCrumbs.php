@@ -72,6 +72,7 @@ class RouteCrumbs
         $breadcrumb[ 'breadcrumb' ] = data_get($breadcrumb, 'breadcrumb', Breadcrumb::class);
         $breadcrumb[ 'url' ]        = data_get($breadcrumb, 'url');
         $breadcrumb[ 'entry' ]      = data_get($route, 'entry');
+        $breadcrumb[ 'truncate' ]      = data_get($breadcrumb, 'truncate', 20);
 
         $this->breadcrumbs->push($breadcrumb);
         return $this;
@@ -156,6 +157,9 @@ class RouteCrumbs
 //                $bc = Parser::parse($bc, $entries);
             }
             $bc = Translator::translate($bc);
+            if(is_int($bc['truncate'])){
+                $bc['title'] = Str::truncate($bc['title'], $bc['truncate'], '..');
+            }
             Hydrator::hydrate($breadcrumb = app()->build($bc[ 'breadcrumb' ]), Collection::unwrap($bc));
             $breadcrumbs->push($breadcrumb);
         }

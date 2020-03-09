@@ -2,17 +2,15 @@
 
 namespace Pyro\Platform\Ui;
 
-
+use Illuminate\Support\Collection;
+use Pyro\Platform\Support\ExpressionLanguageParser;
 use Pyro\Platform\Support\Facade\Authorizer;
 use Pyro\Platform\Support\Facade\Evaluator;
 use Pyro\Platform\Support\Facade\Hydrator;
 use Pyro\Platform\Support\Facade\Parser;
 use Pyro\Platform\Support\Facade\Resolver;
-
 use Pyro\Platform\Support\Facade\Template;
 use Pyro\Platform\Support\Facade\Value;
-use Illuminate\Support\Collection;
-use Pyro\Platform\Support\ExpressionLanguageParser;
 
 class Input
 {
@@ -23,12 +21,12 @@ class Input
 
     public static function expression($target, array $arguments = [])
     {
-        return static::elp()->parse($target,$arguments);
+        return static::elp()->parse($target, $arguments);
     }
 
     public static function resolver($target, array $arguments = [], array $options = [])
     {
-        $target   = Resolver::resolve($target, $arguments, $options);
+        $target = Resolver::resolve($target, $arguments, $options);
         if (is_array($target)) {
             foreach ($target as &$item) {
 
@@ -38,20 +36,31 @@ class Input
                 } elseif (is_string($item) && class_exists($item) && method_exists($item, $method)) {
                     $item = app()->call($item . '@' . $method, $arguments);
                 }
-
             }
         }
         return $target;
     }
 
-    public static function render($target, $entry, $term = 'entry', $payload = [])
+    public static function render($target, $data)
     {
         if (is_array($target)) {
             foreach ($target as &$item) {
-                $item = static::render($item, $entry, $term, $payload);
+                $item = static::render($item, $data);
             }
         } elseif (is_string($target) && str_contains($target, [ '{{', '{%' ])) {
-            $target = (string) Template::render($target, [ $term => $entry ]);
+            $target = (string)Template::render($target, $data);
+        }
+        return $target;
+    }
+
+    public static function renderEntry($target, $entry, $term = 'entry', $payload = [])
+    {
+        if (is_array($target)) {
+            foreach ($target as &$item) {
+                $item = static::renderEntry($item, $entry, $term, $payload);
+            }
+        } elseif (is_string($target) && str_contains($target, [ '{{', '{%' ])) {
+            $target = (string)Template::render($target, [ $term => $entry ]);
         }
         return $target;
     }

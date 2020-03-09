@@ -49,6 +49,7 @@
             "vendor/anomaly/streams-platform/src/Ui/Table/Command/BuildTable.php",
             "vendor/anomaly/streams-platform/src/Ui/Table/Component/Action/Action.php",
             "vendor/anomaly/streams-platform/src/Ui/Table/Component/Action/ActionBuilder.php",
+            "vendor/anomaly/streams-platform/src/Ui/Table/Component/Button/ButtonBuilder.php",
             "vendor/anomaly/streams-platform/src/Ui/Table/Component/Column/Column.php",
             "vendor/anomaly/streams-platform/src/Ui/Table/Component/Filter/Filter.php",
             "vendor/anomaly/streams-platform/src/Ui/Table/Component/Header/Header.php",
