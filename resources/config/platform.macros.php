@@ -59,8 +59,19 @@ return [
     'clients:reinstall'       => [
         'desc'     => 'Reinstall clients',
         'commands' => [
-            [ 'macro', [ 'macro' => 'clients:uninstall' ] ],
-            [ 'macro', [ 'macro' => 'clients:install' ] ],
+//            [ 'departments:set-user', [ 'department' => 'mylink', '--no-interaction' => true ] ],
+
+            [ 'addon:install', [ 'addon' => 'clients' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'seed', [ 'names' => 'clients' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'addon:install', [ 'addon' => 'default_role_type' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'addon:install', [ 'addon' => 'requester_role_type' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'addon:install', [ 'addon' => 'volunteer_role_type' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'addon:install', [ 'addon' => 'care_role_type' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'addon:install', [ 'addon' => 'caretaker_role_type' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'addon:install', [ 'addon' => 'courses_role_type' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'seed', [ 'names' => 'requester_role_type' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'addon:install', [ 'addon' => 'client_registrations' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
+            [ 'seed', [ 'names' => 'client_registrations' ], '--no-interaction' => true, '-vvv' => true, '--force' => true ],
         ],
     ],
     'help_requests:reinstall' => [

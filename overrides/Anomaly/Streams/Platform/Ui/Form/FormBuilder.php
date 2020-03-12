@@ -37,9 +37,6 @@ use Symfony\Component\HttpFoundation\Response;
  * @link http://pyrocms.com/
  * @author PyroCMS, Inc. <support@pyrocms.com>
  * @author Ryan Thompson <ryan@pyrocms.com>
- * @method \Anomaly\Streams\Platform\Version\Contract\VersionInterface getFormEntry()
- * @method \Anomaly\Streams\Platform\Version\VersionModel getFormModelName()
- * @method \Anomaly\Streams\Platform\Version\VersionModel getFormModel()
  */
 class FormBuilder
 {

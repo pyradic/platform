@@ -41,6 +41,12 @@ class Input
         return $target;
     }
 
+    /**
+     * @param $target
+     * @param $data
+     *
+     * @return string|array
+     */
     public static function render($target, $data)
     {
         if (is_array($target)) {
