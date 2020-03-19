@@ -1,6 +1,17 @@
 <?php
 
 return [
+    'ide'                     => [
+        'desc'     => 'Generate IDE Helpers',
+        'commands' => [
+            [ 'ide-helper:streams', [], '-vvv' => true ],
+            [ 'ide-helper:meta', [], '-vvv' => true ],
+            [ 'idea:completion', [], '-vvv' => true ],
+            [ 'idea:meta', [], '-vvv' => true ],
+            [ 'idea:toolbox', [], '-vvv' => true ],
+            [ 'lighthouse:ide-helper', [], '-vvv' => true ],
+        ],
+    ],
     'associate'               => [
         'desc'     => 'Associate departments to streams',
         'commands' => [
@@ -17,7 +28,7 @@ return [
             [ 'departments:association', [ 'action' => 'list' ] ],
         ],
     ],
-    'clients:roles:uninstall'       => [
+    'clients:roles:uninstall' => [
         'desc'     => 'Remove clients',
         'commands' => [
             [ 'addon:uninstall', [ 'addon' => 'default_role_type' ] ],
@@ -28,7 +39,7 @@ return [
             [ 'addon:uninstall', [ 'addon' => 'courses_role_type' ] ],
         ],
     ],
-    'clients:roles:install'         => [
+    'clients:roles:install'   => [
         'desc'     => 'Install clients',
         'commands' => [
             [ 'addon:install', [ 'addon' => 'default_role_type' ] ],
@@ -40,7 +51,7 @@ return [
             [ 'seed', [ 'names' => 'requester_role_type' ], '-vvv' => true ],
         ],
     ],
-    'clients:install'       => [
+    'clients:install'         => [
         'desc'     => 'Install clients',
         'commands' => [
             [ 'addon:install', [ 'addon' => 'clients' ] ],
@@ -81,12 +92,12 @@ return [
             [ 'seed', [ 'names' => 'help_requests' ] ],
         ],
     ],
-    'requester:reinstall' => [
-        'desc' => 'Reinstall Clients Requester Role Type',
+    'requester:reinstall'     => [
+        'desc'     => 'Reinstall Clients Requester Role Type',
         'commands' => [
-            ['addon:reinstall', ['addon' => 'clients_requester_role_type']],
-            ['seed', ['names'=> 'requester_role_type'],'-vvv' => true]
-        ]
-    ]
+            [ 'addon:reinstall', [ 'addon' => 'clients_requester_role_type' ] ],
+            [ 'seed', [ 'names' => 'requester_role_type' ], '-vvv' => true ],
+        ],
+    ],
 ];
 

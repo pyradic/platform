@@ -8,6 +8,7 @@ use Anomaly\Streams\Platform\Addon\Addon;
 use Anomaly\Streams\Platform\Addon\AddonCollection;
 use Anomaly\Streams\Platform\Addon\AddonProvider;
 use Anomaly\Streams\Platform\Addon\AddonServiceProvider;
+use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
 use Anomaly\Streams\Platform\Addon\Event\AddonWasRegistered;
 use Anomaly\Streams\Platform\Addon\Extension\Extension;
 use Anomaly\Streams\Platform\Addon\Module\Module;
@@ -52,6 +53,7 @@ use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
 use Pyro\Platform\Listener\AddControlPanelToJS;
 use Pyro\Platform\Listener\AddJavascriptData;
 use Pyro\Platform\Listener\OverrideAddons;
+use Pyro\Platform\Listener\RegisterModulesParent;
 use Pyro\Platform\Listener\RegisterAddonSeeders;
 use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
@@ -91,6 +93,9 @@ class PlatformServiceProvider extends ServiceProvider
         AddonWasRegistered::class    => [
             RegisterAddonSeeders::class,
         ],
+        AddonsHaveRegistered::class => [
+            RegisterModulesParent::class
+        ]
     ];
 
     protected $providers = [

@@ -68,11 +68,12 @@ class RouteCrumbs
         $breadcrumb[ 'class' ]      = data_get($breadcrumb, 'class');
         $breadcrumb[ 'key' ]        = data_get($breadcrumb, 'key', $route[ 'as' ]);
         $breadcrumb[ 'route' ]      = $route;
+        $breadcrumb[ 'bind' ]       = data_get($breadcrumb, 'bind', []);
         $breadcrumb[ 'addon' ]      = $addon;
         $breadcrumb[ 'breadcrumb' ] = data_get($breadcrumb, 'breadcrumb', Breadcrumb::class);
         $breadcrumb[ 'url' ]        = data_get($breadcrumb, 'url');
         $breadcrumb[ 'entry' ]      = data_get($route, 'entry');
-        $breadcrumb[ 'truncate' ]      = data_get($breadcrumb, 'truncate', 20);
+        $breadcrumb[ 'truncate' ]   = data_get($breadcrumb, 'truncate', 20);
 
         $this->breadcrumbs->push($breadcrumb);
         return $this;
@@ -104,16 +105,20 @@ class RouteCrumbs
         while ($bc) {
             $bcs[]             = $bc;
             $bc[ 'variables' ] = [];
-            $bcRoute = $routes->getByName($bc[ 'key' ]) ?? $routes->getByName($bc['route']['as']);
-            if ($bcRoute) {
-                $bc[ 'route' ] = $bcRoute;
-                $compiled      = $bcRoute->getCompiled();
-                if ( ! $compiled) {
-                    $compiled = ($rc = new \Illuminate\Routing\RouteCompiler($bcRoute))->compile();
+            if ($bc[ 'url' ] !== false && $bc[ 'route' ] !== false) {
+
+                $bcRoute = $routes->getByName($bc[ 'key' ]) ?? $routes->getByName($bc[ 'route' ][ 'as' ]);
+                if ($bcRoute) {
+                    $bc[ 'route' ] = $bcRoute;
+                    $compiled      = $bcRoute->getCompiled();
+                    if ( ! $compiled) {
+                        $compiled = ($rc = new \Illuminate\Routing\RouteCompiler($bcRoute))->compile();
+                    }
+                    $bc[ 'variables' ] = $compiled->getPathVariables();
                 }
-                $bc[ 'variables' ] = $compiled->getPathVariables();
             }
-            $bc = $this->findBreadcrumb($bc[ 'parent' ]);
+            $parent = $this->findBreadcrumb($bc[ 'parent' ]);
+            $bc     = $parent;
         }
 
         $entries = $route->parameters();
@@ -138,11 +143,28 @@ class RouteCrumbs
                 $entry = $entry->getPresenter();
             }
         }
+        $bcs = $bcs->map(function ($bc) use ($bcs) {
+            if ($parent = $bcs->firstWhere('key', $bc[ 'parent' ])) {
+                $bc[ 'parent' ] = $parent;
+//                $bc['parent']['child'] = function() use($bc){ return  $bc; };
+            }
+            return $bc;
+        });
+
         $breadcrumbs = collect();
+        $bindings    = $bcs->pluck('bind')->map('collect')->filter->isNotEmpty()->toArray();
+
         foreach ($bcs as $bc) {
             if ( ! isset($bc[ 'url' ]) || $bc[ 'url' ] === null) {
                 if ($bc[ 'route' ] instanceof Route) {
-                    $bc[ 'url' ] = route($bc[ 'route' ]->getName(), $route->parameters());
+                    $parameters = $route->parameters();
+                    foreach ($bindings as $item) {
+                        foreach ($item as $paramName => $binding) {
+                            $parameters[ $paramName ] = data_get($entries, $binding);
+                            $parameters[ $paramName ] = \Decorator::undecorate($parameters[ $paramName ]);
+                        }
+                    }
+                    $bc[ 'url' ] = route($bc[ 'route' ]->getName(), $parameters);
                 } else {
 //                    if($route=$routes->getByName($bc['route']['as'])){
 //                        $bc[ 'url' ] =
@@ -157,8 +179,8 @@ class RouteCrumbs
 //                $bc = Parser::parse($bc, $entries);
             }
             $bc = Translator::translate($bc);
-            if(is_int($bc['truncate'])){
-                $bc['title'] = Str::truncate($bc['title'], $bc['truncate'], '..');
+            if (is_int($bc[ 'truncate' ])) {
+                $bc[ 'title' ] = Str::truncate($bc[ 'title' ], $bc[ 'truncate' ], '..');
             }
             Hydrator::hydrate($breadcrumb = app()->build($bc[ 'breadcrumb' ]), Collection::unwrap($bc));
             $breadcrumbs->push($breadcrumb);
