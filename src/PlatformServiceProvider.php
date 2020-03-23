@@ -104,7 +104,6 @@ class PlatformServiceProvider extends ServiceProvider
     protected $providers = [
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
-        \Laradic\Workflow\WorkflowServiceProvider::class,
         \Inertia\ServiceProvider::class,
 //        \Tightenco\Ziggy\ZiggyServiceProvider::class,
 
