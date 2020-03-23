@@ -26,6 +26,17 @@ class RouteCrumbs
         $this->breadcrumbs = collect();
     }
 
+    public function addFromRoute(Route $route)
+    {
+        $addon = $route->action[ 'addon' ];
+        if (isset($route->action[ 'breadcrumbs' ])) {
+            foreach ($route->action[ 'breadcrumbs' ] as $breadcrumb) {
+                $this->addFromProvider($breadcrumb, $route->action, $addon);
+            }
+        }
+        $this->addFromProvider($route->action[ 'breadcrumb' ], $route->action, $addon);
+    }
+
     /**
      * @param array                                 $route = \Pyro\IdeHelper\Examples\AddonServiceProviderExamples::routes()
      * @param \Anomaly\Streams\Platform\Addon\Addon $addon

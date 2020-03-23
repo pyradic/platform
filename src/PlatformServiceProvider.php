@@ -33,6 +33,7 @@ use Illuminate\Contracts\View\Factory as ViewFactoryContract;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Jackiedo\DotenvEditor\DotenvEditor;
@@ -53,8 +54,9 @@ use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
 use Pyro\Platform\Listener\AddControlPanelToJS;
 use Pyro\Platform\Listener\AddJavascriptData;
 use Pyro\Platform\Listener\OverrideAddons;
-use Pyro\Platform\Listener\RegisterModulesParent;
 use Pyro\Platform\Listener\RegisterAddonSeeders;
+use Pyro\Platform\Listener\RegisterAddonWorkflows;
+use Pyro\Platform\Listener\RegisterModulesParent;
 use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
 use Pyro\Platform\Listener\SharePlatform;
@@ -93,14 +95,16 @@ class PlatformServiceProvider extends ServiceProvider
         AddonWasRegistered::class    => [
             RegisterAddonSeeders::class,
         ],
-        AddonsHaveRegistered::class => [
-            RegisterModulesParent::class
-        ]
+        AddonsHaveRegistered::class  => [
+            RegisterModulesParent::class,
+            RegisterAddonWorkflows::class
+        ],
     ];
 
     protected $providers = [
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
+        \Laradic\Workflow\WorkflowServiceProvider::class,
         \Inertia\ServiceProvider::class,
 //        \Tightenco\Ziggy\ZiggyServiceProvider::class,
 
@@ -280,8 +284,28 @@ class PlatformServiceProvider extends ServiceProvider
         });
     }
 
+
     protected function registerAddonProviderExtras()
     {
+        // subscribers property
+        AddonServiceProvider::macro('setSubscribers', function ($subscribers) {
+            $this->subscribers = $subscribers;
+            return $this;
+        });
+        AddonServiceProvider::macro('getSubscribers', function () {
+            return isset($this->subscribers) ? $this->subscribers : [];
+        });
+        AddonProvider::macro('registerSubscribers', function (AddonServiceProvider $provider) {
+            foreach ($provider->getSubscribers() as $subscriber) {
+                $this->application->events->subscribe($subscriber);
+            }
+        });
+        AddonProvider::when('register', function (AddonServiceProvider $provider, Addon $addon, AddonProvider $addonProvider) {
+            $addonProvider->registerSubscribers($provider);
+        });
+
+
+        // Route crumbs
         AddonServiceProvider::macro('setRoutes', function ($routes) {
             $this->routes = $routes;
         });
@@ -329,6 +353,14 @@ class PlatformServiceProvider extends ServiceProvider
                 }
             }
             $provider->setRoutes($routes);
+        });
+        Route::macro('breadcrumb', function($breadcrumb){
+            $this->action['breadcrumb'] = $breadcrumb;
+            return $this;
+        });
+        Route::macro('breadcrumbs', function($breadcrumbs){
+            $this->action['breadcrumbs'] = $breadcrumbs;
+            return $this;
         });
     }
 

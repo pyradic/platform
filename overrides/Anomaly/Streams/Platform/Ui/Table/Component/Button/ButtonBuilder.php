@@ -96,6 +96,8 @@ class ButtonBuilder
             $button = $this->parser->parse($button, $entry);
 
             $button = Input::expression($button, compact('entry','table'));
+//            $button = Input::render($button, compact('entry','table'));
+
             $button = $this->value->replace($button, $entry);
             $button = $this->factory->make($button);
 

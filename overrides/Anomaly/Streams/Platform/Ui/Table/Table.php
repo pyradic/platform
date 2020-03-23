@@ -2,6 +2,7 @@
 
 use Anomaly\Streams\Platform\Model\EloquentModel;
 use Anomaly\Streams\Platform\Stream\Contract\StreamInterface;
+use Anomaly\Streams\Platform\Traits\Hookable;
 use Anomaly\Streams\Platform\Ui\Form\FormPresenter;
 use Anomaly\Streams\Platform\Ui\Table\Component\Action\ActionCollection;
 use Anomaly\Streams\Platform\Ui\Table\Component\Action\Contract\ActionInterface;
@@ -28,6 +29,7 @@ use Symfony\Component\HttpFoundation\Response;
 class Table implements PresentableInterface
 {
     use Macroable;
+    use Hookable;
 
     /**
      * The table model.

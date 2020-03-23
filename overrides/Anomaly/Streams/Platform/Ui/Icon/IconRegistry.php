@@ -84,6 +84,7 @@ class IconRegistry
         'language'             => 'fa fa-language',
         'laptop'               => 'fa fa-laptop',
         'link'                 => 'glyphicons glyphicons-link',
+        'link-variant'                 => 'mdi mdi-link-variant',
         'list-alt'             => 'fa fa-list-alt',
         'list-ol'              => 'fa fa-list-ol',
         'list-ul'              => 'fa fa-list-ul',
