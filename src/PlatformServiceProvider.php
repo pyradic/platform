@@ -97,7 +97,7 @@ class PlatformServiceProvider extends ServiceProvider
         ],
         AddonsHaveRegistered::class  => [
             RegisterModulesParent::class,
-            RegisterAddonWorkflows::class
+//            RegisterAddonWorkflows::class
         ],
     ];
 
