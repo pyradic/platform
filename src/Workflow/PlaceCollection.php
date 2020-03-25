@@ -5,18 +5,17 @@ namespace Pyro\Platform\Workflow;
 use Illuminate\Support\Collection;
 use Pyro\Platform\Workflow\Aware\WorkflowAwareInterface;
 
-class TransitionCollection extends Collection implements WorkflowAwareInterface
+class PlaceCollection extends Collection implements WorkflowAwareInterface
 {
     /** @var \Pyro\Platform\Workflow\Workflow */
     public $workflow;
 
     public function add($item)
     {
-        if ( ! $item instanceof Transition) {
-            $item = collect($item);
-            $item = new Transition($item[ 'slug' ], $item[ 'from' ], $item[ 'to' ], $item[ 'handler' ], $item[ 'screen' ]);
+        if ( ! $item instanceof Place) {
+            $item = new Place($item);
         }
-        $this->workflow->provider->provide($item);
+        $item->workflow = $this->workflow;
         $this->put($item->slug, $item);
         return $this;
     }
@@ -24,5 +23,8 @@ class TransitionCollection extends Collection implements WorkflowAwareInterface
     public function setWorkflow(Workflow $workflow)
     {
         $this->workflow = $workflow;
+        return $this;
     }
+
+
 }

@@ -2,98 +2,110 @@
 
 namespace Pyro\Platform\Workflow;
 
-use Pyro\Platform\Workflow\Concerns\HasScreen;
-use Pyro\Platform\Workflow\Concerns\HasWorkflow;
+use Closure;
+use Illuminate\Http\Response;
+use Pyro\Platform\Workflow\Aware\AwareProvider;
+use Pyro\Platform\Workflow\Aware\StateAwareInterface;
+use Pyro\Platform\Workflow\Aware\TransitionAwareInterface;
+use Pyro\Platform\Workflow\Aware\WorkflowAwareInterface;
 
-class Transition extends Base implements TransitionInterface
+class Transition implements WorkflowAwareInterface
 {
-    use HasWorkflow;
-    use HasScreen;
+    /** @var \Pyro\Platform\Workflow\Workflow */
+    public $workflow;
 
-    /** @var Workflow */
-    protected $workflow;
+    /** @var string */
+    public $slug;
 
-    /** @var StepInterface */
-    protected $from;
+    /** @var string */
+    public $from;
 
-    /** @var StepInterface */
-    protected $to;
+    /** @var string */
+    public $to;
 
-    /** @var \Closure */
-    protected $handler;
+    /** @var Closure */
+    public $handler;
 
-    public function __construct(string $slug, StepInterface $from, StepInterface $to, $handler = null)
+    /** @var string */
+    public $screen;
+
+    public function __construct($slug, $from, $to, ?Closure $handler = null, ?string $screen = null)
     {
         $this->slug    = $slug;
         $this->from    = $from;
         $this->to      = $to;
         $this->handler = $handler;
+        $this->screen  = $screen;
     }
 
-    public function handle()
+    public function handle(State $state)
     {
-        if ($this->hasScreen()) {
-            $response = $this->renderScreen();
+        $provider = new AwareProvider([
+            StateAwareInterface::class      => $state,
+            TransitionAwareInterface::class => $this,
+            WorkflowAwareInterface::class   => $this->workflow,
+        ]);
+        $result   = new TransitionResult();
+        $provider->provide($result);
+        if ( ! $this->validate($state)) {
+            $result->errors[] = 'validation error';
+            return $result;
         }
 
-        $this->getWorkflow()->getState()->setCurrentStep($this->to);
+        if ($this->screen) {
+            $screen = app()->make($this->screen);
+            if ( ! $screen instanceof Screen) {
+                throw new \RuntimeException("Class {$this->screen} does not implement " . Screen::class);
+            }
+            $provider->provide($screen);
+
+            if ($this->handler) {
+                $params                 = compact('state', 'screen', 'result');
+                $params[ 'transition' ] = $this;
+                $handlerResult          = app()->call($this->handler, $params);
+                if ($handlerResult instanceof Response) {
+                    $result->response = $handlerResult;
+                } elseif ($handlerResult instanceof TransitionResult) {
+                    $result = $handlerResult;
+                }
+            } else {
+                $result->response = $screen->render();
+            }
+            return $result;
+        }
+
+        if ($this->handler) {
+            $params                 = compact('state', 'result');
+            $params[ 'transition' ] = $this;
+            $result                 = app()->call($this->handler, $params);
+            return $result;
+        }
+        return $result;
     }
 
-    public function renderScreen()
+    public function validate(State $state)
     {
-        return $this->resolveScreen($this)->render();
-    }
-
-    public function validate()
-    {
-        return $this->resolveHandler()->validate();
+        if ($state->place !== $this->from) {
+            return false;
+        }
+        return true;
     }
 
     public function getFrom()
     {
-        return $this->from;
-    }
-
-    public function setFrom($from)
-    {
-        $this->from = $from;
-        return $this;
+        return $this->workflow->places[ $this->from ];
     }
 
     public function getTo()
     {
-        return $this->to;
+        return $this->workflow->places[ $this->to ];
     }
 
-    public function setTo($to)
+    public function setWorkflow($workflow)
     {
-        $this->to = $to;
+        $this->workflow = $workflow;
         return $this;
     }
 
-    public function getHandler()
-    {
-        return $this->handler;
-    }
-
-    public function setHandler($handler)
-    {
-        $this->handler = $handler;
-        return $this;
-    }
-
-    public function resolveHandler(): TransitionHandler
-    {
-        if ($this->handler instanceof \Closure) {
-            $handler = app()->call($this->handler, [ 'transition' => $this ]);
-        } elseif (is_string($this->handler)) {
-            $handler = app()->make($this->handler, [ 'transition' => $this ]);
-        }
-        if ( !isset($handler) || ! $handler instanceof TransitionHandler) {
-            throw new \RuntimeException("Not a valid transition handler for transition '{$this->getSlug()}' in workflow '{$this->getWorkflow()->getSlug()}'");
-        }
-
-        return $handler;
-    }
 
 }

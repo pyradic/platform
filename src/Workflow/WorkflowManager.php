@@ -2,41 +2,60 @@
 
 namespace Pyro\Platform\Workflow;
 
-use Crvs\RequesterRoleTypeExtension\Request\Contract\RequestInterface;
 use Illuminate\Support\Collection;
-use Laradic\Support\Dot;
+use Pyro\Platform\Workflow\Command\BuildWorkflowFromArray;
 
 class WorkflowManager
 {
-    /** @var \Closure[] */
-    protected $extensions = [];
+    /** @var \Illuminate\Support\Collection|\Pyro\Platform\Workflow\Workflow[] */
+    protected $workflows;
+
+    protected $drafts;
+
+    public function __construct(Collection $workflows)
+    {
+        $this->workflows = $workflows;
+        $this->drafts    = collect();
+    }
+
+    public function addFromArray($slug, array $data)
+    {
+        if (data_get($data, 'draft', false) === true) {
+            $this->drafts[ $slug ] = $data;
+        } else {
+            $this->workflows[ $slug ] = dispatch_now(new BuildWorkflowFromArray($slug, $data));
+        }
+        return $this;
+    }
+
+    public function add($slug, $workflow)
+    {
+        $this->workflows->put($slug, $workflow);
+        return $this;
+    }
+
+    public function getDraft($slug, array $overrides = [])
+    {
+        if ( ! $this->drafts->has($slug)) {
+            throw new \InvalidArgumentException("Draft [{$slug}] not found");
+        }
+        $draft = $this->drafts->get($slug);
+        unset($draft['draft']);
+        return array_replace_recursive($draft, $overrides);
+    }
 
     /**
-     * @param       $slug
-     * @param \Closure $builderSetup
+     * @param $slug
      *
-     * @return void
+     * @return \Pyro\Platform\Workflow\Workflow
      */
-    public function extend($slug, \Closure $builderSetup)
-    {
-        $this->extensions[$slug] = $builderSetup;
-    }
-
     public function get($slug)
     {
-        return $this->extensions[$slug];
+        return $this->workflows->get($slug);
     }
 
-    public function build($slug, $item, $itemId)
+    public function has($slug)
     {
-        /** @var WorkflowBuilder $builder */
-        $builder = resolve(WorkflowBuilder::class);
-        $setupBuilder = $this->get($slug);
-        $builder
-            ->setSlug($slug)
-            ->setItem($item, $itemId);
-        app()->call($setupBuilder, compact('builder'));
-        $workflow = $builder->build();
-        return $workflow;
+        return $this->workflows->has($slug);
     }
 }

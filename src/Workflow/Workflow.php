@@ -2,129 +2,94 @@
 
 namespace Pyro\Platform\Workflow;
 
-use Pyro\Platform\Workflow\Concerns\HasItem;
-use Pyro\Platform\Workflow\Concerns\HasState;
-use Pyro\Platform\Workflow\Concerns\HasSteps;
-use Pyro\Platform\Workflow\Concerns\HasTransitions;
+use Anomaly\Streams\Platform\Entry\Contract\EntryInterface;
+use Closure;
+use Illuminate\Routing\Router;
+use Illuminate\Support\Collection;
+use Pyro\Platform\Workflow\Aware\AwareProvider;
+use Pyro\Platform\Workflow\Aware\WorkflowAwareInterface;
+use Pyro\Platform\Workflow\Command\BuildWorkflowFromArray;
+use Pyro\Platform\Workflow\Command\SetupWorkflowRouting;
 
-class Workflow extends Base
+class Workflow
 {
-    use HasTransitions;
-    use HasSteps;
-    use HasState;
-    use HasItem;
+    /** @var string */
+    public $slug;
 
-    /** @var \Pyro\Platform\Workflow\Transition */
-    protected $startTransition;
+    /** @var array array */
+    public $supports = [];
 
-    public function __construct(
-//        string $slug,
-        StepCollection $steps,
-        TransitionCollection $transitions,
-        State $state
-    )
-    {
-//        $this->slug        = $slug;
-        $this->steps       = $steps;
-        $this->transitions = $transitions;
-        $this->state       = $state;
-    }
+    /** @var PlaceCollection|\Pyro\Platform\Workflow\Place[] */
+    public $places;
 
-    public function handle($transition)
-    {
-        if ( ! $this->can($transition)) {
-            return false;
-        }
-
-        $transition = $this->transition($transition);
-        return $transition->handle();
-    }
-
-    public function can($transition)
-    {
-        $transition = $this->transition($transition);
-        if ($transition->getFrom()->getSlug() !== $this->currentStep()->getSlug()) {
-            return false;
-        }
-        if ( ! $this->steps->has($transition->getTo()->getSlug())) {
-            return false;
-        }
-        return $transition->validate();
-    }
-
-    public function currentStep()
-    {
-        return $this->step($this->state->getCurrentStep());
-    }
-
-    public function setCurrentStep($step)
-    {
-        $this->state
-            ->setCurrentStep($step)
-            ->save();
-        return $this;
-    }
-
-    public function state($key, $default = null)
-    {
-        return $this->state->get($key, $default);
-    }
-
-    public function stateSet($key, $value, $save = false)
-    {
-        $this->state->set($key, $value);
-        if ($save) {
-            $this->state->save();
-        }
-        return $this;
-    }
-
-    public function saveState()
-    {
-        $this->state->save();
-        return $this;
-    }
-
-    /** @var TransitionCollection|TransitionInterface[] */
+    /** @var TransitionCollection|\Pyro\Platform\Workflow\Transition[] */
     public $transitions;
 
-    public function addTransition(TransitionInterface $transition)
+    /** @var Closure */
+    public $resolve_place;
+
+    /** @var StateStore */
+    public $store;
+
+    /** @var Collection */
+    public $routing;
+
+    /** @var Collection|\Illuminate\Routing\Route[] */
+    public $routes;
+
+    /** @var \Anomaly\Streams\Platform\Addon\Addon|null */
+    public $addon;
+
+    /** @var \Pyro\Platform\Workflow\Aware\AwareProvider */
+    public $provider;
+
+    public function __construct($slug)
     {
-        $this->transitions->put($transition->getSlug(), $transition);
-        return $transition;
+        $this->slug        = $slug;
+        $this->provider    = new AwareProvider([
+            WorkflowAwareInterface::class => $this,
+        ]);
+        $this->store       = resolve(StateStore::class, [ 'workflow' => $this ]);
+        $this->places      = $this->provider->provide(PlaceCollection::make());
+        $this->transitions = $this->provider->provide(TransitionCollection::make());
+        $this->routing     = Collection::make();
     }
 
-    public function getTransition($slug): TransitionInterface
+    /**
+     * @param string           $slug
+     * @param array|Collection $data
+     *
+     * @return static
+     */
+    public static function fromArray($slug, $data = [])
     {
-        return $this->transitions->get($slug);
+        return dispatch_now(new BuildWorkflowFromArray($slug,$data));
     }
 
-    public function transition($slug)
+    public function handle(EntryInterface $subject, string $transactionSlug)
     {
-        return $this->getTransition($slug);
+        // check $this->supports to contain a instanceof $subject
+        $transition = $this->transitions[ $transactionSlug ];
+        $state       = $this->store->getOrCreate($subject);
+        $result      = $transition->handle($state);
+        return $result;
     }
 
-    public function getTransitions()
+    public function getBase64Slug()
     {
-        return $this->transitions;
+        return rtrim(base64_encode($this->slug), '=');
     }
 
-    public function setTransitions($transitions = [])
+    public function getTransitionHref($transition, $queryData = [])
     {
-        $this->transitions = $this->createTransitionCollection($transitions);
-        return $this;
+        $params = request()->route()->parameters();
+        $href  = route($this->routes[ 'transition' ]->getName(), $params);
+        $query = http_build_query(array_merge([
+            'workflow'   => $this->getBase64Slug(),
+            'transition' => $transition,
+            'base64'     => true,
+        ], $queryData));
+        return $href . '?' . $query;
     }
 
-    public function createTransitionCollection($transitions = [])
-    {
-        return TransitionCollection::wrap($transitions);
-    }
-
-    protected function resolveTransition($transition)
-    {
-        if(!$transition instanceof TransitionInterface){
-            return $this->transition($transition);
-        }
-        return $transition;
-    }
 }

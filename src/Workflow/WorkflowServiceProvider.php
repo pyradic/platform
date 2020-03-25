@@ -2,27 +2,34 @@
 
 namespace Pyro\Platform\Workflow;
 
+use Anomaly\Streams\Platform\Addon\Event\AddonsHaveRegistered;
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
 class WorkflowServiceProvider extends ServiceProvider
 {
-    public $providers = [];
-
     public $bindings = [
-        WorkflowBuilder::class => WorkflowBuilder::class
+        Workflow::class => Workflow::class,
     ];
 
     public $singletons = [
-        WorkflowManager::class=>WorkflowManager::class
+        WorkflowManager::class => WorkflowManager::class,
     ];
-
-    public function boot()
-    {
-//        $this->publishes([ dirname(__DIR__) . '/config/foo.php' => config_path('foo.php') ]);
-    }
 
     public function register()
     {
-//        $this->mergeConfigFrom(dirname(__DIR__) . '/config/foo.php', 'foo');
+        $this->app->events->listen(
+            AddonsHaveRegistered::class,
+            RegisterAddonWorkflows::class
+        );
+
+    }
+
+    public function boot(Router $router)
+    {
+        $router->bind('workflow', function ($value) {
+            $manager = resolve(WorkflowManager::class);
+            return $manager->has($value) ? $manager->get($value) : abort(500, "Cannot find workflow [{$value}]");
+        });
     }
 }

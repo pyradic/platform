@@ -2,58 +2,50 @@
 
 namespace Pyro\Platform\Workflow;
 
-use Laradic\Support\Dot;
+use Anomaly\Streams\Platform\Entry\Contract\EntryInterface;
+use Illuminate\Support\Arr;
 
-class State extends Dot
+class State
 {
+    /** @var \Pyro\Platform\Workflow\Workflow */
+    public $workflow;
 
-    public function __construct()
+    /** @var EntryInterface */
+    public $subject;
+
+    /** @var string */
+    public $place;
+
+    /** @var \Pyro\Platform\Workflow\StateStore */
+    public $store;
+
+    /** @var array */
+    public $metadata = [];
+
+    public function set($key, $value)
     {
-        parent::__construct();
+        data_set($this->metadata, $key, $value);
+        return $this;
+    }
+
+    public function get($key, $default = null)
+    {
+        return data_get($this->metadata, $key, $default);
+    }
+
+    public function has($keys)
+    {
+        return Arr::has($this->metadata, $keys);
     }
 
     public function save()
     {
-        session()->put($this->getKey(), $this->toArray());
+        $this->store->save($this);
         return $this;
     }
 
-    public function load()
+    public function getPlace()
     {
-        $this->items = session()->get($this->getKey(), []);
-        return $this;
+        return $this->workflow->places[$this->place];
     }
-
-    public function destroy()
-    {
-        session()->remove($this->getKey());
-        return $this;
-    }
-
-    public function getCurrentStep()
-    {
-        return $this->get('current_step');
-    }
-    public function setCurrentStep($step)
-    {
-        if($step instanceof StepInterface){
-            $step->getSlug();
-        }
-        return $this->set('current_step', (string) $step);
-    }
-
-    /** @var string */
-    protected $key;
-
-    public function getKey()
-    {
-        return $this->key;
-    }
-
-    public function setKey($key)
-    {
-        $this->key = $key;
-        return $this;
-    }
-
 }

@@ -55,7 +55,6 @@ use Pyro\Platform\Listener\AddControlPanelToJS;
 use Pyro\Platform\Listener\AddJavascriptData;
 use Pyro\Platform\Listener\OverrideAddons;
 use Pyro\Platform\Listener\RegisterAddonSeeders;
-use Pyro\Platform\Listener\RegisterAddonWorkflows;
 use Pyro\Platform\Listener\RegisterModulesParent;
 use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
@@ -96,8 +95,7 @@ class PlatformServiceProvider extends ServiceProvider
             RegisterAddonSeeders::class,
         ],
         AddonsHaveRegistered::class  => [
-            RegisterModulesParent::class,
-//            RegisterAddonWorkflows::class
+            RegisterModulesParent::class
         ],
     ];
 
@@ -112,6 +110,7 @@ class PlatformServiceProvider extends ServiceProvider
         \Pyro\Helpers\HelpersServiceProvider::class,
 
 //        \Pyro\Platform\Livewire\LivewireServiceProvider::class,
+        \Pyro\Platform\Workflow\WorkflowServiceProvider::class,
         \Pyro\Platform\Bus\BusServiceProvider::class,
         \Pyro\Platform\Routing\RoutingServiceProvider::class,
         \BeyondCode\ServerTiming\ServerTimingServiceProvider::class,
