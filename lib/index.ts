@@ -32,6 +32,7 @@ export * from './utils/kindOf'
 export * from './utils/cash'
 export * from './utils/cash.ensureClass'
 
+
 export { merge, Plugin, toJS };
 if ( DEV ) {
     window[ 'toJS' ] = toJS
