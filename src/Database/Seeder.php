@@ -4,6 +4,8 @@ namespace Pyro\Platform\Database;
 
 use Anomaly\Streams\Platform\Traits\FiresCallbacks;
 use Illuminate\Support\Arr;
+use Pyro\Platform\Database\Event\InvokedSeeder;
+use Pyro\Platform\Database\Event\InvokeSeeder;
 
 class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 {
@@ -148,16 +150,35 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
 
             $this->fire('call', [ $this, $instance, $class, $silent ]);
 
-            $result = $instance->__invoke();
+            $result = $instance->__invoke($silent);
 
             if (isset($result)) {
                 $this->setResult($result);
             }
 
-            $this->fire('called', [ $this, $instance, $class, $silent ]);
+            $this->fire('called', [ $this, $instance, $class, $result ]);
         }
 
         return $this;
+    }
+
+    public function __invoke($silent = false)
+    {
+        $class = get_class($this);
+
+        event(new InvokeSeeder($this));
+        $this->fire('invoke', [ $this, $class, $silent ]);
+
+        $result = parent::__invoke();
+
+        if (isset($result)) {
+            $this->setResult($result);
+        }
+
+        event(new InvokedSeeder($this, $result));
+        $this->fire('invoked', [ $this, $class, $result ]);
+
+        return $result;
     }
 
     public function getCommand()
