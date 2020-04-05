@@ -19,6 +19,25 @@ class EntryModel extends \Anomaly\Streams\Platform\Entry\EntryModel
     use CausesActivity;
     use HasRelationships;
 
+    protected $removedScopes = [];
+
+    public function getRemovedScopes()
+    {
+        return $this->removedScopes;
+    }
+
+    public function setRemovedScopes($removedScopes)
+    {
+        $this->removedScopes = $removedScopes;
+        return $this;
+    }
+
+    public function addRemovedScope($removedScope)
+    {
+        $this->removedScopes[] = $removedScope;
+        return $this;
+    }
+
     public function __construct(array $attributes = [])
     {
         array_push($this->observables, ...[
@@ -85,6 +104,7 @@ class EntryModel extends \Anomaly\Streams\Platform\Entry\EntryModel
      */
     public function updated_by()
     {
+
         return $this->updatedBy();
     }
 

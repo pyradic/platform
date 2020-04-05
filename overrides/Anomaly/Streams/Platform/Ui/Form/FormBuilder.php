@@ -37,9 +37,18 @@ use Symfony\Component\HttpFoundation\Response;
  * @link http://pyrocms.com/
  * @author PyroCMS, Inc. <support@pyrocms.com>
  * @author Ryan Thompson <ryan@pyrocms.com>
- * @method \Anomaly\Streams\Platform\Version\Contract\VersionInterface getFormEntry()
- * @method \Anomaly\Streams\Platform\Version\VersionModel getFormModelName()
- * @method \Anomaly\Streams\Platform\Version\VersionModel getFormModel()
+ * @method void onReady(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @method void onBuilt(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @method void onPost(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @method void onSaving(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @method void onSaved(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @method void onValidating(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @method void onValidated(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @method void onPosting(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @method void onSettingEntry(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @method void onEntrySet(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder, \Anomaly\Streams\Platform\Entry\EntryQueryBuilder $entry)
+ * @method void onQuerying(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder, \Anomaly\Streams\Platform\Entry\EntryQueryBuilder $query)
+ * @method void onQueried(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder, \Anomaly\Streams\Platform\Entry\EntryQueryBuilder $query)
  */
 class FormBuilder
 {

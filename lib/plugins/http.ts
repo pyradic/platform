@@ -1,10 +1,10 @@
-import Vue                        from 'vue';
-import Axios,{AxiosRequestConfig} from 'axios';
-import { VuePlugin }              from '@c/VuePlugin';
+import Vue             from 'vue';
+import { AxiosStatic } from 'axios';
+import { VuePlugin }   from '@c/VuePlugin';
 
 const log = require('debug')('plugins:http:install');
 
-export {HttpPlugin}
+export { HttpPlugin };
 export default class HttpPlugin extends VuePlugin {
     static __installed: boolean = false;
 
@@ -13,7 +13,14 @@ export default class HttpPlugin extends VuePlugin {
         if ( this.__installed ) { return; }
         this.__installed = true;
 
-        _Vue.prototype.$http                            = this.app.get('http');
+        _Vue.prototype.$http = this.app.get('http');
 
     }
 }
+
+declare module 'vue/types/vue' {
+    interface Vue {
+        $http: AxiosStatic
+    }
+}
+

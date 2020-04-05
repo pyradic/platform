@@ -13,6 +13,7 @@ use Anomaly\Streams\Platform\Addon\Event\AddonWasRegistered;
 use Anomaly\Streams\Platform\Addon\Extension\Extension;
 use Anomaly\Streams\Platform\Addon\Module\Module;
 use Anomaly\Streams\Platform\Asset\Asset;
+use Anomaly\Streams\Platform\Entry\EntryCollection;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
@@ -23,6 +24,7 @@ use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewOverrides;
 use Anomaly\UsersModule\User\Contract\UserRepositoryInterface;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
+use BeyondCode\ServerTiming\Middleware\ServerTimingMiddleware;
 use Illuminate\Console\Application as Artisan;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
@@ -60,6 +62,7 @@ use Pyro\Platform\Listener\SetParserStub;
 use Pyro\Platform\Listener\SetSafeDelimiters;
 use Pyro\Platform\Listener\SharePlatform;
 use Pyro\Platform\Routing\ResponseFactory;
+use Pyro\Platform\Support\ExpressionLanguageParser;
 use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
 
@@ -95,7 +98,7 @@ class PlatformServiceProvider extends ServiceProvider
             RegisterAddonSeeders::class,
         ],
         AddonsHaveRegistered::class  => [
-            RegisterModulesParent::class
+            RegisterModulesParent::class,
         ],
     ];
 
@@ -280,8 +283,15 @@ class PlatformServiceProvider extends ServiceProvider
         Request::macro('isAdmin', function () {
             return $this->segment(1) === 'admin';
         });
-    }
 
+        EntryCollection::macro('setRemovedScopes', function ($removedScopes) {
+            foreach ($this->items as $item) {
+                if (method_exists($item, 'setRemovedScopes')) {
+                    $item->setRemovedScopes($removedScopes);
+                }
+            }
+        });
+    }
 
     protected function registerAddonProviderExtras()
     {
@@ -301,7 +311,6 @@ class PlatformServiceProvider extends ServiceProvider
         AddonProvider::when('register', function (AddonServiceProvider $provider, Addon $addon, AddonProvider $addonProvider) {
             $addonProvider->registerSubscribers($provider);
         });
-
 
         // Route crumbs
         AddonServiceProvider::macro('setRoutes', function ($routes) {
@@ -352,12 +361,12 @@ class PlatformServiceProvider extends ServiceProvider
             }
             $provider->setRoutes($routes);
         });
-        Route::macro('breadcrumb', function($breadcrumb){
-            $this->action['breadcrumb'] = $breadcrumb;
+        Route::macro('breadcrumb', function ($breadcrumb) {
+            $this->action[ 'breadcrumb' ] = $breadcrumb;
             return $this;
         });
-        Route::macro('breadcrumbs', function($breadcrumbs){
-            $this->action['breadcrumbs'] = $breadcrumbs;
+        Route::macro('breadcrumbs', function ($breadcrumbs) {
+            $this->action[ 'breadcrumbs' ] = $breadcrumbs;
             return $this;
         });
     }
@@ -381,17 +390,18 @@ class PlatformServiceProvider extends ServiceProvider
 
     protected function registerHttp()
     {
+        $kernel = $this->app->make(Kernel::class);
+
         /*
          * Development Feature - Login as user using a request variable (header, url parameter, etc)
          * Not enabled on production. Requires app.debug to be true
          */
-        $use = $this->app->config[ 'platform.debug_login' ] === true;
-        if ($use === null) {
-            $use = $this->app->environment('local') && $this->app->config[ 'app.debug' ];
+        $debugLogin = $this->app->config->get('platform.debug_login', $this->app->environment('local') && $this->app->config[ 'app.debug' ]) === true;
+        if ($debugLogin === true) {
+            $kernel->pushMiddleware(DebugLoginMiddleware::class);
         }
-        if ($use === true) {
-            $this->app->make(Kernel::class)->pushMiddleware(DebugLoginMiddleware::class);
-        }
+
+        $kernel->prependMiddleware(ServerTimingMiddleware::class);
     }
 
     protected function registerTranslator()
@@ -500,6 +510,9 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton(\Anomaly\Streams\Platform\Support\Template::class, \Anomaly\Streams\Platform\Support\Template::class);
         $this->app->singleton(\Anomaly\Streams\Platform\Support\Value::class, \Anomaly\Streams\Platform\Support\Value::class);
         $this->app->singleton(\Anomaly\Streams\Platform\Support\Decorator::class, \Anomaly\Streams\Platform\Support\Decorator::class);
+        $this->app->singleton('expression_parser', function(){
+            return ExpressionLanguageParser::getInstance();
+        });
 
         $alias = AliasLoader::getInstance();
         $alias->alias('Authorizer', \Pyro\Platform\Support\Facade\Authorizer::class);
@@ -513,6 +526,7 @@ class PlatformServiceProvider extends ServiceProvider
         $alias->alias('Translator', \Pyro\Platform\Support\Facade\Translator::class);
         $alias->alias('Value', \Pyro\Platform\Support\Facade\Value::class);
         $alias->alias('MessageBag', \Pyro\Platform\Support\Facade\MessageBag::class);
+        $alias->alias('ExpressionParser', \Pyro\Platform\Support\Facade\ExpressionParser::class);
     }
 
 }

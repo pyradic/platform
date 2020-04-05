@@ -9,7 +9,7 @@ import Vue, { Component, ComponentOptions, VueConstructor }                     
 import { merge }                                                                      from 'lodash';
 import { Cookies, Storage }                                                           from '@u/storage';
 import debug                                                                          from 'debug';
-import { AxiosStatic,AxiosRequestConfig }                                                                from 'axios';
+import { AxiosStatic }                                                                from 'axios';
 import { PlatformStyleVariables }                                                     from '@/styling/export';
 import { Store }                                                                      from 'vuex';
 import { IState }                                                                     from '@/store';
@@ -30,6 +30,7 @@ export interface Application {
     agent: IAgent
     http: AxiosStatic
     data: Config<Platform.Data> & Platform.Data
+    settings: Config<any> & any
     cookies: Cookies
     events: Dispatcher
     styling: Config<Styling> & Styling
@@ -42,7 +43,7 @@ const defaultConfig: Partial<IConfig> = {
     debug     : false,
     csrf      : null,
     delimiters: [ '\{\{', '}}' ],
-    http: {}
+    http      : {},
 };
 
 export function loadConfigDefaults(): Config<IConfig> {
@@ -62,7 +63,7 @@ export function loadConfigDefaults(): Config<IConfig> {
 // }
 
 export class Application extends Container {
-    public hooks = {
+    public readonly hooks = {
         loadProviders      : new SyncHook<Array<IServiceProviderClass>>([ 'Providers' ]),
         loadedProviders    : new SyncHook<Array<IServiceProvider>>([ 'providers' ]),
         registerProviders  : new SyncHook<Array<IServiceProviderClass | IServiceProvider>>([ 'providers' ]),
@@ -107,7 +108,7 @@ export class Application extends Container {
 
     public get config(): Config<IConfig> & IConfig {return this.get('config');}
 
-    public get routes(): Record<string, { uri: string, methods: string[], domain:string|null }> {return this.get('routes');}
+    public get routes(): Record<string, { uri: string, methods: string[], domain: string | null }> {return this.get('routes');}
 
     protected constructor() {
         super({
@@ -264,7 +265,7 @@ export class Application extends Container {
         this.starting = true;
         this.hooks.start.call(Vue);
         this.root = new (this.Root.extend({
-            name: 'Root',
+            name      : 'Root',
             delimiters: this.config.delimiters,
             // template: '<div id="app"><slot></slot></div>',
             // render(h,ctx){     return h(this.$slots.default, this.$slots.default)
@@ -308,16 +309,22 @@ export class Application extends Container {
         return this;
     }
 
+
     protected bindIf<T>(id, override: boolean = false, cb: (binding: interfaces.BindingToSyntax<T>) => void): this {
         if ( this.isBound(id) && !override ) return this;
         cb(this.isBound(id) ? this.rebind(id) : this.bind(id));
         return this;
     }
 
+    public readonly bindingHooks:Record<string, SyncWaterfallHook<any>> = {}
+
     public dynamic<T>(id: interfaces.ServiceIdentifier<T>, cb: (app: Application) => T) {
+        let hook = this.bindingHooks[id.toString()]
+        if(hook === undefined){
+            hook = this.bindingHooks[id.toString()] = new SyncWaterfallHook(['value'])
+        }
         return this.bind(id).toDynamicValue(ctx => {
-            let req = ctx.currentRequest;
-            return cb(this);
+            return hook.call(cb(this));
         });
     }
 
@@ -331,7 +338,14 @@ export class Application extends Container {
     }
 
     public instance<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {
-        return this.bindIf(id, override, b => b.toConstantValue(value));
+        let hook = this.bindingHooks[id.toString()]
+        if(hook === undefined){
+            hook = this.bindingHooks[id.toString()] = new SyncWaterfallHook(['value'])
+        }
+        return this.bindIf(id, override, b => {
+            return hook.call(b.toConstantValue(value));
+
+        });
     }
 
     public ctxfactory<T, T2>(id: interfaces.ServiceIdentifier<T>, factory: ((ctx: interfaces.Context) => (...args: any[]) => T2)) {

@@ -165,7 +165,7 @@ class Seeder extends \Anomaly\Streams\Platform\Database\Seeder\Seeder
     public function __invoke($silent = false)
     {
         $class = get_class($this);
-
+        $this->container->make('config')->set('streams::database.cache', false);
         event(new InvokeSeeder($this));
         $this->fire('invoke', [ $this, $class, $silent ]);
 

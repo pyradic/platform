@@ -1,7 +1,7 @@
 import Vue             from 'vue'
 import Vuex            from 'vuex'
-import lang            from 'element-ui/lib/locale/lang/nl';
-import locale          from 'element-ui/lib/locale';
+import elementNlLang            from 'element-ui/lib/locale/lang/nl';
+import ElementLocale          from 'element-ui/lib/locale';
 import LogPlugin       from '@/plugins/log';
 import HttpPlugin      from '@/plugins/http';
 import { VuePlugin }   from '@c/VuePlugin';
@@ -10,6 +10,7 @@ import { Application } from '@c/Application';
 import { Script }      from '#/script';
 import Axios           from 'axios';
 import { warn }        from '@u/general';
+import VueI18n         from 'vue-i18n';
 
 const log = require('debug')('install')
 
@@ -26,7 +27,10 @@ export default class PlatformVuePlugin extends VuePlugin {
 
         this.app.hooks.install.call(_Vue, opts);
 
-        locale.use(lang);
+        // _Vue.use(VueI18n)
+        const i18n = this.app.get<VueI18n>('i18n')
+        i18n.mergeLocaleMessage('nl', elementNlLang)
+        ElementLocale.i18n((key, value) => i18n.t(key, value));
 
         _Vue.use(LogPlugin)
         _Vue.use(HttpPlugin)
@@ -38,8 +42,8 @@ export default class PlatformVuePlugin extends VuePlugin {
         Object.defineProperty(_Vue.prototype, '$py', {
             get(): any {return Application.instance }
         })
-
         this.app.extendRoot({
+            i18n,
             data(){
                 return this.$py.data.getClone()
             }

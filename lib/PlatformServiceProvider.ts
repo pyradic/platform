@@ -7,10 +7,19 @@ import Axios, { AxiosRequestConfig } from 'axios';
 import { styleVars }                 from '@/styling/export';
 import { store }                     from '@/store';
 import { theme }                     from '@/styling/theme';
+import VueI18n                       from 'vue-i18n';
+import { observable, observe }       from '@u/observable';
+import { Config }                    from '@c/Config';
+import { toJS }                      from '@u/toJS';
 
 export class PlatformServiceProvider extends ServiceProvider {
     public register() {
         this.vuePlugin(PlatformVuePlugin);
+
+        this.app.instance('i18n', new VueI18n({
+            fallbackLocale: 'en',
+            locale        : 'nl',
+        }));
 
         // @todo fix properly in backend
         if ( this.app.config.csrf === null ) {
@@ -43,25 +52,37 @@ export class PlatformServiceProvider extends ServiceProvider {
         this.app.instance('events', new Vue);
         this.app.addBindingGetter('events');
 
-        this.app.instance<AxiosRequestConfig>('http.config', {} as AxiosRequestConfig);
+        this.app.instance<AxiosRequestConfig>('http.config', {
+            credentials: 'same-origin',
+            headers    : {
+                'Content-Type'    : 'application/json',
+                'Accept'          : 'text/html, application/xhtml+xml',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN'    : this.app.config.csrf || document.head.querySelector('meta[name="csrf-token"]')[ 'content' ],
+                'X-Livewire'      : true,
+            },
+        });
         this.app.dynamic('http', app => {
-
             const http = Axios.create({
-                credentials: "same-origin",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'text/html, application/xhtml+xml',
-                    'X-Requested-With':'XMLHttpRequest',
-                    'X-CSRF-TOKEN': app.config.csrf || document.head.querySelector('meta[name="csrf-token"]')['content'],
-                    'X-Livewire': true,
-                },
-                ...(app.config.http || {})
-            })
-
+                ...app.get<AxiosRequestConfig>('http.config'),
+                ...(app.config.http || {}),
+            });
             return http;
         });
         this.app.addBindingGetter('http');
 
+
+        this.app.dynamic('settings', app => {
+            const storage   = app.get<Storage>('storage');
+            const data: any = observable(storage.get('settings', {}, { seralization: true, compression: true })); // const data = new Observable(_data);
+            const settings = Config.proxied<any>(data);
+            observe(data, change => {
+                console.log('change', change.type, '::', change.name, change.newValue, change.object);
+                storage.set('settings', settings.toJS(), { seralization: true, compression: true });
+            });
+            return settings;
+        });
+        this.app.addBindingGetter('settings');
 
     }
 }

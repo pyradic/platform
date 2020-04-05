@@ -1,10 +1,12 @@
+import _collect from 'collect.js';
+
 export function collect<T>(items: T[]) {
     return new Collection<T>(...items);
 }
 
-export class Collection<T> extends Array<T> implements Array<T> {
-    filter: (callbackfn: (value: T, index: number, array: T[]) => any, thisArg?: any) => this
 
+export class Collection<T> extends Array<T> implements Array<T> {
+    filter: (callbackfn: (value: T, index: number, array: T[]) => any, thisArg?: any) => this;
 
 
     constructor(...items: T[]) {
@@ -15,9 +17,9 @@ export class Collection<T> extends Array<T> implements Array<T> {
     static make<T>(items: T[] = []) { return new (this)(...items); }
 
 
-    isEmpty() { return this.length === 0}
+    isEmpty() { return this.length === 0;}
 
-    isNotEmpty() { return this.length > 0}
+    isNotEmpty() { return this.length > 0;}
 
     first() { return this[ 0 ]; }
 
@@ -32,6 +34,16 @@ export class Collection<T> extends Array<T> implements Array<T> {
     whereIn(key: keyof T, values: any[]): this {return this.filter(item => values.includes(item[ key ]) === true); }
 
     whereNotIn(key: keyof T, values: any[]): this {return this.filter(item => values.includes(item[ key ]) === false); }
+
+    sortBy(key: keyof T, direction:'asc'|'desc'='asc'): this {
+        let items;
+        if(direction === 'desc') {
+            items = _collect(this).sortByDesc(key).all()
+        } else {
+            items = _collect(this).sortBy(key).all();
+        }
+        return this.newInstance(...items);
+    }
 
     each(callbackfn: (value: T, index: number, array: T[]) => void) {
         this.forEach(callbackfn);
@@ -57,7 +69,7 @@ export class Collection<T> extends Array<T> implements Array<T> {
         return result as any;
     }
 
-    mapKeyBy<K extends keyof T>(key: K | ((item: T) => [string,T])): Map<K, T> {
+    mapKeyBy<K extends keyof T>(key: K | ((item: T) => [ string, T ])): Map<K, T> {
         let cb: ((item: T) => string) = key as any;
         if ( typeof key === 'string' ) {
             cb = item => item[ key as any ];
@@ -70,37 +82,33 @@ export class Collection<T> extends Array<T> implements Array<T> {
         return result as any;
     }
 
-    split(numOfGroups:number, balanced:boolean=false):T[][] {
+    split(numOfGroups: number, balanced: boolean = false): T[][] {
 
-        if (numOfGroups < 2)
-            return [this];
+        if ( numOfGroups < 2 )
+            return [ this ];
 
         var len = this.length,
             out = [],
-            i = 0,
+            i   = 0,
             size;
 
-        if (len % numOfGroups === 0) {
+        if ( len % numOfGroups === 0 ) {
             size = Math.floor(len / numOfGroups);
-            while (i < len) {
+            while ( i < len ) {
                 out.push(this.slice(i, i += size));
             }
-        }
-
-        else if (balanced) {
-            while (i < len) {
-                size = Math.ceil((len - i) / numOfGroups--);
+        } else if ( balanced ) {
+            while ( i < len ) {
+                size = Math.ceil((len - i) / numOfGroups --);
                 out.push(this.slice(i, i += size));
             }
-        }
+        } else {
 
-        else {
-
-            numOfGroups--;
+            numOfGroups --;
             size = Math.floor(len / numOfGroups);
-            if (len % size === 0)
-                size--;
-            while (i < size * numOfGroups) {
+            if ( len % size === 0 )
+                size --;
+            while ( i < size * numOfGroups ) {
                 out.push(this.slice(i, i += size));
             }
             out.push(this.slice(size * numOfGroups));
