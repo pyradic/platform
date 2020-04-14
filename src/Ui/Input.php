@@ -14,9 +14,10 @@ use Pyro\Platform\Support\Facade\Value;
 
 class Input
 {
+    /** @return ExpressionLanguageParser */
     public static function elp()
     {
-        return ExpressionLanguageParser::getInstance();
+        return resolve('expression_parser');
     }
 
     public static function expression($target, array $arguments = [])

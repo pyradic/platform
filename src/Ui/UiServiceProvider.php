@@ -25,14 +25,13 @@ class UiServiceProvider extends ServiceProvider
 
     public function boot(Router $router)
     {
-        Input::elp()
-            ->registerPhpFunctions([ 'route', 'resolve', 'response','app','request','auth' ])
-            ->share([
+//        Input::elp()
+//            ->share([
 //                'router'  => $router,
 //                'app'     => app(),
 //                'request' => request(),
 //                'auth'    => auth(),
-            ]);
+//            ]);
     }
 
     public function register()

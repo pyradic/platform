@@ -17,6 +17,8 @@ use Anomaly\Streams\Platform\Entry\EntryCollection;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
+use Anomaly\Streams\Platform\Http\Middleware\ApplicationReady;
+use Anomaly\Streams\Platform\Support\Collection;
 use Anomaly\Streams\Platform\Ui\Form\Event\FormWasBuilt;
 use Anomaly\Streams\Platform\Ui\Table\Component\View\ViewRegistry;
 use Anomaly\Streams\Platform\View\Event\RegisteringTwigPlugins;
@@ -53,6 +55,7 @@ use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
 use Pyro\Platform\Event\PlatformWillRender;
 use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
+use Pyro\Platform\Http\Middleware\RenderPlatformDataToFile;
 use Pyro\Platform\Listener\AddControlPanelToJS;
 use Pyro\Platform\Listener\AddJavascriptData;
 use Pyro\Platform\Listener\OverrideAddons;
@@ -137,7 +140,11 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function register()
     {
-
+/** @var \Pyro\Platform\Http\Kernel $kernel */
+        $kernel=resolve(Kernel::class);
+        if($this->app->environment('local') && $this->app->config('app.debug')) {
+            $kernel->pushMiddleware(RenderPlatformDataToFile::class);
+        }
         AliasLoader::getInstance()->alias('ServerTiming', \BeyondCode\ServerTiming\Facades\ServerTiming::class);
         $this->mergeConfig();
 
@@ -510,9 +517,19 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton(\Anomaly\Streams\Platform\Support\Template::class, \Anomaly\Streams\Platform\Support\Template::class);
         $this->app->singleton(\Anomaly\Streams\Platform\Support\Value::class, \Anomaly\Streams\Platform\Support\Value::class);
         $this->app->singleton(\Anomaly\Streams\Platform\Support\Decorator::class, \Anomaly\Streams\Platform\Support\Decorator::class);
-        $this->app->singleton('expression_parser', function(){
-            return ExpressionLanguageParser::getInstance();
+        $this->app->singleton('expression_parser', function () {
+            $parser = ExpressionLanguageParser::getInstance();
+            $parser->registerPhpFunctions([ 'route', 'resolve', 'response', 'app', 'request', 'auth', 'url' ]);
+//            $parser->registerFunction();
+            return $parser;
         });
+//
+//        $this->app->events->listen(ApplicationReady::class, function () {
+//            /** @var ExpressionLanguageParser $parser */
+//            $parser = $this->app->make('expression_parser');
+//            $parser->share('request', $this->expressionLanguageRequestVariable());
+//            return $parser;
+//        });
 
         $alias = AliasLoader::getInstance();
         $alias->alias('Authorizer', \Pyro\Platform\Support\Facade\Authorizer::class);

@@ -1,5 +1,5 @@
 export interface PlatformData {
-    detail:      Detail;
+    teams:       Team[];
     cp:          Cp;
     menus:       Menus;
     module:      Module;
@@ -8,15 +8,258 @@ export interface PlatformData {
 }
 
 export interface Breadcrumbs {
-    Hulpvragen:                              string;
-    "Adipisci atque enim nostrum incidunt.": string;
+    "pyro.module.deployment::addon.name": Overzicht;
+    Overzicht:                            Overzicht;
+}
+
+export interface Overzicht {
+    title: string;
+    url:   string;
 }
 
 export interface Cp {
-    structure:  Structure;
-    navigation: null;
-    section:    null;
+    navigation: Navigation;
     shortcuts:  Shortcuts;
+    buttons:    any[];
+}
+
+export interface Navigation {
+    children: NavigationChild[];
+}
+
+export interface NavigationChild {
+    key:        string;
+    slug:       string;
+    icon:       string;
+    title:      string;
+    class:      null;
+    active:     boolean;
+    favorite:   boolean;
+    attributes: PurpleAttributes;
+    permission: null;
+    breadcrumb: string;
+    image:      Asset;
+    asset:      Asset;
+    children?:  PurpleChild[];
+}
+
+export interface Asset {
+}
+
+export interface PurpleAttributes {
+    href:                string;
+    ":no-submenu-icons": boolean;
+}
+
+export interface PurpleChild {
+    key:         KeyClass | string;
+    slug:        string;
+    icon:        null;
+    title:       string;
+    label:       null;
+    class:       null;
+    active:      boolean;
+    matcher:     null;
+    permalink:   null | string;
+    description: null;
+    highlighted: boolean;
+    context:     Context;
+    parent:      null;
+    buttons:     Button[];
+    attributes:  ButtonAttributes;
+    permission:  string;
+    breadcrumb:  null;
+    hidden:      boolean;
+    children?:   FluffyChild[];
+}
+
+export interface ButtonAttributes {
+    href:                 string;
+    ":no-submenu-icons"?: boolean;
+    "data-toggle"?:       DataToggle;
+    "data-target"?:       DataTarget;
+    "0"?:                 string;
+}
+
+export enum DataTarget {
+    Modal = "#modal",
+}
+
+export enum DataToggle {
+    Modal = "modal",
+}
+
+export interface Button {
+    key:        string;
+    slug:       string;
+    sectionKey: string;
+    tag:        Tag;
+    url:        string;
+    text:       string;
+    icon:       null | string;
+    class:      null;
+    type:       ButtonType;
+    size:       Size;
+    permission: string;
+    disabled:   boolean;
+    enabled:    boolean | string;
+    attributes: ButtonAttributes;
+    dropdown:   any[];
+    dropup:     boolean;
+    position:   Position;
+    parent:     null;
+    entry:      null;
+}
+
+export enum Position {
+    Left = "left",
+}
+
+export enum Size {
+    Md = "md",
+}
+
+export enum Tag {
+    A = "a",
+}
+
+export enum ButtonType {
+    Default = "default",
+    Info = "info",
+    Success = "success",
+}
+
+export interface FluffyChild {
+    key:         string;
+    slug:        string;
+    icon:        null;
+    title:       string;
+    label:       null;
+    class:       null;
+    active:      boolean;
+    matcher:     null;
+    permalink:   null;
+    description: null;
+    highlighted: boolean;
+    context:     Context;
+    parent:      string;
+    buttons:     Button[];
+    attributes:  DepartmentAttributes;
+    permission:  string;
+    breadcrumb:  null;
+    hidden:      boolean;
+}
+
+export interface DepartmentAttributes {
+    href: string;
+}
+
+export enum Context {
+    Danger = "danger",
+}
+
+export interface KeyClass {
+    checks:   Checks;
+    commands: Commands;
+}
+
+export interface Checks {
+    app_key_is_set:                                  AppKeyIsSet;
+    composer_with_dev_dependencies_is_up_to_date:    AppKeyIsSet;
+    composer_without_dev_dependencies_is_up_to_date: AppKeyIsSet;
+    configuration_is_cached:                         AppKeyIsSet;
+    configuration_is_not_cached:                     AppKeyIsSet;
+    correct_php_version_is_installed:                AppKeyIsSet;
+    database_can_be_accessed:                        AppKeyIsSet;
+    debug_mode_is_not_enabled:                       AppKeyIsSet;
+    directories_have_correct_permissions:            AppKeyIsSet;
+    env_file_exists:                                 AppKeyIsSet;
+    example_environment_variables_are_set:           AppKeyIsSet;
+    example_environment_variables_are_up_to_date:    AppKeyIsSet;
+    horizon_is_running:                              HorizonIsRunning;
+    locales_are_installed:                           LocalesAreInstalled;
+    maintenance_mode_not_enabled:                    AppKeyIsSet;
+    migrations_are_up_to_date:                       MigrationsAreUpToDate;
+    php_extensions_are_disabled:                     AppKeyIsSet;
+    php_extensions_are_installed:                    AppKeyIsSet;
+    redis_can_be_accessed:                           RedisCanBeAccessed;
+    routes_are_cached:                               AppKeyIsSet;
+    routes_are_not_cached:                           AppKeyIsSet;
+    servers_are_pingable:                            AppKeyIsSet;
+    storage_directory_is_linked:                     AppKeyIsSet;
+    supervisor_programs_are_running:                 SupervisorProgramsAreRunning;
+}
+
+export interface AppKeyIsSet {
+    message: string;
+    name:    string;
+}
+
+export interface HorizonIsRunning {
+    message: HorizonIsRunningMessage;
+    name:    string;
+}
+
+export interface HorizonIsRunningMessage {
+    not_running:     string;
+    unable_to_check: string;
+}
+
+export interface LocalesAreInstalled {
+    message: LocalesAreInstalledMessage;
+    name:    string;
+}
+
+export interface LocalesAreInstalledMessage {
+    cannot_run_on_windows:        string;
+    locale_command_not_available: string;
+    missing_locales:              string;
+    shell_exec_not_available:     string;
+}
+
+export interface MigrationsAreUpToDate {
+    message: MigrationsAreUpToDateMessage;
+    name:    string;
+}
+
+export interface MigrationsAreUpToDateMessage {
+    need_to_migrate: string;
+    unable_to_check: string;
+}
+
+export interface RedisCanBeAccessed {
+    message: RedisCanBeAccessedMessage;
+    name:    string;
+}
+
+export interface RedisCanBeAccessedMessage {
+    not_accessible: string;
+    default_cache:  string;
+    named_cache:    string;
+}
+
+export interface SupervisorProgramsAreRunning {
+    message: SupervisorProgramsAreRunningMessage;
+    name:    string;
+}
+
+export interface SupervisorProgramsAreRunningMessage {
+    cannot_run_on_windows:            string;
+    not_running_programs:             string;
+    shell_exec_not_available:         string;
+    supervisor_command_not_available: string;
+}
+
+export interface Commands {
+    self_diagnosis: SelfDiagnosis;
+}
+
+export interface SelfDiagnosis {
+    common_checks:               string;
+    environment_specific_checks: string;
+    failed_checks:               string;
+    running_check:               string;
+    success:                     string;
 }
 
 export interface Shortcuts {
@@ -34,13 +277,9 @@ export interface Department {
     class:       null | string;
     highlighted: boolean;
     context:     Context;
-    attributes:  PurpleAttributes;
+    attributes:  DepartmentAttributes;
     permission:  string;
     href:        string;
-}
-
-export interface PurpleAttributes {
-    href: string;
 }
 
 export interface DepartmentChild {
@@ -49,648 +288,23 @@ export interface DepartmentChild {
     href:  string;
 }
 
-export enum Context {
-    Danger = "danger",
-}
-
-export interface Structure {
-    "anomaly.module.dashboard":   AnomalyModuleDashboard;
-    "crvs.module.activities":     AnomalyModulePreferences;
-    "pyro.module.activity_log":   AnomalyModulePreferences;
-    "crvs.module.clients":        CrvsModuleClients;
-    "crvs.module.contacts":       AnomalyModulePreferences;
-    "crvs.module.departments":    CrvsModuleDepartments;
-    "pyro.module.diagnose":       AnomalyModulePreferences;
-    "crvs.module.faq":            CrvsModuleFAQ;
-    "crvs.module.files":          CrvsModuleFiles;
-    "anomaly.module.grids":       AnomalyModule;
-    "crvs.module.help_requests":  AnomalyModulePreferences;
-    "pyro.module.menus":          PyroModuleMenus;
-    "anomaly.module.preferences": AnomalyModulePreferences;
-    "crvs.module.registrations":  AnomalyModuleDashboard;
-    "anomaly.module.repeaters":   AnomalyModule;
-    "anomaly.module.settings":    AnomalyModulePreferences;
-    "anomaly.module.users":       AnomalyModuleUsers;
-}
-
-export interface AnomalyModuleDashboard {
-    children:   AnomalyModuleDashboardChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface AnomalyModuleDashboardChild {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     ChildButtonsClass;
-    attributes:  PurpleAttributes;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface ChildButtonsClass {
-    new_dashboard?: NewDashboard;
-    manage?:        Manage;
-    new_widget:     NewWidgetClass;
-}
-
-export interface Manage {
-    type:       ManageType;
-    icon:       Icon;
-    enabled:    string;
-    permission: string;
-}
-
-export enum Icon {
-    FaFaPlus = "fa fa-plus",
-    Upload = "upload",
-    Wrench = "wrench",
-}
-
-export enum ManageType {
-    Default = "default",
-    Info = "info",
-    Success = "success",
-}
-
-export interface NewDashboard {
-    enabled: string;
-}
-
-export interface NewWidgetClass {
-    "data-toggle"?: DataToggle;
-    "data-target"?: DataTarget;
-    enabled?:       string;
-    href:           string;
-    permission?:    string;
-}
-
-export enum DataTarget {
-    Modal = "#modal",
-}
-
-export enum DataToggle {
-    Modal = "modal",
-}
-
-export interface PurpleChild {
-    key:        string;
-    title:      string;
-    dropdown:   any[];
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: FluffyAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       Icon | null;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       ManageType;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-}
-
-export interface FluffyAttributes {
-    href:           string;
-    "data-toggle"?: DataToggle;
-    "data-target"?: DataTarget;
-}
-
-export enum Position {
-    Left = "left",
-}
-
-export enum Size {
-    Md = "md",
-}
-
-export enum Tag {
-    A = "a",
-}
-
-export interface AnomalyModule {
-    children:   AnomalyModuleGridsChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface AnomalyModuleGridsChild {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null | string;
-    subSection:  boolean;
-    buttons:     string[] | PurpleButtons;
-    attributes:  PurpleAttributes;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface PurpleButtons {
-    new_field?:     FluffyAttributes;
-    assign_fields?: AssignFields;
-}
-
-export interface AssignFields {
-    "data-toggle"?: DataToggle;
-    "data-target"?: DataTarget;
-    enabled?:       string;
-    href:           string;
-}
-
-export interface AnomalyModulePreferences {
-    children:   AnomalyModulePreferencesChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface AnomalyModulePreferencesChild {
-    children:    FluffyChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     string[];
-    attributes:  PurpleAttributes;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface FluffyChild {
-    key:        string;
-    title:      string;
-    dropdown:   any[];
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: PurpleAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       null;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       ManageType;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-}
-
-export interface AnomalyModuleUsers {
-    children:   AnomalyModuleUsersChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface AnomalyModuleUsersChild {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     string[] | FluffyButtons;
-    attributes:  PurpleAttributes;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface FluffyButtons {
-    add_field: NewWidgetClass;
-}
-
-export interface CrvsModuleClients {
-    children:   CrvsModuleClientsChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface CrvsModuleClientsChild {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null | string;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     string[] | TentacledButtons;
-    attributes:  PurpleAttributes;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface TentacledButtons {
-    new_role?:  NewRole;
-    new_field?: NewWidgetClass;
-}
-
-export interface NewRole {
-    permission: string;
-}
-
-export interface CrvsModuleDepartments {
-    children:   CrvsModuleDepartmentsChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface CrvsModuleDepartmentsChild {
-    children:    FluffyChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     any[] | StickyButtons;
-    attributes:  PurpleAttributes;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface StickyButtons {
-    new_department?:  New;
-    new_association?: New;
-}
-
-export interface New {
-    text:       string;
-    permission: string;
-}
-
-export interface CrvsModuleFAQ {
-    children:   CrvsModuleFAQChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface CrvsModuleFAQChild {
-    children:    TentacledChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     string[] | IndigoButtons;
-    attributes:  PurpleAttributes;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface IndigoButtons {
-    "0":     string;
-    default: string[];
-}
-
-export interface TentacledChild {
-    key:        string;
-    title:      string;
-    dropdown:   any[];
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    attributes: TentacledAttributes;
-    disabled:   boolean;
-    enabled:    boolean;
-    entry:      null;
-    icon:       null;
-    class:      null;
-    size:       Size;
-    permission: string;
-    type:       ManageType;
-    text:       string;
-    url:        null;
-    tag:        Tag;
-}
-
-export interface TentacledAttributes {
-    href: string;
-    "0"?: string;
-}
-
-export interface CrvsModuleFiles {
-    children:   CrvsModuleFilesChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface CrvsModuleFilesChild {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     string[] | IndecentButtons;
-    attributes:  PurpleAttributes;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface IndecentButtons {
-    upload?:    Upload;
-    new_disk?:  AssignFields;
-    new_field?: AssignFields;
-}
-
-export interface Upload {
-    "data-toggle": DataToggle;
-    icon:          Icon;
-    "data-target": DataTarget;
-    type:          ManageType;
-    href:          string;
-}
-
-export interface PyroModuleMenus {
-    children:   PyroModuleMenusChild[];
-    key:        string;
-    slug:       string;
-    icon:       string;
-    title:      string;
-    class:      null;
-    active:     boolean;
-    favorite:   boolean;
-    attributes: PurpleAttributes;
-    permission: null;
-    breadcrumb: string;
-    href:       string;
-    url:        string;
-}
-
-export interface PyroModuleMenusChild {
-    children:    PurpleChild[];
-    key:         string;
-    slug:        string;
-    icon:        null;
-    title:       string;
-    label:       null;
-    class:       null;
-    active:      boolean;
-    matcher:     null;
-    permalink:   null | string;
-    description: null;
-    highlighted: boolean;
-    context:     Context;
-    parent:      null;
-    subSection:  boolean;
-    buttons:     string[] | FluffyButtons;
-    attributes:  NewWidgetClass;
-    permission:  string;
-    breadcrumb:  null;
-    hidden:      boolean;
-    href:        string;
-    url:         string;
-}
-
-export interface Detail {
-    entry:    Entry;
-    sections: any[];
-    actions:  any[];
-    widgets:  any[];
-    fields:   Field[];
-}
-
-export interface Entry {
-    id:                        number;
-    sort_order:                number;
-    created_at:                Date;
-    created_by_id:             number;
-    updated_at:                Date;
-    updated_by_id:             number;
-    date_open:                 string;
-    date_close:                string;
-    date_start:                string;
-    date_end:                  string;
-    time_start:                string;
-    time_end:                  string;
-    client_id:                 number;
-    availability:              string;
-    category_id:               number;
-    subject:                   string;
-    nature:                    string;
-    frequency:                 string;
-    hours:                     null;
-    memo:                      string;
-    info:                      string;
-    external_info:             string;
-    is_closed:                 number;
-    reason_is_closed:          null;
-    reason_not_filled_request: null;
-    department_id:             number;
-}
-
-export interface Field {
-    title:      null | string;
-    attributes: any[];
-    class:      null;
-    key:        string;
-    value:      boolean | null | string;
-}
-
 export interface Menus {
-    admin_footer:     Admin;
-    admin_header:     Admin;
-    admin_pre_header: Admin;
-    admin_sidebar:    Admin;
+    admin_header:     AdminHeader;
+    admin_pre_header: AdminHeader;
 }
 
-export interface Admin {
+export interface AdminHeader {
     slug:        string;
     locale:      string;
     name:        string;
     description: string;
-    children:    AdminFooterChild[];
+    children:    AdminHeaderChild[];
 }
 
-export interface AdminFooterChild {
+export interface AdminHeaderChild {
     id:          number;
     sort_order:  number;
-    type:        PurpleType;
+    type:        ChildType;
     entry_id:    number;
     target:      Target;
     class:       null;
@@ -698,20 +312,18 @@ export interface AdminFooterChild {
     icon:        null | string;
     hash:        null | string;
     querystring: null | string;
-    url:         null | string;
+    url:         string;
     title:       string;
-    children:    AdminFooterChild[];
+    children:    AdminHeaderChild[];
 }
 
 export enum Target {
     Blank = "_blank",
 }
 
-export enum PurpleType {
-    PyroExtensionCpActionLinkType = "pyro.extension.cp_action_link_type",
+export enum ChildType {
     PyroExtensionLabelLinkType = "pyro.extension.label_link_type",
     PyroExtensionModuleLinkType = "pyro.extension.module_link_type",
-    PyroExtensionURLLinkType = "pyro.extension.url_link_type",
 }
 
 export interface Module {
@@ -721,6 +333,251 @@ export interface Module {
     type:      string;
 }
 
+export interface Team {
+    id:               number;
+    sort_order:       number;
+    created_at:       Date;
+    created_by_id:    number;
+    updated_at:       Date;
+    updated_by_id:    null;
+    workspace_id:     WorkspaceID;
+    account_username: string;
+    account_password: string;
+    meta:             TeamMeta;
+    fetched_at:       Date;
+    repositories:     RepositoryElement[];
+}
+
+export interface TeamMeta {
+    members:      { [key: string]: Member };
+    projects:     Projects;
+    repositories: { [key: string]: RepositoryValue };
+    displayName:  DisplayName;
+    type:         OwnerType;
+    username:     WorkspaceID;
+    avatar:       string;
+    url:          string;
+}
+
+export enum DisplayName {
+    MyLink = "My-Link",
+}
+
+export interface Member {
+    id:            string;
+    status:        string;
+    createdOn:     Date;
+    displayName:   string;
+    has2faEnabled: null;
+    isStaff:       boolean;
+    avatar:        string;
+    url:           string;
+    nickname:      string;
+    properties:    any[];
+    type:          string;
+    uuid:          string;
+}
+
+export interface Projects {
+    CRVS2: Alg;
+    PHP:   Alg;
+    KP:    Alg;
+    ALG:   Alg;
+    CRVS:  Alg;
+}
+
+export interface Alg {
+    createdOn:   Date | null;
+    description: null | string;
+    isPrivate:   boolean | null;
+    key:         string;
+    avatar:      string;
+    url:         null;
+    name:        string;
+    owner:       Owner | null;
+    type:        OwnerType;
+    updatedOn:   Date | null;
+    uuid:        string;
+}
+
+export interface Owner {
+    displayName: DisplayName | null;
+    type:        OwnerType;
+    username:    WorkspaceID | null;
+    avatar:      string;
+    url:         string;
+}
+
+export enum OwnerType {
+    Project = "project",
+    Team = "team",
+}
+
+export enum WorkspaceID {
+    Mylink = "mylink",
+}
+
+export interface RepositoryValue {
+    created_on:  Date;
+    description: string;
+    fork_policy: ForkPolicy;
+    full_name:   string;
+    has_issues:  boolean;
+    has_wiki:    boolean;
+    is_private:  boolean;
+    language:    string;
+    mainbranch:  Mainbranch;
+    owner:       Owner;
+    project:     Owner;
+    scm:         SCM;
+    size:        number;
+    slug:        string;
+    type:        RepositoryType;
+    updated_on:  Date;
+    website:     null | string;
+    fullName:    string;
+    name:        string;
+    uuid:        string;
+    avatar:      string;
+    url:         string;
+}
+
+export enum ForkPolicy {
+    AllowForks = "allow_forks",
+    NoPublicForks = "no_public_forks",
+}
+
+export interface Mainbranch {
+    type: MainbranchType;
+    name: Name;
+}
+
+export enum Name {
+    Develop = "develop",
+    Master = "master",
+}
+
+export enum MainbranchType {
+    Branch = "branch",
+}
+
+export enum SCM {
+    Git = "git",
+}
+
+export enum RepositoryType {
+    Repository = "repository",
+}
+
+export interface RepositoryElement {
+    id:            number;
+    sort_order:    number;
+    created_at:    Date;
+    created_by_id: number;
+    updated_at:    Date;
+    updated_by_id: null;
+    name:          string;
+    team_id:       number;
+    meta:          RepositoryMeta;
+    fetched_at:    Date;
+}
+
+export interface RepositoryMeta {
+    branches:    { [key: string]: Branch };
+    commits:     { [key: string]: Commit };
+    created_on:  Date;
+    description: string;
+    fork_policy: ForkPolicy;
+    full_name:   string;
+    has_issues:  boolean;
+    has_wiki:    boolean;
+    is_private:  boolean;
+    language:    string;
+    mainbranch:  Mainbranch;
+    owner:       Owner;
+    project:     Alg;
+    scm:         SCM;
+    size:        number;
+    slug:        string;
+    type:        RepositoryType;
+    updated_on:  Date;
+    website:     string;
+    fullName:    string;
+    name:        string;
+    uuid:        string;
+    avatar:      string;
+    url:         string;
+}
+
+export interface Branch {
+    name:   string;
+    target: Commit;
+    url:    string;
+}
+
+export interface Commit {
+    author:   Author;
+    date:     Date;
+    hash:     string;
+    message:  string;
+    rendered: Rendered | null;
+    url:      string;
+}
+
+export interface Author {
+    raw:          Raw;
+    account_id:   AccountID;
+    display_name: DisplayNameEnum;
+    nickname:     Nickname;
+    url:          string;
+    avatar:       string;
+}
+
+export enum AccountID {
+    The557058A6719252964047F1A632273Defcb23Ce = "557058:a6719252-9640-47f1-a632-273defcb23ce",
+    The5C7E7Ffc3671D04Fdefcd44D = "5c7e7ffc3671d04fdefcd44d",
+    The5D1B155586B1040Ce2816F93 = "5d1b155586b1040ce2816f93",
+}
+
+export enum DisplayNameEnum {
+    FrNk = "Fr@nk!",
+    Martha = "Martha",
+    RobinRadic = "Robin Radic",
+}
+
+export enum Nickname {
+    Frankroeland = "Frankroeland",
+    Martha = "Martha",
+    RobinRadic = "Robin Radic",
+}
+
+export enum Raw {
+    FrankMeijerInfoWmomoNl = "Frank Meijer <info@wmomo.nl>",
+    MarthaMarthaMyLinkNl = "martha <martha@my-link.nl>",
+    RobinRadicRobinMyLinkNl = "Robin Radic <robin@my-link.nl>",
+    RobinRadicRobinRadicNl = "Robin Radic <robin@radic.nl>",
+    RobinRadicRradicHotmailCOM = "Robin Radic <rradic@hotmail.com>",
+}
+
+export interface Rendered {
+    message: RenderedMessage;
+}
+
+export interface RenderedMessage {
+    raw:    string;
+    markup: Markup;
+    html:   string;
+    type:   MessageType;
+}
+
+export enum Markup {
+    Markdown = "markdown",
+}
+
+export enum MessageType {
+    Rendered = "rendered",
+}
+
 export interface User {
     id:               number;
     sort_order:       number;
@@ -728,7 +585,7 @@ export interface User {
     email:            string;
     username:         string;
     display_name:     string;
-    first_name:       null;
+    first_name:       string;
     last_name:        null;
     activated:        number;
     enabled:          number;

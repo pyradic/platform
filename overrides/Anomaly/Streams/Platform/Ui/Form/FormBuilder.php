@@ -37,6 +37,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @link http://pyrocms.com/
  * @author PyroCMS, Inc. <support@pyrocms.com>
  * @author Ryan Thompson <ryan@pyrocms.com>
+ * @property array $fields = \Pyro\IdeHelper\Examples\FieldTypeExamples::values()
  * @method void onReady(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
  * @method void onBuilt(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
  * @method void onPost(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
