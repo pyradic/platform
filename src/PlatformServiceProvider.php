@@ -142,7 +142,7 @@ class PlatformServiceProvider extends ServiceProvider
     {
 /** @var \Pyro\Platform\Http\Kernel $kernel */
         $kernel=resolve(Kernel::class);
-        if($this->app->environment('local') && $this->app->config('app.debug')) {
+        if($this->app->environment('local') && config('app.debug')) {
             $kernel->pushMiddleware(RenderPlatformDataToFile::class);
         }
         AliasLoader::getInstance()->alias('ServerTiming', \BeyondCode\ServerTiming\Facades\ServerTiming::class);
