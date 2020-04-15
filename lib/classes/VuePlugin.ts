@@ -1,5 +1,4 @@
 import { prefixAndRegisterComponents, registerElementComponents } from '@u/registerComponents';
-import Vue from 'vue';
 import { Application } from '@c/Application';
 
 
@@ -9,6 +8,10 @@ export abstract class VuePlugin {
     //     if ( this.__installed ) return;
     //     this.__installed = true;
     // }
+    constructor() {
+
+    }
+
 
     static get app():Application{return Application.instance}
     static prefixAndRegisterComponents: typeof prefixAndRegisterComponents = prefixAndRegisterComponents

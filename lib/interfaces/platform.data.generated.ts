@@ -1,26 +1,107 @@
 export interface PlatformData {
-    teams:       Team[];
+    breadcrumbs: Breadcrumb[];
     cp:          Cp;
     menus:       Menus;
     module:      Module;
-    breadcrumbs: Breadcrumbs;
     user:        User;
 }
 
-export interface Breadcrumbs {
-    "pyro.module.deployment::addon.name": Overzicht;
-    Overzicht:                            Overzicht;
+export interface Breadcrumb {
+    key:        string;
+    route:      Route;
+    addon:      Module;
+    parent:     string;
+    title:      string;
+    url:        string;
+    attributes: any[];
+    class:      null;
 }
 
-export interface Overzicht {
-    title: string;
-    url:   string;
+export interface Module {
+    id:        string;
+    name:      string;
+    namespace: string;
+    type:      string;
+}
+
+export interface Route {
+    uri:                string;
+    methods:            string[];
+    action:             Action;
+    isFallback:         boolean;
+    controller:         Controller;
+    defaults:           any[];
+    wheres:             any[];
+    parameters:         any[];
+    parameterNames:     any[];
+    computedMiddleware: string[];
+    compiled:           Compiled;
+}
+
+export interface Action {
+    as:               string;
+    uses:             string;
+    breadcrumb:       string[];
+    uri:              string;
+    "streams::addon": string;
+    controller:       string;
+}
+
+export interface Compiled {
+}
+
+export interface Controller {
+    events: Compiled;
 }
 
 export interface Cp {
     navigation: Navigation;
     shortcuts:  Shortcuts;
-    buttons:    any[];
+    buttons:    CpButton[];
+}
+
+export interface CpButton {
+    key:        null;
+    slug:       string;
+    sectionKey: null;
+    tag:        Tag;
+    url:        string;
+    text:       string;
+    icon:       null;
+    class:      null;
+    type:       ButtonType;
+    size:       Size;
+    permission: string;
+    disabled:   boolean;
+    enabled:    boolean;
+    attributes: DepartmentAttributes;
+    dropdown:   any[];
+    dropup:     boolean;
+    position:   Position;
+    parent:     null;
+    entry:      null;
+}
+
+export interface DepartmentAttributes {
+    href: string;
+}
+
+export enum Position {
+    Left = "left",
+}
+
+export enum Size {
+    Md = "md",
+}
+
+export enum Tag {
+    A = "a",
+}
+
+export enum ButtonType {
+    Default = "default",
+    Info = "info",
+    Success = "success",
 }
 
 export interface Navigation {
@@ -38,12 +119,9 @@ export interface NavigationChild {
     attributes: PurpleAttributes;
     permission: null;
     breadcrumb: string;
-    image:      Asset;
-    asset:      Asset;
+    image:      Compiled;
+    asset:      Compiled;
     children?:  PurpleChild[];
-}
-
-export interface Asset {
 }
 
 export interface PurpleAttributes {
@@ -65,15 +143,15 @@ export interface PurpleChild {
     highlighted: boolean;
     context:     Context;
     parent:      null;
-    buttons:     Button[];
-    attributes:  ButtonAttributes;
+    buttons:     ChildButton[];
+    attributes:  FluffyAttributes;
     permission:  string;
     breadcrumb:  null;
     hidden:      boolean;
     children?:   FluffyChild[];
 }
 
-export interface ButtonAttributes {
+export interface FluffyAttributes {
     href:                 string;
     ":no-submenu-icons"?: boolean;
     "data-toggle"?:       DataToggle;
@@ -89,7 +167,7 @@ export enum DataToggle {
     Modal = "modal",
 }
 
-export interface Button {
+export interface ChildButton {
     key:        string;
     slug:       string;
     sectionKey: string;
@@ -103,30 +181,12 @@ export interface Button {
     permission: string;
     disabled:   boolean;
     enabled:    boolean | string;
-    attributes: ButtonAttributes;
+    attributes: FluffyAttributes;
     dropdown:   any[];
     dropup:     boolean;
     position:   Position;
     parent:     null;
     entry:      null;
-}
-
-export enum Position {
-    Left = "left",
-}
-
-export enum Size {
-    Md = "md",
-}
-
-export enum Tag {
-    A = "a",
-}
-
-export enum ButtonType {
-    Default = "default",
-    Info = "info",
-    Success = "success",
 }
 
 export interface FluffyChild {
@@ -143,15 +203,11 @@ export interface FluffyChild {
     highlighted: boolean;
     context:     Context;
     parent:      string;
-    buttons:     Button[];
+    buttons:     ChildButton[];
     attributes:  DepartmentAttributes;
     permission:  string;
     breadcrumb:  null;
     hidden:      boolean;
-}
-
-export interface DepartmentAttributes {
-    href: string;
 }
 
 export enum Context {
@@ -324,258 +380,6 @@ export enum Target {
 export enum ChildType {
     PyroExtensionLabelLinkType = "pyro.extension.label_link_type",
     PyroExtensionModuleLinkType = "pyro.extension.module_link_type",
-}
-
-export interface Module {
-    id:        string;
-    name:      string;
-    namespace: string;
-    type:      string;
-}
-
-export interface Team {
-    id:               number;
-    sort_order:       number;
-    created_at:       Date;
-    created_by_id:    number;
-    updated_at:       Date;
-    updated_by_id:    null;
-    workspace_id:     WorkspaceID;
-    account_username: string;
-    account_password: string;
-    meta:             TeamMeta;
-    fetched_at:       Date;
-    repositories:     RepositoryElement[];
-}
-
-export interface TeamMeta {
-    members:      { [key: string]: Member };
-    projects:     Projects;
-    repositories: { [key: string]: RepositoryValue };
-    displayName:  DisplayName;
-    type:         OwnerType;
-    username:     WorkspaceID;
-    avatar:       string;
-    url:          string;
-}
-
-export enum DisplayName {
-    MyLink = "My-Link",
-}
-
-export interface Member {
-    id:            string;
-    status:        string;
-    createdOn:     Date;
-    displayName:   string;
-    has2faEnabled: null;
-    isStaff:       boolean;
-    avatar:        string;
-    url:           string;
-    nickname:      string;
-    properties:    any[];
-    type:          string;
-    uuid:          string;
-}
-
-export interface Projects {
-    CRVS2: Alg;
-    PHP:   Alg;
-    KP:    Alg;
-    ALG:   Alg;
-    CRVS:  Alg;
-}
-
-export interface Alg {
-    createdOn:   Date | null;
-    description: null | string;
-    isPrivate:   boolean | null;
-    key:         string;
-    avatar:      string;
-    url:         null;
-    name:        string;
-    owner:       Owner | null;
-    type:        OwnerType;
-    updatedOn:   Date | null;
-    uuid:        string;
-}
-
-export interface Owner {
-    displayName: DisplayName | null;
-    type:        OwnerType;
-    username:    WorkspaceID | null;
-    avatar:      string;
-    url:         string;
-}
-
-export enum OwnerType {
-    Project = "project",
-    Team = "team",
-}
-
-export enum WorkspaceID {
-    Mylink = "mylink",
-}
-
-export interface RepositoryValue {
-    created_on:  Date;
-    description: string;
-    fork_policy: ForkPolicy;
-    full_name:   string;
-    has_issues:  boolean;
-    has_wiki:    boolean;
-    is_private:  boolean;
-    language:    string;
-    mainbranch:  Mainbranch;
-    owner:       Owner;
-    project:     Owner;
-    scm:         SCM;
-    size:        number;
-    slug:        string;
-    type:        RepositoryType;
-    updated_on:  Date;
-    website:     null | string;
-    fullName:    string;
-    name:        string;
-    uuid:        string;
-    avatar:      string;
-    url:         string;
-}
-
-export enum ForkPolicy {
-    AllowForks = "allow_forks",
-    NoPublicForks = "no_public_forks",
-}
-
-export interface Mainbranch {
-    type: MainbranchType;
-    name: Name;
-}
-
-export enum Name {
-    Develop = "develop",
-    Master = "master",
-}
-
-export enum MainbranchType {
-    Branch = "branch",
-}
-
-export enum SCM {
-    Git = "git",
-}
-
-export enum RepositoryType {
-    Repository = "repository",
-}
-
-export interface RepositoryElement {
-    id:            number;
-    sort_order:    number;
-    created_at:    Date;
-    created_by_id: number;
-    updated_at:    Date;
-    updated_by_id: null;
-    name:          string;
-    team_id:       number;
-    meta:          RepositoryMeta;
-    fetched_at:    Date;
-}
-
-export interface RepositoryMeta {
-    branches:    { [key: string]: Branch };
-    commits:     { [key: string]: Commit };
-    created_on:  Date;
-    description: string;
-    fork_policy: ForkPolicy;
-    full_name:   string;
-    has_issues:  boolean;
-    has_wiki:    boolean;
-    is_private:  boolean;
-    language:    string;
-    mainbranch:  Mainbranch;
-    owner:       Owner;
-    project:     Alg;
-    scm:         SCM;
-    size:        number;
-    slug:        string;
-    type:        RepositoryType;
-    updated_on:  Date;
-    website:     string;
-    fullName:    string;
-    name:        string;
-    uuid:        string;
-    avatar:      string;
-    url:         string;
-}
-
-export interface Branch {
-    name:   string;
-    target: Commit;
-    url:    string;
-}
-
-export interface Commit {
-    author:   Author;
-    date:     Date;
-    hash:     string;
-    message:  string;
-    rendered: Rendered | null;
-    url:      string;
-}
-
-export interface Author {
-    raw:          Raw;
-    account_id:   AccountID;
-    display_name: DisplayNameEnum;
-    nickname:     Nickname;
-    url:          string;
-    avatar:       string;
-}
-
-export enum AccountID {
-    The557058A6719252964047F1A632273Defcb23Ce = "557058:a6719252-9640-47f1-a632-273defcb23ce",
-    The5C7E7Ffc3671D04Fdefcd44D = "5c7e7ffc3671d04fdefcd44d",
-    The5D1B155586B1040Ce2816F93 = "5d1b155586b1040ce2816f93",
-}
-
-export enum DisplayNameEnum {
-    FrNk = "Fr@nk!",
-    Martha = "Martha",
-    RobinRadic = "Robin Radic",
-}
-
-export enum Nickname {
-    Frankroeland = "Frankroeland",
-    Martha = "Martha",
-    RobinRadic = "Robin Radic",
-}
-
-export enum Raw {
-    FrankMeijerInfoWmomoNl = "Frank Meijer <info@wmomo.nl>",
-    MarthaMarthaMyLinkNl = "martha <martha@my-link.nl>",
-    RobinRadicRobinMyLinkNl = "Robin Radic <robin@my-link.nl>",
-    RobinRadicRobinRadicNl = "Robin Radic <robin@radic.nl>",
-    RobinRadicRradicHotmailCOM = "Robin Radic <rradic@hotmail.com>",
-}
-
-export interface Rendered {
-    message: RenderedMessage;
-}
-
-export interface RenderedMessage {
-    raw:    string;
-    markup: Markup;
-    html:   string;
-    type:   MessageType;
-}
-
-export enum Markup {
-    Markdown = "markdown",
-}
-
-export enum MessageType {
-    Rendered = "rendered",
 }
 
 export interface User {
