@@ -48,7 +48,11 @@ return [
             [ 'addon:install', [ 'addon' => 'care_role_type' ] ],
             [ 'addon:install', [ 'addon' => 'caretaker_role_type' ] ],
             [ 'addon:install', [ 'addon' => 'courses_role_type' ] ],
+            ['stream:compile', []],
+            ['addon:_register',[]],
             [ 'seed', [ 'names' => 'requester_role_type' ], '-vvv' => true ],
+            [ 'seed', [ 'names' => 'volunteer_role_type' ], '-vvv' => true ],
+            [ 'seed', [ 'names' => 'caretaker_role_type' ], '-vvv' => true ],
         ],
     ],
     'clients:install'         => [

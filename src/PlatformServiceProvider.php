@@ -145,7 +145,8 @@ class PlatformServiceProvider extends ServiceProvider
         if($this->app->environment('local') && config('app.debug')) {
             $kernel->pushMiddleware(RenderPlatformDataToFile::class);
         }
-        AliasLoader::getInstance()->alias('ServerTiming', \BeyondCode\ServerTiming\Facades\ServerTiming::class);
+//        AliasLoader::getInstance()->alias('ServerTiming', \BeyondCode\ServerTiming\Facades\ServerTiming::class);
+        AliasLoader::getInstance()->alias('ServerTiming', \App\Facades\ServerTiming::class);
         $this->mergeConfig();
 
         // Start listening to listeners
@@ -174,6 +175,8 @@ class PlatformServiceProvider extends ServiceProvider
                 }
             }
         });
+
+
 
         $this->registerAddonProviderExtras();
         $this->registerMacros();
@@ -531,7 +534,10 @@ class PlatformServiceProvider extends ServiceProvider
 //            return $parser;
 //        });
 
+        $this->app->singleton(\Pyro\Platform\Support\BladeString::class,\Pyro\Platform\Support\BladeString::class);
+
         $alias = AliasLoader::getInstance();
+        $alias->alias('BladeString', \Pyro\Platform\Support\Facade\BladeString::class);
         $alias->alias('Authorizer', \Pyro\Platform\Support\Facade\Authorizer::class);
         $alias->alias('Configurator', \Pyro\Platform\Support\Facade\Configurator::class);
         $alias->alias('Decorator', \Pyro\Platform\Support\Facade\Decorator::class);

@@ -19,7 +19,7 @@ trait HasIcon
      *
      * @var string
      */
-    protected $icon ;
+    protected $icon;
 
     /**
      * Get the icon.
@@ -35,6 +35,7 @@ trait HasIcon
      * Set the icon.
      *
      * @param string $icon = \Pyro\IdeHelper\Examples\IconExamples::all()[$any]
+     *
      * @return $this
      */
     public function setIcon($icon)
@@ -47,15 +48,23 @@ trait HasIcon
     /**
      * Return icon HTML.
      *
-     * @param array $icon
+     * @param null $class
+     *
      * @return null|string
      */
-    public function icon()
+    public function icon($class = null)
     {
-        if (!$this->icon) {
+        if ( ! $this->icon) {
             return null;
         }
 
-        return (new Icon())->setType(app(IconRegistry::class)->get($this->icon));
+        return (new Icon())
+            ->setType(app(IconRegistry::class)->get($this->icon))
+            ->setClass($class);
+    }
+
+    public function hasIcon()
+    {
+        return ! ! $this->icon;
     }
 }
