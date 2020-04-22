@@ -95,8 +95,8 @@ class ButtonBuilder
             $button = $this->evaluator->evaluate($button, compact('entry', 'table'));
             $button = $this->parser->parse($button, $entry);
 
-            $button = Input::expression($button, compact('entry','table'));
-//            $button = Input::render($button, compact('entry','table'));
+//            $button = Input::expression($button, compact('entry','table'));
+            $button = Input::render($button, compact('entry','table'));
 
             $button = $this->value->replace($button, $entry);
             $button = $this->factory->make($button);

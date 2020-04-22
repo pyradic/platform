@@ -1,107 +1,25 @@
 export interface PlatformData {
-    breadcrumbs: Breadcrumb[];
     cp:          Cp;
     menus:       Menus;
     module:      Module;
+    breadcrumbs: Breadcrumbs;
     user:        User;
 }
 
-export interface Breadcrumb {
-    key:        string;
-    route:      Route;
-    addon:      Module;
-    parent:     string;
-    title:      string;
-    url:        string;
-    attributes: any[];
-    class:      null;
+export interface Breadcrumbs {
+    "pyro.module.deployment::addon.name": Overzicht;
+    Overzicht:                            Overzicht;
 }
 
-export interface Module {
-    id:        string;
-    name:      string;
-    namespace: string;
-    type:      string;
-}
-
-export interface Route {
-    uri:                string;
-    methods:            string[];
-    action:             Action;
-    isFallback:         boolean;
-    controller:         Controller;
-    defaults:           any[];
-    wheres:             any[];
-    parameters:         any[];
-    parameterNames:     any[];
-    computedMiddleware: string[];
-    compiled:           Compiled;
-}
-
-export interface Action {
-    as:               string;
-    uses:             string;
-    breadcrumb:       string[];
-    uri:              string;
-    "streams::addon": string;
-    controller:       string;
-}
-
-export interface Compiled {
-}
-
-export interface Controller {
-    events: Compiled;
+export interface Overzicht {
+    title: string;
+    url:   string;
 }
 
 export interface Cp {
     navigation: Navigation;
     shortcuts:  Shortcuts;
-    buttons:    CpButton[];
-}
-
-export interface CpButton {
-    key:        null;
-    slug:       string;
-    sectionKey: null;
-    tag:        Tag;
-    url:        string;
-    text:       string;
-    icon:       null;
-    class:      null;
-    type:       ButtonType;
-    size:       Size;
-    permission: string;
-    disabled:   boolean;
-    enabled:    boolean;
-    attributes: DepartmentAttributes;
-    dropdown:   any[];
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    entry:      null;
-}
-
-export interface DepartmentAttributes {
-    href: string;
-}
-
-export enum Position {
-    Left = "left",
-}
-
-export enum Size {
-    Md = "md",
-}
-
-export enum Tag {
-    A = "a",
-}
-
-export enum ButtonType {
-    Default = "default",
-    Info = "info",
-    Success = "success",
+    buttons:    any[];
 }
 
 export interface Navigation {
@@ -119,9 +37,12 @@ export interface NavigationChild {
     attributes: PurpleAttributes;
     permission: null;
     breadcrumb: string;
-    image:      Compiled;
-    asset:      Compiled;
+    image:      Asset;
+    asset:      Asset;
     children?:  PurpleChild[];
+}
+
+export interface Asset {
 }
 
 export interface PurpleAttributes {
@@ -143,15 +64,15 @@ export interface PurpleChild {
     highlighted: boolean;
     context:     Context;
     parent:      null;
-    buttons:     ChildButton[];
-    attributes:  FluffyAttributes;
+    buttons:     Button[];
+    attributes:  ButtonAttributes;
     permission:  string;
     breadcrumb:  null;
     hidden:      boolean;
     children?:   FluffyChild[];
 }
 
-export interface FluffyAttributes {
+export interface ButtonAttributes {
     href:                 string;
     ":no-submenu-icons"?: boolean;
     "data-toggle"?:       DataToggle;
@@ -167,7 +88,7 @@ export enum DataToggle {
     Modal = "modal",
 }
 
-export interface ChildButton {
+export interface Button {
     key:        string;
     slug:       string;
     sectionKey: string;
@@ -181,12 +102,30 @@ export interface ChildButton {
     permission: string;
     disabled:   boolean;
     enabled:    boolean | string;
-    attributes: FluffyAttributes;
+    attributes: ButtonAttributes;
     dropdown:   any[];
     dropup:     boolean;
     position:   Position;
     parent:     null;
     entry:      null;
+}
+
+export enum Position {
+    Left = "left",
+}
+
+export enum Size {
+    Md = "md",
+}
+
+export enum Tag {
+    A = "a",
+}
+
+export enum ButtonType {
+    Default = "default",
+    Info = "info",
+    Success = "success",
 }
 
 export interface FluffyChild {
@@ -203,11 +142,15 @@ export interface FluffyChild {
     highlighted: boolean;
     context:     Context;
     parent:      string;
-    buttons:     ChildButton[];
+    buttons:     Button[];
     attributes:  DepartmentAttributes;
     permission:  string;
     breadcrumb:  null;
     hidden:      boolean;
+}
+
+export interface DepartmentAttributes {
+    href: string;
 }
 
 export enum Context {
@@ -380,6 +323,13 @@ export enum Target {
 export enum ChildType {
     PyroExtensionLabelLinkType = "pyro.extension.label_link_type",
     PyroExtensionModuleLinkType = "pyro.extension.module_link_type",
+}
+
+export interface Module {
+    id:        string;
+    name:      string;
+    namespace: string;
+    type:      string;
 }
 
 export interface User {

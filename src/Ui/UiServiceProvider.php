@@ -17,8 +17,10 @@ class UiServiceProvider extends ServiceProvider
         \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Navigation\NavigationLink::class => \Pyro\Platform\Ui\ControlPanel\Component\NavigationLink::class,
         \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\Section::class           => \Pyro\Platform\Ui\ControlPanel\Component\Section::class,
         \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Shortcut\Shortcut::class         => \Pyro\Platform\Ui\ControlPanel\Component\Shortcut::class,
+        \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\SectionInput::class      => \Pyro\Platform\Ui\ControlPanel\Component\SectionInput::class,
 
-        \Anomaly\Streams\Platform\Ui\ControlPanel\Component\Section\SectionInput::class => \Pyro\Platform\Ui\ControlPanel\Component\SectionInput::class,
+        \Anomaly\Streams\Platform\Ui\Table\Component\Column\ColumnNormalizer::class => \Pyro\Platform\Ui\Table\ColumnNormalizer::class,
+        \Anomaly\Streams\Platform\Ui\Table\Component\Column\ColumnBuilder::class    => \Pyro\Platform\Ui\Table\ColumnBuilder::class,
     ];
 
     public $singletons = [];

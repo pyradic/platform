@@ -7,7 +7,7 @@ export function collect<T>(items: T[]) {
 
 export class Collection<T> extends Array<T> implements Array<T> {
     filter: (callbackfn: (value: T, index: number, array: T[]) => any, thisArg?: any) => this;
-
+    map: <U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any) => Collection<U>;
 
     constructor(...items: T[]) {
         super(...items);

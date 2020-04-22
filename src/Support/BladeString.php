@@ -2,6 +2,7 @@
 
 namespace Pyro\Platform\Support;
 
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\View\Compilers\BladeCompiler;
 
@@ -16,16 +17,33 @@ class BladeString
     /** @var string */
     protected $cachePath;
 
-    public function __construct(Filesystem $fs)
+    /**
+     * @var \Illuminate\Contracts\Cache\Repository
+     */
+    protected $cache;
+
+    public function __construct(Filesystem $fs, Repository $cache)
     {
         $this->fs        = $fs;
         $this->cachePath = storage_path('blade-extensions');
+        $this->cache     = $cache;
+    }
+
+    public function compile($string, array $vars = [], $cache = true)
+    {
+        if ( ! $cache) {
+            return $this->compileString($string, $vars);
+        }
+        $key = 'bladestring:' . md5($string) . '_' . md5(serialize($vars));
+        return $this->cache->rememberForever($key, function () use ($string, $vars) {
+            return $this->compileString($string, $vars);
+        });
     }
 
     /**
      * {@inheritdoc}
      */
-    public function compileString($string, array $vars = [])
+    protected function compileString($string, array $vars = [])
     {
         if (empty($vars)) {
             return $this->getCompiler()->compileString($string);
