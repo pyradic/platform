@@ -68,6 +68,7 @@ use Pyro\Platform\Routing\ResponseFactory;
 use Pyro\Platform\Support\ExpressionLanguageParser;
 use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
+use Radic\BladeExtensions\BladeExtensionsServiceProvider;
 
 class PlatformServiceProvider extends ServiceProvider
 {
@@ -107,6 +108,7 @@ class PlatformServiceProvider extends ServiceProvider
 
     protected $providers = [
         \EddIriarte\Console\Providers\SelectServiceProvider::class,
+        \Radic\BladeExtensions\BladeExtensionsServiceProvider::class,
         \Laradic\Support\SupportServiceProvider::class,
         \Inertia\ServiceProvider::class,
 //        \Tightenco\Ziggy\ZiggyServiceProvider::class,
