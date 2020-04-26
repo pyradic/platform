@@ -1,13 +1,13 @@
-import Vue             from 'vue';
-import elementNlLang   from 'element-ui/lib/locale/lang/nl';
-import ElementLocale   from 'element-ui/lib/locale';
-import LogPlugin       from '@/plugins/log';
-import HttpPlugin      from '@/plugins/http';
-import { VuePlugin }   from '@c/VuePlugin';
-import { Application } from '@c/Application';
-import { Script }      from '#/script';
-import VueI18n         from 'vue-i18n';
-import VueFunctionalApi from 'vue-function-api'
+import Vue              from 'vue';
+import elementNlLang    from 'element-ui/lib/locale/lang/nl';
+import ElementLocale    from 'element-ui/lib/locale';
+import LogPlugin        from '@/plugins/log';
+import HttpPlugin       from '@/plugins/http';
+import { VuePlugin }    from '@c/VuePlugin';
+import { Application }  from '@c/Application';
+import { Script }       from '#/script';
+import VueI18n          from 'vue-i18n';
+import VueFunctionalApi from 'vue-function-api';
 
 const log = require('debug')('install');
 
@@ -24,7 +24,7 @@ export default class PlatformVuePlugin extends VuePlugin {
 
         this.app.hooks.install.call(_Vue, opts);
 
-        _Vue.use(VueFunctionalApi,{})
+        _Vue.use(VueFunctionalApi, {});
         // _Vue.use(VueI18n)
         const i18n = this.app.get<VueI18n>('i18n');
         i18n.mergeLocaleMessage('nl', elementNlLang);

@@ -537,6 +537,7 @@ class PlatformServiceProvider extends ServiceProvider
 //        });
 
         $this->app->singleton(\Pyro\Platform\Support\BladeString::class,\Pyro\Platform\Support\BladeString::class);
+        $this->app->singleton(\Pyro\Platform\Support\Hydrator::class,\Pyro\Platform\Support\Hydrator::class);
 
         $alias = AliasLoader::getInstance();
         $alias->alias('BladeString', \Pyro\Platform\Support\Facade\BladeString::class);

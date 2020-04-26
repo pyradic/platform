@@ -9,6 +9,6 @@ class Hydrator extends Facade
 
     protected static function getFacadeAccessor()
     {
-        return \Anomaly\Streams\Platform\Support\Hydrator::class;
+        return \Pyro\Platform\Support\Hydrator::class;
     }
 }
