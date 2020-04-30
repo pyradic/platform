@@ -34,6 +34,9 @@ export function component<V extends Vue>(options: ComponentOptions<V> & ThisType
         if ( Component[ 'components' ] !== undefined ) {
             Extended = Extended.extend({ components: Component[ 'components' ] })
         }
+        if ( Component[ 'block' ] !== undefined ) {
+            Extended = Extended.extend({ block: Component[ 'block' ] })
+        }
         if ( Component.prototype.setupLogger !== undefined ) {
             Extended = Extended.extend({ setupLogger: Component.prototype.setupLogger } as any)
         }

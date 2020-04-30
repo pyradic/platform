@@ -1,21 +1,23 @@
-import { AsyncContainerModule, Container, interfaces }                                from 'inversify';
-import getDecorators                                                                  from 'inversify-inject-decorators';
-import { Dispatcher }                                                                 from './Dispatcher';
-import { BootstrapOptions, IAgent, IConfig, IServiceProvider, IServiceProviderClass } from '../interfaces';
-import { SyncHook, SyncWaterfallHook }                                                from 'tapable';
-import { Config }                                                                     from './Config';
-import { ServiceProvider }                                                            from './ServiceProvider';
-import Vue, { Component, ComponentOptions, VueConstructor }                           from 'vue';
-import { merge }                                                                      from 'lodash';
-import { Cookies, Storage }                                                           from '@u/storage';
-import debug                                                                          from 'debug';
-import { AxiosStatic }                                                                from 'axios';
-import { PlatformStyleVariables }                                                     from '@/styling/export';
-import { Store }                                                                      from 'vuex';
-import { IState }                                                                     from '@/store';
-import { toJS }                                                                       from '@u/toJS';
-import { PlatformData }                                                               from '@/interfaces/platform.data.generated';
-import { Platform }                                                                   from '@/interfaces/platform.data';
+import { AsyncContainerModule, Container, decorate, id, inject, injectable, interfaces, multiInject, named, optional, postConstruct, tagged, targetName, unmanaged } from 'inversify';
+import getDecorators                                                                                                                                                 from 'inversify-inject-decorators';
+import getInjectDecorators                                                                                                                                           from 'inversify-inject-decorators';
+import { Dispatcher }                                                                                                                                                from './Dispatcher';
+import { BootstrapOptions, IAgent, IConfig, IServiceProvider, IServiceProviderClass }                                                                                from '../interfaces';
+import { SyncHook, SyncWaterfallHook }                                                                                                                               from 'tapable';
+import { Config }                                                                                                                                                    from './Config';
+import { ServiceProvider }                                                                                                                                           from './ServiceProvider';
+import Vue, { Component, ComponentOptions, VueConstructor }                                                                                                          from 'vue';
+import { merge }                                                                                                                                                     from 'lodash';
+import { Cookies, Storage }                                                                                                                                          from '@u/storage';
+import debug                                                                                                                                                         from 'debug';
+import { AxiosStatic }                                                                                                                                               from 'axios';
+import { PlatformStyleVariables }                                                                                                                                    from '@/styling/export';
+import { Store }                                                                                                                                                     from 'vuex';
+import { IState }                                                                                                                                                    from '@/store';
+import { toJS }                                                                                                                                                      from '@u/toJS';
+import { PlatformData }                                                                                                                                              from '@/interfaces/platform.data.generated';
+import { Platform }                                                                                                                                                  from '@/interfaces/platform.data';
+import { fluentProvide, provide }                                                                                                                                    from 'inversify-binding-decorators';
 
 const log = require('debug')('classes:Application');
 
@@ -316,12 +318,12 @@ export class Application extends Container {
         return this;
     }
 
-    public readonly bindingHooks:Record<string, SyncWaterfallHook<any>> = {}
+    public readonly bindingHooks: Record<string, SyncWaterfallHook<any>> = {};
 
     public dynamic<T>(id: interfaces.ServiceIdentifier<T>, cb: (app: Application) => T) {
-        let hook = this.bindingHooks[id.toString()]
-        if(hook === undefined){
-            hook = this.bindingHooks[id.toString()] = new SyncWaterfallHook(['value'])
+        let hook = this.bindingHooks[ id.toString() ];
+        if ( hook === undefined ) {
+            hook = this.bindingHooks[ id.toString() ] = new SyncWaterfallHook([ 'value' ]);
         }
         return this.bind(id).toDynamicValue(ctx => {
             return hook.call(cb(this));
@@ -332,15 +334,14 @@ export class Application extends Container {
         return this.bindIf(id, override, b => b.to(value).inSingletonScope());
     }
 
-    public binding<T>(id: interfaces.ServiceIdentifier<T>, value: any): this {
-
-        return this;
+    public binding<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {
+        return this.bindIf(id, override, b => b.to(value));
     }
 
     public instance<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {
-        let hook = this.bindingHooks[id.toString()]
-        if(hook === undefined){
-            hook = this.bindingHooks[id.toString()] = new SyncWaterfallHook(['value'])
+        let hook = this.bindingHooks[ id.toString() ];
+        if ( hook === undefined ) {
+            hook = this.bindingHooks[ id.toString() ] = new SyncWaterfallHook([ 'value' ]);
         }
         return this.bindIf(id, override, b => {
             return hook.call(b.toConstantValue(value));
@@ -365,3 +366,17 @@ export class Application extends Container {
 let caller    = { get app(): Application {return Application.instance as any as Application; } };
 const { app } = caller;
 export { app };
+
+fluentProvide('').inSingletonScope().done(true);
+provide('sdf');
+import ServiceIdentifier = interfaces.ServiceIdentifier;
+
+const { lazyInject, lazyInjectNamed, lazyInjectTagged, lazyMultiInject } = getInjectDecorators(app);
+
+export const di = {
+    injectable, decorate, postConstruct,  inject, named, optional, unmanaged, tagged, targetName, multiInject, id,
+    lazyInject, lazyInjectNamed, lazyInjectTagged, lazyMultiInject,
+
+    singleton: (serviceIdentifier: ServiceIdentifier<any>, force?: boolean) => fluentProvide(serviceIdentifier).inSingletonScope().done(force),
+    provide,
+};

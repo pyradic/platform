@@ -133,7 +133,7 @@ Object.keys(propTypeMap).forEach(key => {
         //         if ( kindOf(options.default) === 'array' ) {
         //             let def         = options.default
         //             options.default = (target) => def
-        //         }
+        //         }py-deployment-target-py-deployment-target
         //         if ( kindOf(options.default) === 'function' ) {
         //             let def: Function = options.default
         //             options.default   = def.bind(options.target, options.target)

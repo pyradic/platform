@@ -7,11 +7,11 @@ export interface PlatformData {
 }
 
 export interface Breadcrumbs {
-    "pyro.module.deployment::addon.name": Overzicht;
-    Overzicht:                            Overzicht;
+    "anomaly.module.dashboard::addon.name":               AnomalyModuleDashboardAddon;
+    "anomaly.module.dashboard::addon.section.dashboards": AnomalyModuleDashboardAddon;
 }
 
-export interface Overzicht {
+export interface AnomalyModuleDashboardAddon {
     title: string;
     url:   string;
 }
@@ -19,7 +19,62 @@ export interface Overzicht {
 export interface Cp {
     navigation: Navigation;
     shortcuts:  Shortcuts;
-    buttons:    any[];
+    buttons:    CpButton[];
+}
+
+export interface CpButton {
+    key:        null;
+    slug:       null | string;
+    sectionKey: null;
+    tag:        Tag;
+    url:        string;
+    text:       string;
+    icon:       null | string;
+    class:      null;
+    type:       ButtonType;
+    size:       Size;
+    permission: string;
+    disabled:   boolean;
+    enabled:    boolean;
+    attributes: ButtonAttributes;
+    dropdown:   any[];
+    dropup:     boolean;
+    position:   Position;
+    parent:     null;
+    entry:      null;
+}
+
+export interface ButtonAttributes {
+    href:                 string;
+    "data-toggle"?:       DataToggle;
+    "data-target"?:       DataTarget;
+    ":no-submenu-icons"?: boolean;
+}
+
+export enum DataTarget {
+    Modal = "#modal",
+}
+
+export enum DataToggle {
+    Modal = "modal",
+}
+
+export enum Position {
+    Left = "left",
+}
+
+export enum Size {
+    Md = "md",
+}
+
+export enum Tag {
+    A = "a",
+}
+
+export enum ButtonType {
+    Default = "default",
+    Info = "info",
+    Success = "success",
 }
 
 export interface Navigation {
@@ -64,7 +119,7 @@ export interface PurpleChild {
     highlighted: boolean;
     context:     Context;
     parent:      null;
-    buttons:     Button[];
+    buttons:     ChildButton[];
     attributes:  ButtonAttributes;
     permission:  string;
     breadcrumb:  null;
@@ -72,23 +127,7 @@ export interface PurpleChild {
     children?:   FluffyChild[];
 }
 
-export interface ButtonAttributes {
-    href:                 string;
-    ":no-submenu-icons"?: boolean;
-    "data-toggle"?:       DataToggle;
-    "data-target"?:       DataTarget;
-    "0"?:                 string;
-}
-
-export enum DataTarget {
-    Modal = "#modal",
-}
-
-export enum DataToggle {
-    Modal = "modal",
-}
-
-export interface Button {
+export interface ChildButton {
     key:        string;
     slug:       string;
     sectionKey: string;
@@ -110,24 +149,6 @@ export interface Button {
     entry:      null;
 }
 
-export enum Position {
-    Left = "left",
-}
-
-export enum Size {
-    Md = "md",
-}
-
-export enum Tag {
-    A = "a",
-}
-
-export enum ButtonType {
-    Default = "default",
-    Info = "info",
-    Success = "success",
-}
-
 export interface FluffyChild {
     key:         string;
     slug:        string;
@@ -142,7 +163,7 @@ export interface FluffyChild {
     highlighted: boolean;
     context:     Context;
     parent:      string;
-    buttons:     Button[];
+    buttons:     ChildButton[];
     attributes:  DepartmentAttributes;
     permission:  string;
     breadcrumb:  null;
@@ -321,6 +342,7 @@ export enum Target {
 }
 
 export enum ChildType {
+    PyroExtensionDisabledLinkType = "pyro.extension.disabled_link_type",
     PyroExtensionLabelLinkType = "pyro.extension.label_link_type",
     PyroExtensionModuleLinkType = "pyro.extension.module_link_type",
 }
