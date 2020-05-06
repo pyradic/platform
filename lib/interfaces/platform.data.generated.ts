@@ -2,79 +2,190 @@ export interface PlatformData {
     cp:          Cp;
     menus:       Menus;
     module:      Module;
-    breadcrumbs: Breadcrumbs;
+    breadcrumbs: PlatformDataBreadcrumb[];
     user:        User;
+    detail:      Detail;
 }
 
-export interface Breadcrumbs {
-    "anomaly.module.dashboard::addon.name":               AnomalyModuleDashboardAddon;
-    "anomaly.module.dashboard::addon.section.dashboards": AnomalyModuleDashboardAddon;
+export interface PlatformDataBreadcrumb {
+    key:        string;
+    route:      Route;
+    addon:      Module;
+    parent:     PurpleParent | ID;
+    title:      string;
+    url:        string;
+    attributes: any[];
+    class:      null;
 }
 
-export interface AnomalyModuleDashboardAddon {
-    title: string;
-    url:   string;
+export interface Module {
+    id:        ID;
+    name:      Name;
+    namespace: ID;
+    type:      ModuleType;
+}
+
+export enum ID {
+    CrvsExtensionRequesterRoleType = "crvs.extension.requester_role_type",
+    CrvsModuleClients = "crvs.module.clients",
+}
+
+export enum Name {
+    CrvsModuleClientsAddonName = "crvs.module.clients::addon.name",
+    HulpvragerRoleTypeExtension = "Hulpvrager Role Type Extension",
+    Klanten = "Klanten",
+}
+
+export enum ModuleType {
+    Extension = "extension",
+    Module = "module",
+}
+
+export interface PurpleParent {
+    title:      string;
+    parent:     FluffyParent | ID;
+    attributes: any[];
+    class:      null;
+    key:        string;
+    route:      Route;
+    bind:       any[];
+    addon:      Module;
+    breadcrumb: string;
+    url:        null;
+    entry:      null;
+    truncate:   number;
+    variables:  string[];
+}
+
+export interface FluffyParent {
+    title:      string;
+    parent:     TentacledParent | ID;
+    attributes: any[];
+    class:      null;
+    key:        As;
+    route:      Route;
+    bind:       any[];
+    addon:      Module;
+    breadcrumb: string;
+    url:        null;
+    entry:      null;
+    truncate:   number;
+    variables:  any[];
+}
+
+export enum As {
+    CrvsExtensionRequesterRoleTypeRequestsIndex = "crvs.extension.requester_role_type::requests.index",
+    CrvsExtensionRequesterRoleTypeRequestsView = "crvs.extension.requester_role_type::requests.view",
+    CrvsModuleClientsClientsIndex = "crvs.module.clients::clients.index",
+}
+
+export interface TentacledParent {
+    title:      Name;
+    parent:     ID;
+    attributes: any[];
+    class:      null;
+    key:        As;
+    route:      Route;
+    bind:       any[];
+    addon:      Module;
+    breadcrumb: string;
+    url:        null;
+    entry:      null;
+    truncate:   number;
+    variables:  any[];
+}
+
+export interface Route {
+    uri:                URI;
+    methods:            Method[];
+    action:             Action;
+    isFallback:         boolean;
+    controller:         Controller | null;
+    defaults:           any[];
+    wheres:             any[];
+    parameters:         Parameters | null;
+    parameterNames:     string[] | null;
+    computedMiddleware: string[] | null;
+    compiled:           Compiled;
+}
+
+export interface Action {
+    as:               As;
+    uses:             string;
+    breadcrumb:       string[];
+    uri:              URI;
+    "streams::addon": ID;
+    controller:       string;
+    breadcrumbs?:     Array<string[] | BreadcrumbBreadcrumb>;
+}
+
+export interface BreadcrumbBreadcrumb {
+    key:    string;
+    title:  string;
+    parent: string;
+}
+
+export enum URI {
+    AdminClients = "admin/clients",
+    AdminClientsRequesterRequests = "admin/clients/requester/requests",
+    AdminClientsRequesterRequestsViewRequest = "admin/clients/requester/requests/view/{request}",
+}
+
+export interface Compiled {
+}
+
+export interface Controller {
+    events: Compiled;
+}
+
+export enum Method {
+    Delete = "DELETE",
+    Get = "GET",
+    Head = "HEAD",
+    Options = "OPTIONS",
+    Patch = "PATCH",
+    Post = "POST",
+    Put = "PUT",
+}
+
+export interface Parameters {
+    request: Entry;
+}
+
+export interface Entry {
+    id:                           number;
+    sort_order:                   number;
+    created_at:                   Date;
+    created_by_id:                number;
+    updated_at:                   Date;
+    updated_by_id:                number;
+    date_open:                    string;
+    date_close:                   string;
+    date_start:                   string;
+    date_end:                     string;
+    time_start:                   string;
+    time_end:                     string;
+    client_id:                    number;
+    department_id:                number;
+    availability:                 string;
+    category_id:                  number;
+    subject:                      string;
+    match_id:                     null;
+    nature:                       string;
+    frequency:                    string;
+    hours:                        string;
+    memo:                         string;
+    info:                         null;
+    external_info:                null;
+    is_closed:                    number;
+    reason_is_closed_id:          null;
+    reason_not_filled_request_id: null;
 }
 
 export interface Cp {
     navigation: Navigation;
     shortcuts:  Shortcuts;
-    buttons:    CpButton[];
-}
-
-export interface CpButton {
-    key:        null;
-    slug:       null | string;
-    sectionKey: null;
-    tag:        Tag;
-    url:        string;
-    text:       string;
-    icon:       null | string;
-    class:      null;
-    type:       ButtonType;
-    size:       Size;
-    permission: string;
-    disabled:   boolean;
-    enabled:    boolean;
-    attributes: ButtonAttributes;
-    dropdown:   any[];
-    dropup:     boolean;
-    position:   Position;
-    parent:     null;
-    entry:      null;
-}
-
-export interface ButtonAttributes {
-    href:                 string;
-    "data-toggle"?:       DataToggle;
-    "data-target"?:       DataTarget;
-    ":no-submenu-icons"?: boolean;
-}
-
-export enum DataTarget {
-    Modal = "#modal",
-}
-
-export enum DataToggle {
-    Modal = "modal",
-}
-
-export enum Position {
-    Left = "left",
-}
-
-export enum Size {
-    Md = "md",
-}
-
-export enum Tag {
-    A = "a",
-}
-
-export enum ButtonType {
-    Default = "default",
-    Info = "info",
-    Success = "success",
+    buttons:    any[];
 }
 
 export interface Navigation {
@@ -92,12 +203,9 @@ export interface NavigationChild {
     attributes: PurpleAttributes;
     permission: null;
     breadcrumb: string;
-    image:      Asset;
-    asset:      Asset;
+    image:      Compiled;
+    asset:      Compiled;
     children?:  PurpleChild[];
-}
-
-export interface Asset {
 }
 
 export interface PurpleAttributes {
@@ -120,11 +228,26 @@ export interface PurpleChild {
     context:     Context;
     parent:      null;
     buttons:     ChildButton[];
-    attributes:  ButtonAttributes;
+    attributes:  FluffyAttributes;
     permission:  string;
     breadcrumb:  null;
     hidden:      boolean;
     children?:   FluffyChild[];
+}
+
+export interface FluffyAttributes {
+    href:                 string;
+    ":no-submenu-icons"?: boolean;
+    "data-toggle"?:       DataToggle;
+    "data-target"?:       DataTarget;
+}
+
+export enum DataTarget {
+    Modal = "#modal",
+}
+
+export enum DataToggle {
+    Modal = "modal",
 }
 
 export interface ChildButton {
@@ -136,17 +259,35 @@ export interface ChildButton {
     text:       string;
     icon:       null | string;
     class:      null;
-    type:       ButtonType;
-    size:       Size;
+    type:       TypeEnum;
+    size:       PurpleSize;
     permission: string;
     disabled:   boolean;
     enabled:    boolean | string;
-    attributes: ButtonAttributes;
+    attributes: FluffyAttributes;
     dropdown:   any[];
     dropup:     boolean;
     position:   Position;
     parent:     null;
     entry:      null;
+}
+
+export enum Position {
+    Left = "left",
+}
+
+export enum PurpleSize {
+    Md = "md",
+}
+
+export enum Tag {
+    A = "a",
+}
+
+export enum TypeEnum {
+    Default = "default",
+    Info = "info",
+    Success = "success",
 }
 
 export interface FluffyChild {
@@ -308,6 +449,194 @@ export interface DepartmentChild {
     href:  string;
 }
 
+export interface Detail {
+    entry:   Entry;
+    header:  Header;
+    actions: any[];
+    buttons: DetailButton[];
+    widgets: Widget[];
+    groups:  Group[];
+    options: Options;
+    layout:  DetailLayout;
+}
+
+export interface DetailButton {
+    attributes: DepartmentAttributes;
+    class:      null;
+    disabled:   boolean;
+    icon:       string;
+    position:   string;
+    size:       TypeEnum;
+    text:       string;
+    type:       string;
+    url:        string;
+}
+
+export interface Group {
+    key:        string;
+    title:      null;
+    class:      null;
+    attributes: any[];
+    fields:     Field[];
+    header:     null;
+}
+
+export interface Field {
+    title:      string;
+    attributes: any[];
+    class:      null | string;
+    key:        string;
+    value:      null | string;
+    header:     boolean;
+    inline:     boolean;
+    layout:     FieldLayout | null;
+}
+
+export interface FieldLayout {
+    name:       string;
+    attributes: any[];
+    children:   TentacledChild[];
+    value:      null;
+}
+
+export interface TentacledChild {
+    name:       string;
+    attributes: TentacledAttributes;
+    children:   DefaultFieldLayoutChild[];
+    value:      null;
+}
+
+export interface TentacledAttributes {
+    colspan: string;
+}
+
+export interface DefaultFieldLayoutChild {
+    name:       string;
+    attributes: StickyAttributes;
+    children:   StickyChild[];
+    value:      null;
+}
+
+export interface StickyAttributes {
+    class: string;
+}
+
+export interface StickyChild {
+    name:       string;
+    attributes: IndigoAttributes;
+    children:   any[];
+    value:      null;
+}
+
+export interface IndigoAttributes {
+    name: string;
+}
+
+export interface Header {
+    title:      string;
+    subtitle:   string;
+    enabled:    boolean;
+    class:      null;
+    icon:       string;
+    attributes: HeaderAttributes;
+    tags:       any[];
+}
+
+export interface HeaderAttributes {
+    style: string;
+}
+
+export interface DetailLayout {
+    name:       string;
+    attributes: any[];
+    children:   IndigoChild[];
+    value:      null;
+}
+
+export interface IndigoChild {
+    name:       string;
+    attributes: any[] | AttributesAttributes;
+    children:   IndecentChild[];
+    value:      null;
+}
+
+export interface AttributesAttributes {
+    name:         string;
+    "data-slug"?: string;
+}
+
+export interface IndecentChild {
+    name:       string;
+    attributes: IndecentAttributes;
+    children:   HilariousChild[];
+    value:      null;
+}
+
+export interface IndecentAttributes {
+    name?:   string;
+    gutter?: string;
+    class?:  string;
+    style?:  string;
+}
+
+export interface HilariousChild {
+    name:       string;
+    attributes: HilariousAttributes;
+    children:   AmbitiousChild[];
+    value:      null;
+}
+
+export interface HilariousAttributes {
+    span: string;
+}
+
+export interface AmbitiousChild {
+    name:       string;
+    attributes: AmbitiousAttributes;
+    children:   any[];
+    value:      null;
+}
+
+export interface AmbitiousAttributes {
+    name:   string;
+    group?: string;
+}
+
+export interface Options {
+    fields:                        Fields;
+    profile_view:                  string;
+    wrapper_view:                  string;
+    "fields.hide_null":            boolean;
+    "fields.transform_bool":       boolean;
+    "fields.transform_bool_true":  string;
+    "fields.transform_bool_false": string;
+    default_field_layout:          DefaultFieldLayout;
+    permission:                    null;
+}
+
+export interface DefaultFieldLayout {
+    name:       string;
+    attributes: any[];
+    children:   DefaultFieldLayoutChild[];
+    value:      null;
+}
+
+export interface Fields {
+    hide_null: boolean;
+}
+
+export interface Widget {
+    content:    string;
+    slug:       string;
+    permission: null;
+    title:      string;
+    disabled:   boolean;
+    enabled:    boolean;
+    attributes: any[];
+    class:      null;
+    icon:       null;
+}
+
 export interface Menus {
     admin_header:     AdminHeader;
     admin_pre_header: AdminHeader;
@@ -345,13 +674,6 @@ export enum ChildType {
     PyroExtensionDisabledLinkType = "pyro.extension.disabled_link_type",
     PyroExtensionLabelLinkType = "pyro.extension.label_link_type",
     PyroExtensionModuleLinkType = "pyro.extension.module_link_type",
-}
-
-export interface Module {
-    id:        string;
-    name:      string;
-    namespace: string;
-    type:      string;
 }
 
 export interface User {

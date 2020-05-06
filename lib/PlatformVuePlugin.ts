@@ -8,6 +8,7 @@ import { Application }  from '@c/Application';
 import { Script }       from '#/script';
 import VueI18n          from 'vue-i18n';
 import VueFunctionalApi from 'vue-function-api';
+import {Plugin as FragmentPlugin} from 'vue-fragment';
 
 const log = require('debug')('install');
 
@@ -30,6 +31,7 @@ export default class PlatformVuePlugin extends VuePlugin {
         i18n.mergeLocaleMessage('nl', elementNlLang);
         ElementLocale.i18n((key, value) => i18n.t(key, value));
 
+        _Vue.use(FragmentPlugin);
         _Vue.use(LogPlugin);
         _Vue.use(HttpPlugin);
 

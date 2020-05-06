@@ -5,8 +5,10 @@ import 'reflect-metadata';
 import { merge } from 'lodash';
 import { PlatformVuePlugin as Plugin } from './PlatformVuePlugin';
 import { toJS } from '@u/toJS';
-
-
+import Vue from 'vue'
+if(DEV) {
+    Vue.config.performance = true;
+}
 export * from './styling'
 export * from './interfaces';
 export * from './classes/Application';

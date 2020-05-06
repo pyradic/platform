@@ -746,6 +746,7 @@ export type UpdatedById = number;
 export type ClientId = number;
 export type RoleId = number;
 export type SubjectId = number;
+export type DepartmentId = number;
 export type ContactMethod = string;
 export type ContactThrough = string;
 export type RegistrationDate = string;
@@ -756,7 +757,6 @@ export type Follow = number;
 export type FollowDate = string;
 export type FollowInformation = string;
 export type FollowUserId = number;
-export type DepartmentId = number;
 
 export interface ClientRegistrationsRegistrations {
   id: Id;
@@ -768,6 +768,7 @@ export interface ClientRegistrationsRegistrations {
   client_id: ClientId;
   role_id: RoleId;
   subject_id: SubjectId;
+  department_id?: DepartmentId;
   contact_method?: ContactMethod;
   contact_through?: ContactThrough;
   registration_date?: RegistrationDate;
@@ -778,7 +779,6 @@ export interface ClientRegistrationsRegistrations {
   follow_date?: FollowDate;
   follow_information?: FollowInformation;
   follow_user_id?: FollowUserId;
-  department_id?: DepartmentId;
   [k: string]: any;
 }
 
@@ -797,6 +797,7 @@ export type CreatedAt = string;
 export type CreatedById = number;
 export type UpdatedAt = string;
 export type UpdatedById = number;
+export type Title = string;
 export type ReportDate = string;
 export type RegistrationId = number;
 export type AdvisorId = number;
@@ -818,9 +819,10 @@ export interface ClientRegistrationsReports {
   created_by_id?: CreatedById;
   updated_at?: UpdatedAt;
   updated_by_id?: UpdatedById;
+  title?: Title;
   report_date?: ReportDate;
-  registration_id: RegistrationId;
-  advisor_id: AdvisorId;
+  registration_id?: RegistrationId;
+  advisor_id?: AdvisorId;
   contact_method?: ContactMethod;
   contact_through?: ContactThrough;
   action_id?: ActionId;

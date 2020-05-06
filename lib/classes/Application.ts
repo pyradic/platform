@@ -1,4 +1,6 @@
 import { AsyncContainerModule, Container, decorate, id, inject, injectable, interfaces, multiInject, named, optional, postConstruct, tagged, targetName, unmanaged } from 'inversify';
+//@formatter:off
+//@formatter:on
 import getDecorators                                                                                                                                                 from 'inversify-inject-decorators';
 import getInjectDecorators                                                                                                                                           from 'inversify-inject-decorators';
 import { Dispatcher }                                                                                                                                                from './Dispatcher';
@@ -314,7 +316,7 @@ export class Application extends Container {
 
     protected bindIf<T>(id, override: boolean = false, cb: (binding: interfaces.BindingToSyntax<T>) => void): this {
         if ( this.isBound(id) && !override ) return this;
-        cb(this.isBound(id) ? this.rebind(id) : this.bind(id));
+        cb(this.isBound(id) ? this.rebind<T>(id) : this.bind<T>(id));
         return this;
     }
 
@@ -331,7 +333,7 @@ export class Application extends Container {
     }
 
     public singleton<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {
-        return this.bindIf(id, override, b => b.to(value).inSingletonScope());
+        return this.bindIf<T>(id, override, b => b.to(value).inSingletonScope());
     }
 
     public binding<T>(id: interfaces.ServiceIdentifier<T>, value: any, override: boolean = false): this {

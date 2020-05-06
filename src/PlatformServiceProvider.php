@@ -26,6 +26,7 @@ use Anomaly\Streams\Platform\View\Event\TemplateDataIsLoading;
 use Anomaly\Streams\Platform\View\ViewOverrides;
 use Anomaly\UsersModule\User\Contract\UserRepositoryInterface;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
+use Authorizer;
 use BeyondCode\ServerTiming\Middleware\ServerTimingMiddleware;
 use Illuminate\Console\Application as Artisan;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -136,6 +137,22 @@ class PlatformServiceProvider extends ServiceProvider
         $this->bootConsole();
         dispatch_now(new AddPlatformAssetNamespaces());
         dispatch_now(new OverrideIconRegistryIcons());
+        $blade=resolve('blade.compiler');
+        $blade->if('authorize', function($permission, $user = null){
+            return Authorizer::authorize($permission, $user);
+        });
+        $blade->if('authorizeAny', function($permissions, $user = null){
+            return Authorizer::authorizeAny($permissions, $user);
+        });
+        $blade->if('authorizeAll', function($permissions, $user = null){
+            return Authorizer::authorizeAll($permissions, $user);
+        });
+        $blade->if('authorizeRole', function($role, $user = null){
+            return Authorizer::authorizeRole($role, $user);
+        });
+        $blade->if('authorizeAnyRole', function($roles, $user = null){
+            return Authorizer::authorizeAnyRole($roles, $user);
+        });
 //        $overrides->put('pyro.theme.admin::partials/assets', 'platform::assets');
 //        $overrides->put('pyrocms.theme.accelerant::partials/assets', 'platform::assets');
     }

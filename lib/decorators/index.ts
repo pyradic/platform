@@ -1,19 +1,17 @@
 import Vue, { ComponentOptions, PropOptions, WatchOptions } from 'vue'
-import Component, { createDecorator, mixins } from 'vue-class-component'
-import { componentFactory } from 'vue-class-component/lib/component'
-import { InjectKey } from 'vue/types/options'
-import { VueClass } from 'vue-class-component/lib/declarations';
-import { interfaces } from 'inversify';
-import debug from 'debug';
-import { app } from '@c/Application';
+import Component, { createDecorator, mixins }               from 'vue-class-component'
+import { componentFactory }                                 from 'vue-class-component/lib/component'
+import { InjectKey }                                        from 'vue/types/options'
+import { VueClass }                                         from 'vue-class-component/lib/declarations';
+import { interfaces }                                       from 'inversify';
+import debug                                                from 'debug';
+import { app }                                              from '@c/Application';
+import { Constructor }                                      from '@/interfaces';
 
 const log = debug('decorators');
 
 export * from './prop';
 export * from './styles';
-export type Constructor<T = any> = {
-    new(...args: any[]): T
-}
 export { Component as ClassComponent, Vue, mixins as Mixins, mixins }
 
 /** Used for keying reactive provide/inject properties */
