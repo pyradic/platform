@@ -17,8 +17,6 @@ use Anomaly\Streams\Platform\Entry\EntryCollection;
 use Anomaly\Streams\Platform\Entry\Event\GatherParserData;
 use Anomaly\Streams\Platform\Event\Booting;
 use Anomaly\Streams\Platform\Event\Ready;
-use Anomaly\Streams\Platform\Http\Middleware\ApplicationReady;
-use Anomaly\Streams\Platform\Support\Collection;
 use Anomaly\Streams\Platform\Ui\Form\Event\FormWasBuilt;
 use Anomaly\Streams\Platform\Ui\Table\Component\View\ViewRegistry;
 use Anomaly\Streams\Platform\View\Event\RegisteringTwigPlugins;
@@ -69,7 +67,6 @@ use Pyro\Platform\Routing\ResponseFactory;
 use Pyro\Platform\Support\ExpressionLanguageParser;
 use Pyro\Platform\Ui\UiServiceProvider;
 use Pyro\Platform\User\Permission\PermissionSetCollection;
-use Radic\BladeExtensions\BladeExtensionsServiceProvider;
 
 class PlatformServiceProvider extends ServiceProvider
 {
@@ -137,20 +134,20 @@ class PlatformServiceProvider extends ServiceProvider
         $this->bootConsole();
         dispatch_now(new AddPlatformAssetNamespaces());
         dispatch_now(new OverrideIconRegistryIcons());
-        $blade=resolve('blade.compiler');
-        $blade->if('authorize', function($permission, $user = null){
+        $blade = resolve('blade.compiler');
+        $blade->if('authorize', function ($permission, $user = null) {
             return Authorizer::authorize($permission, $user);
         });
-        $blade->if('authorizeAny', function($permissions, $user = null){
+        $blade->if('authorizeAny', function ($permissions, $user = null) {
             return Authorizer::authorizeAny($permissions, $user);
         });
-        $blade->if('authorizeAll', function($permissions, $user = null){
+        $blade->if('authorizeAll', function ($permissions, $user = null) {
             return Authorizer::authorizeAll($permissions, $user);
         });
-        $blade->if('authorizeRole', function($role, $user = null){
+        $blade->if('authorizeRole', function ($role, $user = null) {
             return Authorizer::authorizeRole($role, $user);
         });
-        $blade->if('authorizeAnyRole', function($roles, $user = null){
+        $blade->if('authorizeAnyRole', function ($roles, $user = null) {
             return Authorizer::authorizeAnyRole($roles, $user);
         });
 //        $overrides->put('pyro.theme.admin::partials/assets', 'platform::assets');
@@ -159,9 +156,9 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function register()
     {
-/** @var \Pyro\Platform\Http\Kernel $kernel */
-        $kernel=resolve(Kernel::class);
-        if($this->app->environment('local') && config('app.debug')) {
+        /** @var \Pyro\Platform\Http\Kernel $kernel */
+        $kernel = resolve(Kernel::class);
+        if ($this->app->environment('local') && config('app.debug')) {
             $kernel->pushMiddleware(RenderPlatformDataToFile::class);
         }
 //        AliasLoader::getInstance()->alias('ServerTiming', \BeyondCode\ServerTiming\Facades\ServerTiming::class);
@@ -194,8 +191,6 @@ class PlatformServiceProvider extends ServiceProvider
                 }
             }
         });
-
-
 
         $this->registerAddonProviderExtras();
         $this->registerMacros();
@@ -325,6 +320,25 @@ class PlatformServiceProvider extends ServiceProvider
     protected function registerAddonProviderExtras()
     {
         // subscribers property
+        AddonServiceProvider::macro('getRouteWheres', function () {
+            return $this->routeWheres ?? [];
+        });
+        AddonServiceProvider::macro('setRouteWheres', function ($routeWheres) {
+            $this->routeWheres = $routeWheres;
+        });
+        AddonProvider::when('register', function (AddonServiceProvider $provider, Addon $addon, AddonProvider $addonProvider) {
+            $wheres = $provider->getRouteWheres();
+            $routes = $provider->getRoutes();
+            foreach ($wheres as $key => $pattern) {
+                foreach ($routes as $url => &$route) {
+                    if (Str::contains($url, '{' . $key . '}')) {
+                        data_set($route, 'where.' . $key, $pattern);
+                    }
+                }
+            }
+            $provider->setRoutes($routes);
+        });
+
         AddonServiceProvider::macro('setSubscribers', function ($subscribers) {
             $this->subscribers = $subscribers;
             return $this;
@@ -553,8 +567,8 @@ class PlatformServiceProvider extends ServiceProvider
 //            return $parser;
 //        });
 
-        $this->app->singleton(\Pyro\Platform\Support\BladeString::class,\Pyro\Platform\Support\BladeString::class);
-        $this->app->singleton(\Pyro\Platform\Support\Hydrator::class,\Pyro\Platform\Support\Hydrator::class);
+        $this->app->singleton(\Pyro\Platform\Support\BladeString::class, \Pyro\Platform\Support\BladeString::class);
+        $this->app->singleton(\Pyro\Platform\Support\Hydrator::class, \Pyro\Platform\Support\Hydrator::class);
 
         $alias = AliasLoader::getInstance();
         $alias->alias('BladeString', \Pyro\Platform\Support\Facade\BladeString::class);

@@ -32,6 +32,12 @@ namespace Illuminate\Console {
 
 namespace Anomaly\Streams\Platform\Addon {
 
+    /**
+     * @method array getRouteWheres()
+     * @method setRouteWheres(array $routeWheres)
+     * @method setRoutes(array $routes)
+     */
+    class AddonServiceProvider {}
     class AddonCollection
     {
         public function disabled()
