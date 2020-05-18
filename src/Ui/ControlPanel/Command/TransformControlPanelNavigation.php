@@ -96,6 +96,7 @@ class TransformControlPanelNavigation
                         $subSectionMenuItem = $sectionMenuItem->createChild($child);
                         $subSectionMenuItem->setKey($link->getSlug() . '::' . $section->getSlug() . '.' . $child->getSlug());
                         $child->setButtons($buttons = $this->getSectionButtons($builder, $child));
+                        $subSectionMenuItem->setChildren($buttons->map([$subSectionMenuItem, 'createChild']));
 //                        foreach($buttons as $button){
 //                            $buttonMenuItem = $subSectionMenuItem->createChild($button);
 //                            $buttonMenuItem->setKey($link->getSlug() . '::' . $section->getSlug() . '.' . $child->getSlug() . '.' . $button->getSlug());

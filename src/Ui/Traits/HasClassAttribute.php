@@ -45,14 +45,12 @@ trait HasClassAttribute
     /**
      * Return class HTML.
      *
-     * @param string $class
+     * @param string[] $class
      * @return null|string
      */
-    public function class($class = null)
+    public function class(...$class)
     {
-        return trim(implode(' ', array_filter([
-            $class,
-            $this->getClass()
-        ])));
+        $class[] = $this->getClass();
+        return trim(implode(' ', array_filter($class)));
     }
 }

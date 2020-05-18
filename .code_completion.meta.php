@@ -36,6 +36,7 @@ namespace Anomaly\Streams\Platform\Addon {
      * @method array getRouteWheres()
      * @method setRouteWheres(array $routeWheres)
      * @method setRoutes(array $routes)
+     * @property array $routeWheres
      */
     class AddonServiceProvider {}
     class AddonCollection

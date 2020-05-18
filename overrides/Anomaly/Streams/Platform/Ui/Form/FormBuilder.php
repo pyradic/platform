@@ -25,29 +25,31 @@ use Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionCollection;
 use Anomaly\Streams\Platform\Ui\Form\Component\Action\Contract\ActionInterface;
 use Anomaly\Streams\Platform\Ui\Form\Contract\FormRepositoryInterface;
 use Anomaly\Streams\Platform\Version\Contract\VersionInterface;
-use Closure;
 use Illuminate\Contracts\Support\MessageBag;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Pyro\Platform\Hooks;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class FormBuilder
+ * Fires in {@see \Anomaly\Streams\Platform\Ui\Form\FormBuilder::post() FormBuilder::post()}
  *
  * @link http://pyrocms.com/
  * @author PyroCMS, Inc. <support@pyrocms.com>
  * @author Ryan Thompson <ryan@pyrocms.com>
- * @property array $fields = \Pyro\IdeHelper\Examples\FieldTypeExamples::values()
- * @method void onReady(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
- * @method void onBuilt(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
- * @method void onPost(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
+ * @see \Anomaly\Streams\Platform\Ui\Form\FormBuilder::build() FormBuilder::build()
+ * @see \Anomaly\Streams\Platform\Ui\Form\FormBuilder::build() FormBuilder::build()
+ * @see \Anomaly\Streams\Platform\Ui\Form\FormBuilder::post() FormBuilder::post()
+ * @method $this on(string $trigger = \Pyro\IdeHelper\Examples\FormBuilderExamples::events()[null], $listener)
+ * @method void onReady(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder) Fires in {@see \Anomaly\Streams\Platform\Ui\Form\FormBuilder::build() FormBuilder::build()}
+ * @method void onBuilt(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder) Fires in {@see \Anomaly\Streams\Platform\Ui\Form\FormBuilder::build() FormBuilder::build()}
+ * @method void onPost(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder) Fires in {@see \Anomaly\Streams\Platform\Ui\Form\FormBuilder::post() FormBuilder::post()}
  * @method void onSaving(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
  * @method void onSaved(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
  * @method void onValidating(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
  * @method void onValidated(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
  * @method void onPosting(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
  * @method void onSettingEntry(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder)
- * @method void onEntrySet(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder, \Anomaly\Streams\Platform\Entry\EntryQueryBuilder $entry)
+ * @method void onEntrySet(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder, \Pyro\Platform\Entry\EntryModel $entry)
  * @method void onQuerying(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder, \Anomaly\Streams\Platform\Entry\EntryQueryBuilder $query)
  * @method void onQueried(\Anomaly\Streams\Platform\Ui\Form\FormBuilder $builder, \Anomaly\Streams\Platform\Entry\EntryQueryBuilder $query)
  */
@@ -117,7 +119,7 @@ class FormBuilder
     /**
  * The fields config.
  *
- * @var array = \Pyro\IdeHelper\Examples\FieldTypeExamples::values()
+ * @var array = \Pyro\IdeHelper\Examples\FormBuilderExamples::fields()
  */
     protected $fields = [];
 
@@ -136,11 +138,42 @@ class FormBuilder
     protected $rules = [];
 
     /**
- * The actions config.
+ * Set the actions config.
+ * 
+ * Uses {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionDefaults::defaults() ActionDefaults::defaults()} if not set/empty
+ * 
+ * 
+ * Can (optionally) use pre-defined actions registered at {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionRegistry::$actions ActionRegistry}.
+ * Note that some of them modify the form's redirect option as instructed by {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\Guesser\RedirectGuesser::guess() RedirectGuesser::guess()}
+ * 
+ * 
+ * The builder actions array is populated/modified using:
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\FormBuilder::make() FormBuilder::make()} [dispatches] {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\Command\BuildActions BuildActions}
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\Command\BuildActions BuildActions} [runs] {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionBuilder::build() ActionBuilder::build()}
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionBuilder::build() ActionBuilder::build()} [runs] {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionInput::read() ActionInput::read()}
+ * 
+ * 
+ * Once all values of the builder its actions array have been populated/modified.
+ * It will create a class for each entry in the builder actions array and add it to the form:
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionBuilder::build() ActionBuilder::build()} [runs] {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionFactory::make() ActionFactory::make()}
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionFactory::make() ActionFactory::make()} [creates and hydrates] {@see \Anomaly\Streams\Platform\Ui\Table\Component\Action\Action Action} and {@see \Anomaly\Streams\Platform\Support\Hydrator Hydrator}
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionFactory::build() ActionFactory::build()} [adds it to form] {@see \Anomaly\Streams\Platform\Ui\Form\Form Form}
+ * 
+ * 
+ * ```php
+ * $builder->setActions([
+ * 'save',
+ * 'save_exit'
+ * ]);
+ * ```
  *
+ * @see Anomaly\Streams\Platform\Ui\Form\Component\Action\Guesser\RedirectGuesser::guess() RedirectGuesser::guess()
+ * @see Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionRegistry::$actions ActionRegistry::$actions
  * @var array = \Pyro\IdeHelper\Examples\FormBuilderExamples::actions()
+ * @see \Anomaly\Streams\Platform\Ui\Form\Component\Action\Guesser\RedirectGuesser::guess() RedirectGuesser::guess()
+ * @see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionRegistry::$actions ActionRegistry::$actions
  */
-    protected $actions = [];
+    protected  $actions = [];
 
     /**
  * The buttons config.
@@ -225,7 +258,8 @@ class FormBuilder
     /**
      * Build the form.
      *
-     * @param  null $entry
+     * @param null $entry
+     *
      * @return $this
      */
     public function build($entry = null)
@@ -234,11 +268,11 @@ class FormBuilder
             $this->entry = $entry;
         }
 
-        $this->fire('ready', ['builder' => $this]);
+        $this->fire('ready', [ 'builder' => $this ]);
 
-        Hooks::dispatch([ BuildForm::class, static::class ],[ $this ]);
+        Hooks::dispatch([ BuildForm::class, static::class ], [ $this ]);
 
-        $this->fire('built', ['builder' => $this]);
+        $this->fire('built', [ 'builder' => $this ]);
 
         return $this;
     }
@@ -246,7 +280,8 @@ class FormBuilder
     /**
      * Make the form.
      *
-     * @param  null $entry
+     * @param null $entry
+     *
      * @return $this
      */
     public function make($entry = null)
@@ -255,11 +290,11 @@ class FormBuilder
         $this->build($entry);
         $this->post();
 
-        $this->fire('make', ['builder' => $this]);
+        $this->fire('make', [ 'builder' => $this ]);
 
         if ($this->getFormResponse() === null) {
-            Hooks::dispatch([ LoadForm::class, static::class ],[ $this ]);
-            Hooks::dispatch([ MakeForm::class, static::class ],[ $this ]);
+            Hooks::dispatch([ LoadForm::class, static::class ], [ $this ]);
+            Hooks::dispatch([ MakeForm::class, static::class ], [ $this ]);
         }
         \ServerTiming::stop('FormBuilder make');
 
@@ -269,13 +304,14 @@ class FormBuilder
     /**
      * Handle the form post.
      *
-     * @param  null $entry
+     * @param null $entry
+     *
      * @return $this
      * @throws \Exception
      */
     public function handle($entry = null)
     {
-        if (!app('request')->isMethod('post')) {
+        if ( ! app('request')->isMethod('post')) {
             throw new \Exception('The handle method must be used with a POST request.');
         }
 
@@ -294,13 +330,13 @@ class FormBuilder
     public function post()
     {
         if (app('request')->isMethod('post')) {
-            $this->fire('post', ['builder' => $this]);
+            $this->fire('post', [ 'builder' => $this ]);
 
             if ($this->hasPostData() || $this->isAjax()) {
-                Hooks::dispatch([ PostForm::class, static::class ],[ $this ]);
+                Hooks::dispatch([ PostForm::class, static::class ], [ $this ]);
             }
         } else {
-            Hooks::dispatch([ PopulateFields::class, static::class ],[ $this ]);
+            Hooks::dispatch([ PopulateFields::class, static::class ], [ $this ]);
         }
 
         return $this;
@@ -313,8 +349,8 @@ class FormBuilder
      */
     public function validate()
     {
-        Hooks::dispatch([ LoadFormValues::class, static::class ],[ $this ]);
-        Hooks::dispatch([ ValidateForm::class, static::class ],[ $this ]);
+        Hooks::dispatch([ LoadFormValues::class, static::class ], [ $this ]);
+        Hooks::dispatch([ ValidateForm::class, static::class ], [ $this ]);
 
         return $this;
     }
@@ -326,22 +362,23 @@ class FormBuilder
      */
     public function flash()
     {
-        Hooks::dispatch([ FlashFormErrors::class, static::class ],[ $this ]);
-        Hooks::dispatch([ FlashFieldValues::class, static::class ],[ $this ]);
+        Hooks::dispatch([ FlashFormErrors::class, static::class ], [ $this ]);
+        Hooks::dispatch([ FlashFieldValues::class, static::class ], [ $this ]);
     }
 
     /**
      * Render the form.
      *
-     * @param  null $entry
+     * @param null $entry
+     *
      * @return Response
      */
     public function render($entry = null)
     {
         $this->make($entry);
 
-        if (!$this->form->getResponse()) {
-            Hooks::dispatch([ SetFormResponse::class, static::class ],[ $this ]);
+        if ( ! $this->form->getResponse()) {
+            Hooks::dispatch([ SetFormResponse::class, static::class ], [ $this ]);
         }
 
         return $this->form->getResponse();
@@ -357,7 +394,7 @@ class FormBuilder
     {
         /* @var FieldType $field */
         foreach ($this->getFormFields() as $field) {
-            $field->fire($trigger, array_merge(['builder' => $this], $payload));
+            $field->fire($trigger, array_merge([ 'builder' => $this ], $payload));
         }
     }
 
@@ -366,7 +403,7 @@ class FormBuilder
      */
     public function saveForm()
     {
-        Hooks::dispatch([ SaveForm::class, static::class ],[ $this ]);
+        Hooks::dispatch([ SaveForm::class, static::class ], [ $this ]);
     }
 
     /**
@@ -402,11 +439,11 @@ class FormBuilder
 
             $time = $entry->freshTimestamp();
 
-            if (!is_null($entry::UPDATED_AT) && !$entry->isDirty($entry::UPDATED_AT)) {
+            if ( ! is_null($entry::UPDATED_AT) && ! $entry->isDirty($entry::UPDATED_AT)) {
                 $entry->setUpdatedAt($time);
             }
 
-            if (!$entry->exists && !$entry->isDirty($entry::CREATED_AT)) {
+            if ( ! $entry->exists && ! $entry->isDirty($entry::CREATED_AT)) {
                 $entry->setCreatedAt($time);
             }
         }
@@ -428,6 +465,7 @@ class FormBuilder
      * Set the ajax flag.
      *
      * @param $ajax
+     *
      * @return $this
      */
     public function setAjax($ajax)
@@ -486,6 +524,7 @@ class FormBuilder
      * Set the version.
      *
      * @param VersionInterface $version
+     *
      * @return $this
      */
     public function setVersion(VersionInterface $version)
@@ -519,6 +558,7 @@ class FormBuilder
      * Set the handler.
      *
      * @param $handler
+     *
      * @return $this
      */
     public function setHandler($handler)
@@ -542,6 +582,7 @@ class FormBuilder
      * Set the validator.
      *
      * @param $validator
+     *
      * @return $this
      */
     public function setValidator($validator)
@@ -564,7 +605,8 @@ class FormBuilder
     /**
      * Set the form repository.
      *
-     * @param  FormRepositoryInterface $repository
+     * @param FormRepositoryInterface $repository
+     *
      * @return $this
      */
     public function setRepository(FormRepositoryInterface $repository)
@@ -578,6 +620,7 @@ class FormBuilder
      * Set the form model.
      *
      * @param  $model
+     *
      * @return $this
      */
     public function setModel($model)
@@ -601,6 +644,7 @@ class FormBuilder
      * Set the entry object.
      *
      * @param  $entry
+     *
      * @return $this
      */
     public function setEntry($entry)
@@ -621,11 +665,11 @@ class FormBuilder
     }
 
     /**
-     * Set the fields.
-     *
-     * @param  $fields
-     * @return $this
-     */
+ * Set the fields.
+ *
+ * @return $this
+ * @param array $fields = \Pyro\IdeHelper\Examples\FormBuilderExamples::fields()
+ */
     public function setFields($fields)
     {
         $this->fields = $fields;
@@ -634,28 +678,28 @@ class FormBuilder
     }
 
     /**
-     * Get the fields.
-     *
-     * @return array
-     */
+ * Get the fields.
+ *
+ * @return array = \Pyro\IdeHelper\Examples\FormBuilderExamples::fields()
+ */
     public function getFields()
     {
         return $this->fields;
     }
 
     /**
-     * Add a field.
-     *
-     * @param       $field
-     * @param array $definition
-     * @return $this
-     */
+ * Add a field.
+ *
+ * @return $this
+ * @param string|array $field = \Pyro\IdeHelper\Examples\FormBuilderExamples::field()
+ * @param array $definition = \Pyro\IdeHelper\Examples\FormBuilderExamples::field()
+ */
     public function addField($field, array $definition = [])
     {
-        if (!$definition) {
-            $this->fields[array_get($field, 'field')] = $field;
+        if ( ! $definition) {
+            $this->fields[ array_get($field, 'field') ] = $field;
         } else {
-            $this->fields[$field] = $definition;
+            $this->fields[ $field ] = $definition;
         }
 
         return $this;
@@ -685,6 +729,7 @@ class FormBuilder
      * Set the skipped fields.
      *
      * @param $skips
+     *
      * @return $this
      */
     public function setSkips($skips)
@@ -698,6 +743,7 @@ class FormBuilder
      * Merge in skipped fields.
      *
      * @param array $skips
+     *
      * @return $this
      */
     public function mergeSkips(array $skips)
@@ -711,6 +757,7 @@ class FormBuilder
      * Add a skipped field.
      *
      * @param $fieldSlug
+     *
      * @return $this
      */
     public function skipField($fieldSlug)
@@ -724,6 +771,7 @@ class FormBuilder
      * Set the rules.
      *
      * @param $rules
+     *
      * @return $this
      */
     public function setRules($rules)
@@ -748,19 +796,52 @@ class FormBuilder
      *
      * @param       $field
      * @param array $rules
+     *
      * @return $this
      */
     public function addRules($field, array $rules)
     {
-        $this->rules[$field] = $rules;
+        $this->rules[ $field ] = $rules;
 
         return $this;
     }
 
     /**
  * Set the actions config.
+ * 
+ * Uses {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionDefaults::defaults() ActionDefaults::defaults()} if not set/empty
+ * 
+ * 
+ * Can (optionally) use pre-defined actions registered at {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionRegistry::$actions ActionRegistry}.
+ * Note that some of them modify the form's redirect option as instructed by {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\Guesser\RedirectGuesser::guess() RedirectGuesser::guess()}
+ * 
+ * 
+ * The builder actions array is populated/modified using:
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\FormBuilder::make() FormBuilder::make()} [dispatches] {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\Command\BuildActions BuildActions}
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\Command\BuildActions BuildActions} [runs] {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionBuilder::build() ActionBuilder::build()}
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionBuilder::build() ActionBuilder::build()} [runs] {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionInput::read() ActionInput::read()}
+ * 
+ * 
+ * Once all values of the builder its actions array have been populated/modified.
+ * It will create a class for each entry in the builder actions array and add it to the form:
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionBuilder::build() ActionBuilder::build()} [runs] {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionFactory::make() ActionFactory::make()}
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionFactory::make() ActionFactory::make()} [creates and hydrates] {@see \Anomaly\Streams\Platform\Ui\Table\Component\Action\Action Action} and {@see \Anomaly\Streams\Platform\Support\Hydrator Hydrator}
+ * - {@see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionFactory::build() ActionFactory::build()} [adds it to form] {@see \Anomaly\Streams\Platform\Ui\Form\Form Form}
+ * 
+ * 
+ * ```php
+ * $builder->setActions([
+ * 'save',
+ * 'save_exit'
+ * ]);
+ * ```
  *
+ * @see Anomaly\Streams\Platform\Ui\Form\Component\Action\Guesser\RedirectGuesser::guess() RedirectGuesser::guess()
+ * @see Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionRegistry::$actions ActionRegistry::$actions
  * @param array $actions  = \Pyro\IdeHelper\Examples\FormBuilderExamples::actions()
+ * @see \Anomaly\Streams\Platform\Ui\Form\Component\Action\Guesser\RedirectGuesser::guess() RedirectGuesser::guess()
+ * @see \Anomaly\Streams\Platform\Ui\Form\Component\Action\ActionRegistry::$actions ActionRegistry::$actions
+ * @return $this 
  */
     public function setActions($actions)
     {
@@ -773,13 +854,14 @@ class FormBuilder
      * Add an action.
      *
      * @param        $slug
-     * @param  array $definition
+     * @param array  $definition
+     *
      * @return $this
      */
     public function addAction($slug, array $definition = [])
     {
         if ($definition) {
-            $this->actions[$slug] = $definition;
+            $this->actions[ $slug ] = $definition;
         } else {
             $this->actions[] = $slug;
         }
@@ -828,10 +910,10 @@ class FormBuilder
  */
     public function addButton($button, array $definition = [])
     {
-        if (!$definition) {
+        if ( ! $definition) {
             $this->buttons[] = $button;
         } else {
-            $this->buttons[$button] = $definition;
+            $this->buttons[ $button ] = $definition;
         }
 
         return $this;
@@ -862,7 +944,8 @@ class FormBuilder
     /**
      * Merge in options.
      *
-     * @param  array|string $options
+     * @param array|string $options
+     *
      * @return $this
      */
     public function mergeOptions($options)
@@ -898,8 +981,9 @@ class FormBuilder
      * Add a section.
      *
      * @param        $slug
-     * @param  array $section
-     * @param null $position
+     * @param array  $section
+     * @param null   $position
+     *
      * @return $this
      */
     public function addSection($slug, array $section, $position = null)
@@ -911,7 +995,7 @@ class FormBuilder
         $front = array_slice($this->sections, 0, $position, true);
         $back  = array_slice($this->sections, $position, count($this->sections) - $position, true);
 
-        $this->sections = $front + [$slug => $section] + $back;
+        $this->sections = $front + [ $slug => $section ] + $back;
 
         return $this;
     }
@@ -920,6 +1004,7 @@ class FormBuilder
      * Merge in additional sections.
      *
      * @param array $sections
+     *
      * @return $this
      */
     public function mergeSections(array $sections)
@@ -934,8 +1019,9 @@ class FormBuilder
      *
      * @param        $section
      * @param        $slug
-     * @param  array $tab
-     * @param null $position
+     * @param array  $tab
+     * @param null   $position
+     *
      * @return $this
      */
     public function addSectionTab($section, $slug, array $tab, $position = null)
@@ -949,7 +1035,7 @@ class FormBuilder
         $front = array_slice($tabs, 0, $position, true);
         $back  = array_slice($tabs, $position, count($tabs) - $position, true);
 
-        $tabs = $front + [$slug => $tab] + $back;
+        $tabs = $front + [ $slug => $tab ] + $back;
 
         array_set($this->sections, "{$section}.tabs", $tabs);
 
@@ -961,15 +1047,16 @@ class FormBuilder
      *
      * @param      $prefix
      * @param null $sections
+     *
      * @return array|null
      */
     public function prefixSectionFields($prefix, $sections = null)
     {
-        if (!$sections) {
+        if ( ! $sections) {
             $sections = &$this->sections;
         }
 
-        if (!is_array($sections)) {
+        if ( ! is_array($sections)) {
             return $sections;
         }
 
@@ -1035,6 +1122,7 @@ class FormBuilder
      * Set the assets.
      *
      * @param $assets
+     *
      * @return $this
      */
     public function setAssets($assets)
@@ -1049,15 +1137,16 @@ class FormBuilder
      *
      * @param $collection
      * @param $asset
+     *
      * @return $this
      */
     public function addAsset($collection, $asset)
     {
-        if (!isset($this->assets[$collection])) {
-            $this->assets[$collection] = [];
+        if ( ! isset($this->assets[ $collection ])) {
+            $this->assets[ $collection ] = [];
         }
 
-        $this->assets[$collection][] = $asset;
+        $this->assets[ $collection ][] = $asset;
 
         return $this;
     }
@@ -1076,7 +1165,8 @@ class FormBuilder
      * Get a form option value.
      *
      * @param        $key
-     * @param  null $default
+     * @param null   $default
+     *
      * @return mixed
      */
     public function getFormOption($key, $default = null)
@@ -1089,6 +1179,7 @@ class FormBuilder
      *
      * @param $key
      * @param $value
+     *
      * @return $this
      */
     public function setFormOption($key, $value)
@@ -1147,7 +1238,7 @@ class FormBuilder
     {
         $entry = $this->getFormEntry();
 
-        if (!$entry instanceof EloquentModel) {
+        if ( ! $entry instanceof EloquentModel) {
             return null;
         }
 
@@ -1178,6 +1269,7 @@ class FormBuilder
      * Set the form mode.
      *
      * @param $mode
+     *
      * @return $this
      */
     public function setFormMode($mode)
@@ -1191,7 +1283,8 @@ class FormBuilder
      * Get a form value.
      *
      * @param        $key
-     * @param  null $default
+     * @param null   $default
+     *
      * @return mixed
      */
     public function getFormValue($key, $default = null)
@@ -1204,6 +1297,7 @@ class FormBuilder
      *
      * @param $key
      * @param $value
+     *
      * @return $this
      */
     public function setFormValue($key, $value)
@@ -1264,6 +1358,7 @@ class FormBuilder
      *
      * @param $key
      * @param $value
+     *
      * @return $this
      */
     public function addFormData($key, $value)
@@ -1286,7 +1381,8 @@ class FormBuilder
     /**
      * Set the form response.
      *
-     * @param  null|false|Response $response
+     * @param null|false|Response $response
+     *
      * @return $this
      */
     public function setFormResponse(Response $response)
@@ -1330,6 +1426,7 @@ class FormBuilder
      * Get the form field.
      *
      * @param $fieldSlug
+     *
      * @return FieldType
      */
     public function getFormField($fieldSlug)
@@ -1358,6 +1455,7 @@ class FormBuilder
      * Disable a form field.
      *
      * @param $fieldSlug
+     *
      * @return $this
      */
     public function disableFormField($fieldSlug)
@@ -1370,7 +1468,8 @@ class FormBuilder
     /**
      * Get the form field slugs.
      *
-     * @param  null $prefix
+     * @param null $prefix
+     *
      * @return array
      */
     public function getFormFieldSlugs($prefix = null)
@@ -1400,7 +1499,8 @@ class FormBuilder
     /**
      * Add a form field.
      *
-     * @param  FieldType $field
+     * @param FieldType $field
+     *
      * @return $this
      */
     public function addFormField(FieldType $field)
@@ -1413,7 +1513,8 @@ class FormBuilder
     /**
      * Set the form errors.
      *
-     * @param  MessageBag $errors
+     * @param MessageBag $errors
+     *
      * @return $this
      */
     public function setFormErrors(MessageBag $errors)
@@ -1438,6 +1539,7 @@ class FormBuilder
      *
      * @param $field
      * @param $message
+     *
      * @return $this
      */
     public function addFormError($field, $message)
@@ -1458,13 +1560,14 @@ class FormBuilder
     {
         $errors = $this->form->getErrors();
 
-        return !$errors->isEmpty();
+        return ! $errors->isEmpty();
     }
 
     /**
      * Return whether the field has an error or not.
      *
      * @param $fieldName
+     *
      * @return bool
      */
     public function hasFormError($fieldName)
@@ -1489,11 +1592,11 @@ class FormBuilder
      */
     public function getActiveFormAction()
     {
-        if (!$actions = $this->form->getActions()) {
+        if ( ! $actions = $this->form->getActions()) {
             return null;
         }
 
-        if (!$active = $actions->active()) {
+        if ( ! $active = $actions->active()) {
             return null;
         }
 
@@ -1503,7 +1606,8 @@ class FormBuilder
     /**
      * Add a form button.
      *
-     * @param  ButtonInterface $button
+     * @param ButtonInterface $button
+     *
      * @return $this
      */
     public function addFormButton(ButtonInterface $button)
@@ -1517,7 +1621,8 @@ class FormBuilder
      * Add a form section.
      *
      * @param        $slug
-     * @param  array $section
+     * @param array  $section
+     *
      * @return $this
      */
     public function addFormSection($slug, array $section)
@@ -1531,6 +1636,7 @@ class FormBuilder
      * Set the form entry.
      *
      * @param $entry
+     *
      * @return $this
      */
     public function setFormEntry($entry)
@@ -1545,6 +1651,7 @@ class FormBuilder
      *
      * @param $key
      * @param $value
+     *
      * @return $this
      */
     public function setFormEntryAttribute($key, $value)
@@ -1561,6 +1668,7 @@ class FormBuilder
      *
      * @param      $key
      * @param null $default
+     *
      * @return mixed|null
      */
     public function getFormEntryAttribute($key, $default = null)
@@ -1574,7 +1682,8 @@ class FormBuilder
      * Get a request value.
      *
      * @param        $key
-     * @param  null $default
+     * @param null   $default
+     *
      * @return mixed
      */
     public function getRequestValue($key, $default = null)
@@ -1586,7 +1695,8 @@ class FormBuilder
      * Get a post value.
      *
      * @param        $key
-     * @param  null $default
+     * @param null   $default
+     *
      * @return mixed
      */
     public function getPostValue($key, $default = null)
@@ -1598,12 +1708,13 @@ class FormBuilder
      * Return a post key flag.
      *
      * @param        $key
-     * @param  null $default
+     * @param null   $default
+     *
      * @return mixed
      */
     public function hasPostedInput($key)
     {
-        return isset($_POST[$this->getOption('prefix') . $key]);
+        return isset($_POST[ $this->getOption('prefix') . $key ]);
     }
 
     /**
@@ -1638,7 +1749,8 @@ class FormBuilder
     /**
      * Set the save flag.
      *
-     * @param  bool $save
+     * @param bool $save
+     *
      * @return $this
      */
     public function setSave($save)
@@ -1662,6 +1774,7 @@ class FormBuilder
      * Set the read only flag.
      *
      * @param $readOnly
+     *
      * @return $this
      */
     public function setReadOnly($readOnly)
@@ -1685,6 +1798,7 @@ class FormBuilder
      * Set the lock instance.
      *
      * @param LockInterface $lock
+     *
      * @return $this
      */
     public function setLock(LockInterface $lock)
@@ -1708,6 +1822,7 @@ class FormBuilder
      * Set the locked flag.
      *
      * @param $locked
+     *
      * @return $this
      */
     public function setLocked($locked)
@@ -1731,6 +1846,7 @@ class FormBuilder
      * Set the parent.
      *
      * @param FormBuilder $parent
+     *
      * @return $this
      */
     public function setParentBuilder(FormBuilder $parent)

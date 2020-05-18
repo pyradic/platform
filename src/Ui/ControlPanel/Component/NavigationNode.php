@@ -72,4 +72,15 @@ class NavigationNode extends ValueNode implements Arrayable, \ArrayAccess
     {
         return $this->type;
     }
+
+    public function __get($name)
+    {
+        return $this->getValue()->offsetGet($name);
+    }
+
+    public function __set($name, $value)
+    {
+        return $this->getValue()->offsetSet($name,$value);
+    }
+
 }

@@ -25,7 +25,7 @@ class BladeString
     public function __construct(Filesystem $fs, Repository $cache)
     {
         $this->fs        = $fs;
-        $this->cachePath = storage_path('blade-extensions');
+        $this->cachePath = storage_path('blade-string');
         $this->cache     = $cache;
     }
 
@@ -35,7 +35,7 @@ class BladeString
             return $this->compileString($string, $vars);
         }
         $key = 'bladestring:' . md5($string) . '_' . md5(serialize($vars));
-        return $this->cache->rememberForever($key, function () use ($string, $vars) {
+        return $this->cache->remember($key,60, function () use ($string, $vars) {
             return $this->compileString($string, $vars);
         });
     }

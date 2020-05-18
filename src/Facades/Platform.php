@@ -4,11 +4,11 @@ namespace Pyro\Platform\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class Commander extends Facade
+class Platform extends Facade
 {
-
     protected static function getFacadeAccessor()
     {
-        return \Pyro\Platform\Commander::class;
+        return \Pyro\Platform\Platform::class;
     }
+
 }

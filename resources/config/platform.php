@@ -8,5 +8,8 @@ return [
         'paths' => [
 
         ]
+    ],
+    'blade_string' => [
+        'cache_path' => storage_path('blade-string')
     ]
 ];

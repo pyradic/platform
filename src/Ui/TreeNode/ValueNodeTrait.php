@@ -21,7 +21,7 @@ trait ValueNodeTrait
 
     public function offsetGet($offset)
     {
-        return $this->getValue()->offsetExists($offset);
+        return $this->getValue()->offsetGet($offset);
     }
 
     public function offsetSet($offset, $value)

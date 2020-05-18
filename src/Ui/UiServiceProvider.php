@@ -4,8 +4,13 @@
 
 namespace Pyro\Platform\Ui;
 
+use Anomaly\Streams\Platform\Entry\Contract\EntryInterface;
+use Anomaly\Streams\Platform\Ui\Form\FormBuilder;
+use Anomaly\UsersModule\User\Contract\UserRepositoryInterface;
+use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Jenssegers\Agent\Agent;
 
 class UiServiceProvider extends ServiceProvider
 {
@@ -38,29 +43,42 @@ class UiServiceProvider extends ServiceProvider
 
     public function register()
     {
-//        $this->app->when(\Anomaly\Streams\Platform\Ui\Table\Component\Action\ActionBuilder::class)
-//            ->needs(\Anomaly\Streams\Platform\Ui\Table\Component\Action\ActionInput::class)
-//            ->give(\Pyro\Platform\Ui\ActionInput::class);
-//        $this->app->events->listen(GatherNavigation::class, function (GatherNavigation $event) {
-//            $event->getBuilder()->setNavigation(
-//                collect($event->getBuilder()->getNavigation())->map([ Dot::class, 'wrap' ])->each(function (Dot $section) {
-//                    $section->set('section', $section->get('section', NavigationLink::class));
-//                })->toArray()
-//            );
-//        });
-//        $this->app->events->listen(GatherSections::class, function (GatherSections $event) {
-//            $event->getBuilder()->setSections(
-//                collect($event->getBuilder()->getSections())->map([ Dot::class, 'wrap' ])->each(function (Dot $section) {
-//                    $section->set('section', $section->get('section', Section::class));
-//                })->toArray()
-//            );
-//        });
-//        $this->app->events->listen(GatherShortcuts::class, function (GatherShortcuts $event) {
-//            $event->getBuilder()->setShortcuts(
-//                collect($event->getBuilder()->getShortcuts())->map([ Dot::class, 'wrap' ])->each(function (Dot $shortcut) {
-//                    $shortcut->set('shortcut', $shortcut->get('shortcut', Shortcut::class));
-//                })->toArray()
-//            );
-//        });
+        $this->registerFormBuilderEntrySetsMode();
+        $this->registerLoginFormBuilderAutoFill();
+    }
+
+    protected function registerLoginFormBuilderAutoFill()
+    {
+        /*
+         * Development Feature - Auto-fill login for using the admin's email/password.
+         * Not enabled on production. Requires app.debug to be true
+         */
+        if ($this->app->environment('local') && $this->app->config[ 'app.debug' ]) {
+            $this->app->extend('login', function (LoginFormBuilder $login) {
+                $login->on('built', function (LoginFormBuilder $builder) {
+                    $email    = env('ADMIN_EMAIL');
+                    $password = env("ADMIN_PASSWORD");
+                    if (resolve(Agent::class)->is('Firefox')) {
+                        if (resolve(UserRepositoryInterface::class)->findByEmail('admin2@test.com')) {
+                            $email    = 'admin2@test.com';
+                            $password = 'test';
+                        }
+                    }
+                    $builder->getFormField('email')->setValue($email);
+                    $builder->getFormField('password')->setValue($password);
+                });
+                return $login;
+            });
+        }
+    }
+    protected function registerFormBuilderEntrySetsMode()
+    {
+        FormBuilder::when('entry_set', function (FormBuilder $builder) {
+            if ( ! $builder->getFormMode()) {
+                $builder->setFormMode(
+                    ($builder->getFormEntryId() || $builder->getEntry()) ? 'edit' : 'create'
+                );
+            }
+        });
     }
 }
