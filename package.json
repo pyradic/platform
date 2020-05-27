@@ -18,6 +18,9 @@
     "dependencies": {
         "@inertiajs/inertia": "^0.1.7",
         "@inertiajs/inertia-vue": "^0.1.2",
+        "@radic/arrays": "^1.0.2",
+        "@radic/observable": "^1.1.4",
+        "@radic/tree": "^1.0.0",
         "csx": "^10.0.0",
         "cash-dom": "^5.0.0",
         "debug": "^4.1.1",

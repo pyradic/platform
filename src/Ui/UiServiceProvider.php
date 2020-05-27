@@ -4,8 +4,8 @@
 
 namespace Pyro\Platform\Ui;
 
-use Anomaly\Streams\Platform\Entry\Contract\EntryInterface;
 use Anomaly\Streams\Platform\Ui\Form\FormBuilder;
+use Anomaly\Streams\Platform\Ui\Table\TableBuilder;
 use Anomaly\UsersModule\User\Contract\UserRepositoryInterface;
 use Anomaly\UsersModule\User\Login\LoginFormBuilder;
 use Illuminate\Routing\Router;
@@ -45,6 +45,7 @@ class UiServiceProvider extends ServiceProvider
     {
         $this->registerFormBuilderEntrySetsMode();
         $this->registerLoginFormBuilderAutoFill();
+        $this->registerTableBuilderTraitInitializing();
     }
 
     protected function registerLoginFormBuilderAutoFill()
@@ -71,6 +72,7 @@ class UiServiceProvider extends ServiceProvider
             });
         }
     }
+
     protected function registerFormBuilderEntrySetsMode()
     {
         FormBuilder::when('entry_set', function (FormBuilder $builder) {
@@ -78,6 +80,19 @@ class UiServiceProvider extends ServiceProvider
                 $builder->setFormMode(
                     ($builder->getFormEntryId() || $builder->getEntry()) ? 'edit' : 'create'
                 );
+            }
+        });
+    }
+
+    protected function registerTableBuilderTraitInitializing()
+    {
+        TableBuilder::when('ready', function (TableBuilder $builder) {
+            $traits = class_uses_deep(get_class($builder));
+            foreach ($traits as $trait) {
+                $trait = last(explode('\\', $trait));
+                if (method_exists($builder, $methodName = 'initialize' . $trait)) {
+                    $this->app->call([ $builder, $methodName ], compact('builder'));
+                }
             }
         });
     }

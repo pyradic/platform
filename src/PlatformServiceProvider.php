@@ -48,6 +48,7 @@ use Pyro\Platform\Console\MacroCommand;
 use Pyro\Platform\Console\PermissionsCommand;
 use Pyro\Platform\Console\RouteListCommand;
 use Pyro\Platform\Console\SeedCommand;
+use Pyro\Platform\Console\UserPasswordCommand;
 use Pyro\Platform\Event\PlatformWillRender;
 use Pyro\Platform\Http\Middleware\DebugLoginMiddleware;
 use Pyro\Platform\Http\Middleware\RenderPlatformDataToFile;
@@ -125,7 +126,13 @@ class PlatformServiceProvider extends ServiceProvider
         $dispatcher = resolve(Dispatcher::class);
         foreach ($this->listen as $event => $listeners) {
             foreach (array_unique($listeners) as $listener) {
-                $dispatcher->listen($event, $listener);
+                $dispatcher->listen($event, function (...$args) use ($listener, $dispatcher, $event) {
+                    $cb = $dispatcher->makeListener($listener);
+                    \ServerTiming::start('event:' . $event . ':' . $listener);
+                    $result = $cb($event, $args);
+                    \ServerTiming::stop('event:' . $event . ':' . $listener);
+                    return $result;
+                });
             }
         }
 
@@ -192,6 +199,7 @@ class PlatformServiceProvider extends ServiceProvider
             'command.platform.clear'           => ClearCommand::class,
             'command.platform.database.export' => DatabaseExportCommand::class,
             'command.platform.database.import' => DatabaseImportCommand::class,
+            'command.platform.user.password'   => UserPasswordCommand::class,
         ];
         foreach ($commands as $command => $class) {
             $this->app->singleton($command, function ($app) use ($class) {

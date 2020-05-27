@@ -51,7 +51,9 @@ class FormUtil
 
         $builder->addFields($tmp->getFields());
         foreach ($slugs as $slug) {
-            $builder->addFormField($tmp->getFormField($slug));
+            if($field=$tmp->getFormField($slug)) {
+                $builder->addFormField($field);
+            }
         }
     }
 }

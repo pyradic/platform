@@ -16,6 +16,7 @@ export class PlatformServiceProvider extends ServiceProvider {
     public register() {
         this.vuePlugin(PlatformVuePlugin);
 
+        
         this.app.instance('i18n', new VueI18n({
             fallbackLocale: 'en',
             locale        : 'nl',
@@ -75,7 +76,7 @@ export class PlatformServiceProvider extends ServiceProvider {
         this.app.dynamic('settings', app => {
             const storage   = app.get<Storage>('storage');
             const data: any = observable(storage.get('settings', {}, { seralization: true, compression: true })); // const data = new Observable(_data);
-            const settings = Config.proxied<any>(data);
+            const settings  = Config.proxied<any>(data);
             observe(data, change => {
                 console.log('change', change.type, '::', change.name, change.newValue, change.object);
                 storage.set('settings', settings.toJS(), { seralization: true, compression: true });

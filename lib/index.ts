@@ -34,6 +34,7 @@ export * from './utils/kindOf'
 export * from './utils/cash'
 export * from './utils/cash.ensureClass'
 export * from './utils/css3'
+export * from './utils/createKeyListener'
 
 
 export { merge, Plugin, toJS };

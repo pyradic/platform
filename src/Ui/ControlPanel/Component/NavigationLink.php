@@ -6,6 +6,8 @@ class NavigationLink extends \Anomaly\Streams\Platform\Ui\ControlPanel\Component
 {
     protected $key;
 
+    protected $unarrayable = ['asset','image'];
+
     public function setKey($key)
     {
         $this->key = $key;

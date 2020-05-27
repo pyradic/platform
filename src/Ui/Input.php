@@ -25,7 +25,7 @@ class Input
         return static::elp()->parse($target, $arguments);
     }
 
-    public static function resolver($target, array $arguments = [], array $options = [])
+    public static function resolve($target, array $arguments = [], array $options = [])
     {
         $target = Resolver::resolve($target, $arguments, $options);
         if (is_array($target)) {
